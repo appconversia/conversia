@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* WhatsApp-inspired palette */
+  --wa-primary: #25D366;
+  --wa-primary-hover: #20bd5a;
+  --wa-dark: #075E54;
+  --wa-darker: #054d45;
+  --wa-teal: #128C7E;
+  --wa-light-bg: #ECE5DD;
+  --wa-bubble-sent: #D9FDD3;
+  --wa-bubble-received: #FFFFFF;
+  --wa-text: #111B21;
+  --wa-text-muted: #667781;
+  --wa-sidebar-bg: #111B21;
+  --wa-header-bg: #202C33;
+}
