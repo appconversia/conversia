@@ -17,3 +17,28 @@
   --wa-sidebar-bg: #111B21;
   --wa-header-bg: #202C33;
 }
+
+/* Estilos de impresión para procedimiento Oscar / PDF */
+@media print {
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  .print\:py-0 {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .print\:px-0 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .print\:mb-8 {
+    margin-bottom: 2rem;
+  }
+  a[href]::after {
+    content: none !important;
+  }
+}
