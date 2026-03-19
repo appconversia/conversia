@@ -18,7 +18,7 @@
   --wa-header-bg: #202C33;
 }
 
-/* Estilos de impresión para procedimiento Oscar / PDF */
+/* Estilos de impresión para procedimiento de entrega / PDF */
 @media print {
   body {
     print-color-adjust: exact;

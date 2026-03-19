@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 
-export default function ProcedimientoEntregaOscarPage() {
+export default function ProcedimientoEntregaPage() {
   const handleDownloadPDF = useCallback(() => {
     window.print();
   }, []);
@@ -26,9 +26,6 @@ export default function ProcedimientoEntregaOscarPage() {
             Procedimiento de entrega WhatsApiBot
           </h1>
           <p className="text-lg text-gray-600">
-            Responsable: <strong>Oscar Cabrera</strong>
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
             Documento interno — Ejecutar cada vez que se cierre un cliente
           </p>
         </header>
@@ -36,7 +33,7 @@ export default function ProcedimientoEntregaOscarPage() {
         {/* Alcance */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
-            1. Alcance exacto de Oscar
+            1. Alcance exacto de la entrega
           </h2>
           <div className="space-y-3 text-gray-700">
             <p>
@@ -253,7 +250,7 @@ npm run db:seed`}
         </section>
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <p>WhatsApiBot — Procedimiento de entrega v1.0 — Oscar Cabrera</p>
+          <p>WhatsApiBot — Procedimiento de entrega v1.0</p>
         </footer>
       </article>
     </div>

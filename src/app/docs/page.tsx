@@ -10,7 +10,7 @@ export default function DocsIndexPage() {
           className="block p-4 border border-gray-200 rounded-lg hover:border-[#25D366] hover:bg-[#25D366]/5 transition"
         >
           <span className="font-semibold text-[#075E54]">Procedimiento de entrega</span>
-          <span className="block text-sm text-gray-600 mt-1">Para Oscar Cabrera — cada vez que se cierra un cliente</span>
+          <span className="block text-sm text-gray-600 mt-1">Para el responsable de entrega — cada vez que se cierra un cliente</span>
         </Link>
         <Link
           href="/docs/manual-cliente"
