@@ -171,16 +171,25 @@ async function main() {
     });
   }
 
+  // Categoría ejemplo (solo si no existe)
+  let catEjemplo = await prisma.category.findFirst({ where: { name: "categoria ejemplo" } });
+  if (!catEjemplo) {
+    catEjemplo = await prisma.category.create({
+      data: { name: "categoria ejemplo", order: 0 },
+    });
+    console.log("Categoría ejemplo creada");
+  }
+
   // Productos ejemplo genéricos (solo si no existen)
   const productosEjemplo = [
     { name: "Producto ejemplo 1", description: "Descripción del producto ejemplo 1.", price: 10000, characteristics: '{"material":"genérico","tallas":"única"}' },
     { name: "Producto ejemplo 2", description: "Descripción del producto ejemplo 2.", price: 15000, characteristics: '{"material":"genérico"}' },
     { name: "Producto ejemplo 3", description: "Descripción del producto ejemplo 3.", price: 20000, characteristics: '{}' },
   ];
-  const maxOrderBarriles = (await prisma.product.findFirst({ where: { category: "barriles" }, orderBy: { order: "desc" }, select: { order: true } }))?.order ?? -1;
-  let orderOtros = Math.max(maxOrderBarriles + 1, 100);
+  const maxOrder = (await prisma.product.findFirst({ orderBy: { order: "desc" }, select: { order: true } }))?.order ?? -1;
+  let order = maxOrder + 1;
   for (const p of productosEjemplo) {
-    const existing = await prisma.product.findFirst({ where: { name: p.name, category: "otros" } });
+    const existing = await prisma.product.findFirst({ where: { name: p.name, categoryId: catEjemplo!.id } });
     if (!existing) {
       await prisma.product.create({
         data: {
@@ -189,9 +198,9 @@ async function main() {
           price: p.price,
           stock: 50,
           available: true,
-          category: "otros",
+          categoryId: catEjemplo!.id,
           characteristics: p.characteristics,
-          order: orderOtros++,
+          order: order++,
         },
       });
       console.log(`Producto ejemplo creado: ${p.name}`);

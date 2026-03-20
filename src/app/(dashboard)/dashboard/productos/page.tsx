@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { MEDIA_LIMITS, isImageFile, isVideoFile, validateImageSize, validateVideoSize } from "@/lib/media-upload";
 
-const PRODUCT_CATEGORIES = ["barriles", "otros"] as const;
+type Category = { id: string; name: string };
 
 type Product = {
   id: string;
@@ -15,6 +15,7 @@ type Product = {
   stock: number;
   available: boolean;
   category: string;
+  categoryId: string;
   characteristics: string | Record<string, string> | null;
   photos: string[];
   videos: string[];
@@ -31,13 +32,14 @@ export default function ProductosPage() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     stock: "0",
     available: true,
-    category: "barriles" as "barriles" | "otros",
+    categoryId: "",
     characteristics: "",
     photos: [] as string[],
     videos: [] as string[],
@@ -57,9 +59,22 @@ export default function ProductosPage() {
     }
   }, [router]);
 
+  const loadCategories = useCallback(async () => {
+    try {
+      const r = await fetch("/api/categories");
+      if (r.ok) {
+        const data = await r.json();
+        if (Array.isArray(data)) setCategories(data);
+      }
+    } catch {
+      // Ignorar
+    }
+  }, []);
+
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]);
+    loadCategories();
+  }, [loadProducts, loadCategories]);
 
   const resetForm = () => {
     setForm({
@@ -68,7 +83,7 @@ export default function ProductosPage() {
       price: "",
       stock: "0",
       available: true,
-      category: "barriles",
+      categoryId: categories[0]?.id ?? "",
       characteristics: "",
       photos: [],
       videos: [],
@@ -89,7 +104,7 @@ export default function ProductosPage() {
       price: String(p.price),
       stock: String(p.stock),
       available: p.available,
-      category: (p.category === "otros" ? "otros" : "barriles") as "barriles" | "otros",
+      categoryId: p.categoryId ?? categories[0]?.id ?? "",
       characteristics: typeof p.characteristics === "string" ? (p.characteristics ?? "") : JSON.stringify(p.characteristics ?? {}, null, 2),
       photos: p.photos ?? [],
       videos: p.videos ?? [],
@@ -191,7 +206,7 @@ export default function ProductosPage() {
         price: parseFloat(form.price) || 0,
         stock: parseInt(form.stock, 10) || 0,
         available: form.available,
-        category: form.category,
+        categoryId: form.categoryId || categories[0]?.id,
         characteristics: form.characteristics.trim() || undefined,
         photos: form.photos,
         videos: form.videos,
@@ -210,7 +225,7 @@ export default function ProductosPage() {
         setToast({ message: "Producto actualizado", type: "success" });
       }
       setModal(null);
-      resetForm();
+      loadProducts();
     } catch (e) {
       setToast({ message: e instanceof Error ? e.message : "Error al guardar", type: "error" });
     }
@@ -297,7 +312,7 @@ export default function ProductosPage() {
               {products.map((p) => (
                 <tr key={p.id} className="border-b border-[#E9EDEF] hover:bg-[#F0F2F5]/30">
                   <td className="px-4 py-3 font-medium text-[#111B21]">{p.name}</td>
-                  <td className="px-4 py-3 capitalize">{p.category ?? "barriles"}</td>
+                  <td className="px-4 py-3">{p.category ?? "-"}</td>
                   <td className="px-4 py-3">${Number(p.price).toLocaleString()}</td>
                   <td className="px-4 py-3">{p.stock}</td>
                   <td className="px-4 py-3">{p.available ? "Sí" : "No"}</td>
@@ -326,9 +341,9 @@ export default function ProductosPage() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium">Categoría</label>
-                <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as "barriles" | "otros" }))} className="w-full rounded-lg border px-3 py-2">
-                  {PRODUCT_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>{c === "barriles" ? "Barriles" : "Otros (gorras, ponchos, carbón, etc.)"}</option>
+                <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))} className="w-full rounded-lg border px-3 py-2">
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>

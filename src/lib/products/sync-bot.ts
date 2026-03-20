@@ -5,7 +5,10 @@ const BOT_PRODUCTS_TRAINING_KEY = "bot_products_training";
 
 /** Genera texto completo de todos los productos para entrenar al bot */
 export async function generateProductsTrainingText(): Promise<string> {
-  const products = await prisma.product.findMany({ orderBy: { order: "asc" } });
+  const products = await prisma.product.findMany({
+    include: { category: { select: { name: true } } },
+    orderBy: { order: "asc" },
+  });
   if (products.length === 0) return "";
 
   const lines: string[] = [
@@ -18,7 +21,7 @@ export async function generateProductsTrainingText(): Promise<string> {
   for (const p of products) {
     const photos = p.photos ? (JSON.parse(p.photos) as string[]) : [];
     const char = p.characteristics ? (tryParseJson(p.characteristics) as Record<string, string> | null) : null;
-    const cat = p.category ?? "barriles";
+    const cat = p.category?.name ?? "sin categoría";
     lines.push(`### ${p.name}`);
     lines.push(`- Categoría: ${cat}`);
     lines.push(`- Precio: $${Number(p.price).toLocaleString()}`);

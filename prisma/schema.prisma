@@ -169,6 +169,18 @@ model Lead {
   @@index([createdAt])
 }
 
+// Categorías de productos (CRUD en dashboard)
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@index([order])
+}
+
 // Productos para venta: CRUD y base de entrenamiento del bot
 model Product {
   id              String   @id @default(cuid())
@@ -177,7 +189,8 @@ model Product {
   price           Decimal  @db.Decimal(12, 2)
   stock           Int      @default(0)
   available       Boolean  @default(true)
-  category        String   @default("barriles") // barriles | otros
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   characteristics String?  @db.Text // JSON o texto con características
   photos          String?  @db.Text // JSON array de URLs (Vercel Blob)
   videos          String?  @db.Text // JSON array de URLs (Vercel Blob)
@@ -187,7 +200,7 @@ model Product {
 
   @@index([order])
   @@index([available])
-  @@index([category])
+  @@index([categoryId])
 }
 
 // Flujos del bot (estilo n8n): nodos, conexiones, condiciones, llamadas IA

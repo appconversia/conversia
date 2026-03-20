@@ -72,9 +72,17 @@ const PRODUCTS = [
 async function main() {
   console.log("Sincronizando 3 productos en la base de datos...");
 
+  let cat = await prisma.category.findFirst({ orderBy: { order: "asc" } });
+  if (!cat) {
+    cat = await prisma.category.create({ data: { name: "categoria ejemplo", order: 0 } });
+    console.log("  Categoría ejemplo creada");
+  }
+
   for (const p of PRODUCTS) {
     await prisma.product.deleteMany({ where: { name: p.name } });
-    const created = await prisma.product.create({ data: p });
+    const created = await prisma.product.create({
+      data: { ...p, categoryId: cat.id },
+    });
     console.log(`  ✓ ${created.name} - $${Number(created.price).toLocaleString()}`);
   }
 

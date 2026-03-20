@@ -30,7 +30,7 @@ export async function buildScopeGuardReply(
 
   if (showOtrosMenu) {
     const otrosProducts = await prisma.product.findMany({
-      where: { available: true, category: "otros" },
+      where: { available: true },
       orderBy: { order: "asc" },
       select: { name: true, price: true },
     });
@@ -47,7 +47,7 @@ export async function buildScopeGuardReply(
   }
 
   const barrilesProducts = await prisma.product.findMany({
-    where: { available: true, category: "barriles" },
+    where: { available: true },
     orderBy: { order: "asc" },
     select: { name: true, price: true },
   });
@@ -57,7 +57,6 @@ export async function buildScopeGuardReply(
     const lines = barrilesProducts.map(
       (p, i) => `${i + 1}. *${p.name}* - $${Number(p.price).toLocaleString()}`
     );
-    lines.push(`${lines.length + 1}. *Otros* (gorras, ponchos, carbón, etc.)`);
     listBlock = `\n\n${lines.join("\n")}\n\n¿Cuál te interesa conocer?`;
   } else {
     const allProducts = await prisma.product.findMany({
