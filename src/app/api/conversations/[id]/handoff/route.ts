@@ -23,12 +23,14 @@ export async function POST(
 
   if (!conv) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
+  const sinAsignarTag = await prisma.conversationTag.findUnique({ where: { slug: "sin_asignar" }, select: { id: true } });
   await prisma.conversation.update({
     where: { id: conversationId },
     data: {
       channel: "bot",
       handoffRequestedAt: new Date(),
       assignedToId: null,
+      ...(sinAsignarTag && { conversationTagId: sinAsignarTag.id }),
     },
   });
 

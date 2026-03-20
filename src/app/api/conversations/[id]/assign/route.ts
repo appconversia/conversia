@@ -46,9 +46,14 @@ export async function POST(
     if (conv.channel !== "bot") {
       return NextResponse.json({ error: "Solo conversaciones del canal bot pueden volver al bot" }, { status: 400 });
     }
+    const botTag = await prisma.conversationTag.findUnique({ where: { slug: "bot" }, select: { id: true } });
     await prisma.conversation.update({
       where: { id: conversationId },
-      data: { handoffRequestedAt: null, assignedToId: null },
+      data: {
+        handoffRequestedAt: null,
+        assignedToId: null,
+        ...(botTag && { conversationTagId: botTag.id }),
+      },
     });
     const payload = { assignedTo: null, backToBot: true };
     const pusher = getPusherServer();
@@ -76,9 +81,14 @@ export async function POST(
         data: { conversationId, userId: assignToUserId },
       });
     }
+    const asistidasTag = await prisma.conversationTag.findUnique({ where: { slug: "asistidas" }, select: { id: true } });
     await prisma.conversation.update({
       where: { id: conversationId },
-      data: { assignedToId: assignToUserId },
+      data: {
+        assignedToId: assignToUserId,
+        handoffRequestedAt: null,
+        ...(asistidasTag && { conversationTagId: asistidasTag.id }),
+      },
     });
   } else if (take) {
     if (assignedToSomeoneElse && !isAdmin) {
@@ -104,9 +114,13 @@ export async function POST(
         { status: 403 }
       );
     }
+    const sinAsignarTag = await prisma.conversationTag.findUnique({ where: { slug: "sin_asignar" }, select: { id: true } });
     await prisma.conversation.update({
       where: { id: conversationId },
-      data: { assignedToId: null },
+      data: {
+        assignedToId: null,
+        ...(sinAsignarTag && { conversationTagId: sinAsignarTag.id }),
+      },
     });
   }
 

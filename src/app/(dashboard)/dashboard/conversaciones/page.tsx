@@ -13,12 +13,14 @@ import { MediaViewer } from "@/components/dashboard/media-viewers";
 import { TemplatePreview, buildTemplateDisplayContent, type TemplateForPreview } from "@/components/dashboard/template-preview";
 
 type User = { id: string; email: string; name: string | null };
+type ConversationTagInfo = { id: string; name: string; slug: string } | null;
 type ConversationItem = {
   id: string;
   channel?: string;
   handoffRequestedAt?: string | null;
   handoffPending?: boolean;
   restricted?: boolean;
+  conversationTag?: ConversationTagInfo;
   otherUser: User | null;
   assignedTo: User | null;
   lastMessage: { content: string; createdAt: string; senderId: string } | null;
@@ -120,7 +122,7 @@ export default function ConversacionesPage() {
   const [assignedTo, setAssignedTo] = useState<User | null>(null);
   const [participants, setParticipants] = useState<User[]>([]);
   const [messages, setMessages] = useState<MessageItem[]>([]);
-  const [tabNivel1, setTabNivel1] = useState<"todas" | "bot" | "sin_asignar" | "asistidas" | "restringidos">("todas");
+  const [tabNivel1, setTabNivel1] = useState<string>("todas"); // todas|bot|sin_asignar|asistidas|restringidos|tagId
   const [tabNivel2, setTabNivel2] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadByTab, setUnreadByTab] = useState<UnreadByTab>({ todas: 0, bot: 0, sin_asignar: 0, asistidas: 0 });
@@ -142,6 +144,7 @@ export default function ConversacionesPage() {
   const [showDeleteChatConfirm, setShowDeleteChatConfirm] = useState(false);
   const [showClearChatConfirm, setShowClearChatConfirm] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
+  const [conversationTags, setConversationTags] = useState<{ id: string; name: string; slug: string; isSystem: boolean }[]>([]);
   const [conversationDetail, setConversationDetail] = useState<{
     contact?: { phone: string; name: string | null };
     messagesCount?: number;
@@ -228,10 +231,23 @@ export default function ConversacionesPage() {
     setUsers(data.users ?? []);
   }, []);
 
+  const loadConversationTags = useCallback(async () => {
+    try {
+      const r = await fetch("/api/conversation-tags", { credentials: "include" });
+      if (r.ok) {
+        const data = await r.json();
+        setConversationTags(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     loadConversationsNow();
     loadUsers();
-  }, [loadConversationsNow, loadUsers]);
+    loadConversationTags();
+  }, [loadConversationsNow, loadUsers, loadConversationTags]);
 
   // Poll lista de conversaciones cada poco cuando la pestaña está visible (cercano a tiempo real)
   useEffect(() => {
@@ -1108,6 +1124,7 @@ export default function ConversacionesPage() {
   // Una etiqueta por conversación: bot | sin asignar | asignado (asistidas)
   const filteredConversations = useMemo(() => {
     let list = conversations;
+    const isCustomTag = tabNivel1 && !["todas", "bot", "sin_asignar", "asistidas", "restringidos"].includes(tabNivel1);
     if (tabNivel1 === "bot") {
       list = list.filter((c) => c.channel === "bot" && !c.handoffRequestedAt && !c.assignedTo);
     } else if (tabNivel1 === "sin_asignar") {
@@ -1116,6 +1133,8 @@ export default function ConversacionesPage() {
       list = list.filter((c) => !!c.assignedTo);
     } else if (tabNivel1 === "restringidos") {
       list = list.filter((c) => c.restricted);
+    } else if (isCustomTag) {
+      list = list.filter((c) => c.conversationTag?.id === tabNivel1);
     }
     if (tabNivel2) {
       list = list.filter((c) => c.assignedTo?.id === tabNivel2);
@@ -1200,20 +1219,30 @@ export default function ConversacionesPage() {
             mobileShowChat ? "hidden md:flex" : "flex w-full"
           }`}
         >
-          {(["todas", "bot", "sin_asignar", "asistidas", ...(isAdmin ? (["restringidos"] as const) : [])] as const).map((t) => {
-            const count = t === "restringidos" ? conversations.filter((c) => c.restricted).length : unreadByTab[t as keyof UnreadByTab] ?? 0;
-            const label =
-              t === "todas" ? "Todas" : t === "bot" ? "Bot" : t === "sin_asignar" ? "Sin Asignar" : t === "asistidas" ? "Asistidas" : "Restringidos";
+          {[
+            { id: "todas", label: "Todas" },
+            { id: "bot", label: "Bot" },
+            { id: "sin_asignar", label: "Sin Asignar" },
+            { id: "asistidas", label: "Asistidas" },
+            ...(isAdmin ? [{ id: "restringidos", label: "Restringidos" }] : []),
+            ...conversationTags.filter((t) => !t.isSystem).map((t) => ({ id: t.id, label: t.name })),
+          ].map(({ id, label }) => {
+            const count =
+              id === "restringidos"
+                ? conversations.filter((c) => c.restricted).length
+                : id === "todas" || id === "bot" || id === "sin_asignar" || id === "asistidas"
+                  ? unreadByTab[id as keyof UnreadByTab] ?? 0
+                  : conversations.filter((c) => c.conversationTag?.id === id && (c.unreadCount ?? 0) > 0).length;
             return (
               <button
-                key={t}
+                key={id}
                 type="button"
                 onClick={() => {
-                  setTabNivel1(t);
-                  if (t === "sin_asignar" || t === "bot" || t === "restringidos") setTabNivel2(null);
+                  setTabNivel1(id);
+                  if (["sin_asignar", "bot", "restringidos"].includes(id) || !["todas", "asistidas"].includes(id)) setTabNivel2(null);
                 }}
                 className={`relative rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  tabNivel1 === t ? "bg-[#25D366] text-white" : "bg-white text-[#111B21] hover:bg-[#E9EDEF]"
+                  tabNivel1 === id ? "bg-[#25D366] text-white" : "bg-white text-[#111B21] hover:bg-[#E9EDEF]"
                 }`}
               >
                 {label}
@@ -1225,7 +1254,7 @@ export default function ConversacionesPage() {
               </button>
             );
           })}
-          {(tabNivel1 === "todas" || tabNivel1 === "asistidas") && assignees.length > 0 && (
+          {(["todas", "asistidas"].includes(tabNivel1) || conversationTags.some((t) => t.id === tabNivel1)) && assignees.length > 0 && (
             <>
               <span className="w-px self-stretch bg-[#E9EDEF]" aria-hidden />
               <button
@@ -1381,6 +1410,52 @@ export default function ConversacionesPage() {
                     <>
                       <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setShowChatMenu(false)} />
                       <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] rounded-lg border border-[#E9EDEF] bg-white py-1 shadow-lg">
+                        {conversationTags.length > 0 && (
+                          <div className="border-b border-[#E9EDEF] px-3 py-2">
+                            <span className="text-xs font-medium text-[#667781]">Mover a etiqueta</span>
+                            <select
+                              className="mt-1 w-full rounded border border-[#E9EDEF] px-2 py-1 text-xs"
+                              value={(() => {
+                                const c = conversations.find((x) => x.id === selectedId);
+                                if (!c) return "";
+                                if (c.conversationTag?.id) return c.conversationTag.id;
+                                const botTag = conversationTags.find((t) => t.slug === "bot");
+                                const sinTag = conversationTags.find((t) => t.slug === "sin_asignar");
+                                const asisTag = conversationTags.find((t) => t.slug === "asistidas");
+                                if (c.channel === "bot" && !c.handoffRequestedAt && !c.assignedTo) return botTag?.id ?? "";
+                                if (c.handoffRequestedAt && !c.assignedTo) return sinTag?.id ?? "";
+                                if (c.assignedTo) return asisTag?.id ?? "";
+                                return "";
+                              })()}
+                              onChange={async (e) => {
+                                const tagId = e.target.value;
+                                if (!tagId || !selectedId) return;
+                                setShowChatMenu(false);
+                                try {
+                                  const asistidasTag = conversationTags.find((t) => t.slug === "asistidas");
+                                  const body: { tagId: string; assignToUserId?: string } = { tagId };
+                                  if (tagId === asistidasTag?.id && myId) body.assignToUserId = myId;
+                                  const r = await fetch(`/api/conversations/${selectedId}/tag`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(body),
+                                  });
+                                  if (r.ok) {
+                                    loadConversationsNow();
+                                    if (body.assignToUserId) setAssignedTo(users.find((u) => u.id === body.assignToUserId) ?? null);
+                                  }
+                                } catch {
+                                  // ignore
+                                }
+                              }}
+                            >
+                              <option value="">—</option>
+                              {conversationTags.map((t) => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
                         <button type="button" onClick={openContactInfo} className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-[#111B21] hover:bg-[#F0F2F5]">
                           <svg className="h-5 w-5 text-[#667781]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth={2} /></svg>
                           Info. del contacto

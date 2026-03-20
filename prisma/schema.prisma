@@ -37,6 +37,21 @@ enum ConversationChannel {
   group   // Grupo de WhatsApp
 }
 
+// Etiquetas de conversaciones (Bot, Sin Asignar, Asistidas + custom)
+model ConversationTag {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique // bot | sin_asignar | asistidas | custom_xxx
+  isSystem       Boolean        @default(false) // true = protegida, no se puede borrar/modificar
+  order          Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversations  Conversation[]
+
+  @@index([slug])
+  @@index([order])
+}
+
 model Contact {
   id               String   @id @default(cuid())
   phone            String   @unique  // WhatsApp ID (ej. 573001234567)
@@ -68,8 +83,11 @@ model Conversation {
   participants          ConversationParticipant[]
   messages            Message[]
   botBatches          BotBatch[]
+  conversationTagId    String?
+  conversationTag      ConversationTag? @relation(fields: [conversationTagId], references: [id], onDelete: SetNull)
 
   @@index([id])
+  @@index([conversationTagId])
   @@index([channel])
   @@index([assignedToId])
   @@index([contactId])

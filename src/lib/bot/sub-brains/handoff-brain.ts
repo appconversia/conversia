@@ -18,11 +18,13 @@ export async function executeHandoff(conversationId: string): Promise<void> {
       pusherChannels: ["conversations-updates", conversationId],
     },
   });
+  const sinAsignarTag = await prisma.conversationTag.findUnique({ where: { slug: "sin_asignar" }, select: { id: true } });
   await prisma.conversation.update({
     where: { id: conversationId },
     data: {
       handoffRequestedAt: new Date(),
       assignedToId: null,
+      ...(sinAsignarTag && { conversationTagId: sinAsignarTag.id }),
     },
   });
   const pusher = getPusherServer();

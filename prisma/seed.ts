@@ -6,6 +6,22 @@ const prisma = new PrismaClient();
 const SEED_PASSWORD = process.env.SEED_PASSWORD || "Inicio-00";
 
 async function main() {
+  // Etiquetas de conversaciones (si no existen)
+  const systemTags = [
+    { slug: "bot", name: "Bot", order: 0 },
+    { slug: "sin_asignar", name: "Sin Asignar", order: 1 },
+    { slug: "asistidas", name: "Asistidas", order: 2 },
+  ];
+  for (const t of systemTags) {
+    const existing = await prisma.conversationTag.findUnique({ where: { slug: t.slug } });
+    if (!existing) {
+      await prisma.conversationTag.create({
+        data: { ...t, isSystem: true },
+      });
+      console.log(`Etiqueta ${t.name} creada`);
+    }
+  }
+
   const hashedPassword = await hash(SEED_PASSWORD, 12);
 
   // Super Admin (solo para configuración del sistema)

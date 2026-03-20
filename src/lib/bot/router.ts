@@ -70,10 +70,12 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
   let conversation = contact.conversations?.[0];
 
   if (!conversation) {
+    const botTag = await prisma.conversationTag.findUnique({ where: { slug: "bot" }, select: { id: true } });
     conversation = await prisma.conversation.create({
       data: {
         channel: "bot",
         contactId: contact.id,
+        ...(botTag && { conversationTagId: botTag.id }),
       },
     });
   }

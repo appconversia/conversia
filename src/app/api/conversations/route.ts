@@ -71,6 +71,7 @@ export async function GET() {
     include: {
       contact: { select: { id: true, phone: true, name: true } },
       assignedTo: { select: { id: true, email: true, name: true } },
+      conversationTag: { select: { id: true, name: true, slug: true } },
       participants: {
         include: { user: { select: { id: true, email: true, name: true } } },
       },
@@ -133,6 +134,7 @@ export async function GET() {
       handoffRequestedAt: c.handoffRequestedAt?.toISOString() ?? null,
       handoffPending,
       restricted: c.restricted,
+      conversationTag: c.conversationTag ? { id: c.conversationTag.id, name: c.conversationTag.name, slug: c.conversationTag.slug } : null,
       otherUser: otherUser ? { id: otherUser.id, email: otherUser.email, name: otherUser.name } : null,
       assignedTo: c.assignedTo ? { id: c.assignedTo.id, email: c.assignedTo.email, name: c.assignedTo.name } : null,
       lastMessage: last
