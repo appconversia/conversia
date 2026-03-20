@@ -128,9 +128,9 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     metadata: { flowType: flowResult?.type ?? "none", isFirstMessage: flowContext.isFirstMessage },
   });
 
-  // Primer mensaje: saludo + fotos de barriles + pregunta inductiva (sin IA)
+  // Primer mensaje: saludo + fotos de productos + pregunta inductiva (sin IA)
   if (flowContext.isFirstMessage) {
-    void botLog("info", "main_brain", "Mensaje de bienvenida: saludo + fotos barriles + pregunta", {
+    void botLog("info", "main_brain", "Mensaje de bienvenida: saludo + fotos productos + pregunta", {
       conversationId,
       contactId,
       phone: contactPhone,
@@ -153,7 +153,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     }
     const { sent: sentMedia, ctaMessage } = await sendProductImages(
       contactPhone,
-      "barril",
+      null,
       contactName,
       "image_only"
     );
@@ -516,7 +516,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
           ? "Te envío la información del catálogo, un momento por favor ✨"
           : `Te enviaré los detalles del *${name}*, un momento por favor ✨`;
     } else if (Array.isArray(pf) && pf.length >= 2) {
-      replyToSend = "Te envío la información de los barriles que elegiste, un momento por favor ✨";
+      replyToSend = "Te envío la información de los productos que elegiste, un momento por favor ✨";
     } else {
       replyToSend = "Te envío la información, un momento por favor ✨";
     }
@@ -545,14 +545,14 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     }
   }
 
-  // 2) Enviar imágenes solo cuando sales-flow lo autoriza (opciones primero: no enviar si pidieron genérico tipo "quiero barriles")
+  // 2) Enviar imágenes solo cuando sales-flow lo autoriza (opciones primero: no enviar si pidieron genérico tipo "quiero productos")
   const shouldSendImages = salesResult.sendImages;
   void botLog(
     shouldSendImages ? "info" : "info",
     "main_brain",
     shouldSendImages
       ? "sendImages=true: enviando imagen y video de productos"
-      : "sendImages=false: NO se envían (pide genérico o no cumple pideEspecifico+pideVer)",
+      : "sendImages=false: NO se envían (petición genérica o no cumple pideEspecifico+pideVer)",
     {
       conversationId,
       contactId,

@@ -55,12 +55,12 @@ describe("Bot — Escenarios de peticiones (capa determinista)", () => {
 
   describe("Patrones que debe cubrir sales-flow (documentación)", () => {
     // Estos regex existen en sales-flow-brain; aquí documentamos qué matchean.
-    const pideTodos = /todos\s*(los\s+)?(productos?|barriles?|v[ií]deos?|fotos?|im[aá]genes?)|todo\s+(el\s+)?(cat[aá]logo|lo\s+que\s+tienen)|cat[aá]logo\s+completo|env[ií]ame\s+(todo|todos)|all\s+(the\s+)?(products?|barrels?|videos?)/i;
+    const pideTodos = /todos\s*(los\s+)?(productos?|items?|v[ií]deos?|fotos?|im[aá]genes?)|todo\s+(el\s+)?(cat[aá]logo|lo\s+que\s+tienen)|cat[aá]logo\s+completo|env[ií]ame\s+(todo|todos)|all\s+(the\s+)?(products?|items?|videos?)/i;
     const pideVideoOImagen = /\b(video[s]?\s+de|video[s]?\s+del|v[ií]deos?\s+de|me\s+puedes\s+enviar\s+(un\s+)?v[ií]deo[s]?|imagen(es)?\s+de|imagen(es)?\s+del|env[ií]ame\s+(la\s+)?imagen|foto[s]?\s+de|foto[s]?\s+del)\b/i;
     const referenciaUltimo = /\b(él?\s+que\s+me\s+enviaste|el\s+que\s+me\s+enviaste|el\s+que\s+mostraste|el\s+de\s+las\s+fotos|ese\s+mismo)\b/i;
 
     it("pideTodos matchea frases de catálogo completo", () => {
-      expect(pideTodos.test("todos los barriles")).toBe(true);
+      expect(pideTodos.test("todos los productos")).toBe(true);
       expect(pideTodos.test("envíame todo")).toBe(true);
       expect(pideTodos.test("catálogo completo")).toBe(true);
       expect(pideTodos.test("all the products")).toBe(true);
@@ -102,9 +102,9 @@ describe("Bot — Escenarios de peticiones (capa determinista)", () => {
     });
 
     it("matriz de peticiones: catálogo vs video vs descripción", () => {
-      const pT = /todos\s*(los\s+)?(productos?|barriles?)|env[ií]ame\s+(todo|todos)/i;
+      const pT = /todos\s*(los\s+)?(productos?|items?)|env[ií]ame\s+(todo|todos)/i;
       const pV = /\b(video[s]?\s+(de|del)|imagen(es)?\s+(de|del)|foto[s]?\s+(de|del))\b/i;
-      expect(pT.test("todos los barriles")).toBe(true);
+      expect(pT.test("todos los productos")).toBe(true);
       expect(pT.test("envíame todo")).toBe(true);
       expect(pV.test("video del brochetero")).toBe(true);
       expect(pV.test("imagen del tierno")).toBe(true);

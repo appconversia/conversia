@@ -42,27 +42,11 @@ const MEDIA_DELAY_MS = 600;
 /** Pausa entre productos (video+imagen) en la cola de envío */
 const PRODUCT_DELAY_MS = 1200;
 
-const GENERIC_WORDS = /^(barril|barriles|grande|mediano|pequeño|promo|verano|libra|libras|lb|lbs|con|el|la|de|del|y)$/i;
+const GENERIC_WORDS = /^(producto|productos|item|items|grande|mediano|pequeño|con|el|la|de|del|y)$/i;
 
-/** Reemplazos de nombres inventados por la IA hacia nombres exactos del catálogo */
-const PRODUCT_NAME_CORRECTIONS: [RegExp | string, string][] = [
-  [/Gorra\s+YJ\s+Barriles/gi, "Gorras Yeison Jimenez"],
-  [/\*Gorra\s+YJ\s+Barriles\*/gi, "*Gorras Yeison Jimenez*"],
-];
-
-/** Corrige precios erróneos cuando la IA inventa $35,000 para gorras (correcto: $150,000) */
-const GORRA_PRECIO_ERRONEO = /\$\s*35[,.]?000/g;
-
-/** Valida y corrige nombres/precios inventados por la IA usando datos del catálogo */
+/** Valida y corrige nombres inventados por la IA (extensible por negocio) */
 function validateAndCorrectProductResponse(text: string): string {
-  let out = text;
-  for (const [pattern, replacement] of PRODUCT_NAME_CORRECTIONS) {
-    out = out.replace(pattern, replacement);
-  }
-  if (/\b(Gorras?\s+Yeison\s+Jimenez|Gorra\s+YJ\s+Barriles)\b/i.test(out) && /\$\s*35[,.]?000/.test(out)) {
-    out = out.replace(GORRA_PRECIO_ERRONEO, "$150,000");
-  }
-  return out;
+  return text;
 }
 
 /** Normaliza para matcheo: MLP/M.L.P. → mlp. Permite que "el mlp" matchee "El Barril M.L.P." */
@@ -130,7 +114,7 @@ const ORDINALES: { re: RegExp; index: number }[] = [
 ];
 const ULTIMO_RE = /\b(el\s+)?[úu]ltimo\b/i;
 const NUMERO_GEN_RE = /\b(?:el\s+)?(?:numero|n[úu]mero)\s*([1-9]\d{0,2})\b|\bel\s+([1-9]\d{0,2})\b/i;
-const NUMERO_UNO_RE = /\b(?:numero|n[úu]mero)\s+uno\b|\bel\s+uno\b|\bbarril\s+numero\s+uno\b|\bbarril\s+n[úu]mero\s+uno\b/i;
+const NUMERO_UNO_RE = /\b(?:numero|n[úu]mero)\s+uno\b|\bel\s+uno\b|\b(?:producto|item)\s+numero\s+uno\b|\b(?:producto|item)\s+n[úu]mero\s+uno\b/i;
 
 /** Lista única de productos por orden (para posiciones). */
 function getUniqueProductNames(catalog: { name: string }[]): string[] {
@@ -411,10 +395,10 @@ export async function processSalesFlow(
       }
     }
   }
-  const otrosProductNames = uniqueProductNames.filter((n) => !/barril/i.test(n));
+  const otrosProductNames = uniqueProductNames;
   const otrosListExplicito =
     otrosProductNames.length > 0
-      ? `\n\nProductos "otros" (nombres EXACTOS para usar cuando pregunten por gorras, ponchos, miel, carbón, delantal, etc.): ${otrosProductNames.join(", ")}. Si preguntan "qué otros productos tienen" o "además de barriles", lista estos.`
+      ? `\n\nProductos adicionales (nombres EXACTOS): ${otrosProductNames.join(", ")}. Si preguntan "qué otros productos tienen", lista estos.`
       : "";
 
   const quotedContext = quotedMessage?.trim()
@@ -434,15 +418,13 @@ OBLIGATORIO: Si el usuario elige un producto, incluye al inicio de tu respuesta:
 - "el primero" hasta "el vigésimo", "el 1" hasta "el 100", "el 1, 3 y 5" = uno o varios productos por posición
 - "el último" = último de la lista
 - "el aventurero", "el desmadre", etc = busca el nombre en la lista
-- "todos los productos/barriles/videos", "catálogo completo", "all products" = PRODUCT_INTEREST: todos (envía todo)
-- "enviame informacion de todos", "informacion de todos los barriles", "datos de todo el catálogo", "info de todos" = PRODUCT_INTEREST: todos
+- "todos los productos/videos", "catálogo completo", "all products" = PRODUCT_INTEREST: todos (envía todo)
+- "enviame informacion de todos", "informacion de todos los productos", "datos de todo el catálogo", "info de todos" = PRODUCT_INTEREST: todos
 - Si piden "más detalles", "descripción completa", "qué incluye" de uno: SEND_FULL_DESCRIPTION: [nombre exacto]. El sistema enviará la ficha completa (sin imagen ni video).
 
-OPCIONES PRIMERO: Si piden genéricamente ("quiero barriles"): lista opciones y pregunta cuál. NO prometas imágenes ni video aún.
-OBLIGATORIO al listar el menú: Incluye SIEMPRE la opción 10: "10. *Otros* (gorras, ponchos, carbón, etc.)". No la omitas nunca cuando muestres las opciones disponibles.
-FOTOS/VIDEOS AMBIGUOS: Si piden fotos o videos de forma genérica ("fotos de los barriles", "quiero ver fotos") sin especificar producto ni decir "todos": NO prometas enviarlos. Pregunta: ¿De cuál te gustaría ver? Di el número (1-10), el nombre del modelo, o "todos" para el catálogo completo.
-CATEGORÍAS: Tenemos barriles y otros productos (gorras, ponchos, carbón, manoplas, kit limpieza). Si piden "gorras", "ponchos", "carbón", etc. usa PRODUCT_INTEREST con el nombre exacto de la lista.
-FUERA DE ALCANCE: Si el mensaje es claramente sobre otro tema (comida, política, fútbol, otro negocio, chistes, etc.) o nada que podamos atender: emite ÚNICAMENTE FUERA_DE_ALCANCE. No inventes, no des rodeos.
+OPCIONES PRIMERO: Si piden genéricamente ("quiero productos", "qué tienen"): lista opciones y pregunta cuál. NO prometas imágenes ni video aún.
+FOTOS/VIDEOS AMBIGUOS: Si piden fotos o videos de forma genérica sin especificar producto ni decir "todos": NO prometas enviarlos. Pregunta: ¿De cuál te gustaría ver? Di el número, el nombre del modelo, o "todos" para el catálogo completo.
+FUERA DE ALCANCE: Si el mensaje es claramente sobre otro tema (comida, política, otro negocio, chistes, etc.) o nada que podamos atender: emite ÚNICAMENTE FUERA_DE_ALCANCE. No inventes, no des rodeos.
 Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderación (📦 💲 ✨).`
       : `[Contexto actual] No hay catálogo configurado. Si piden productos, imágenes o videos, invita a que un asesor les envíe la información.${quotedContext}`;
   const trainingBlock = productsTraining
@@ -546,13 +528,14 @@ Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderació
 
   cleanReply = validateAndCorrectProductResponse(cleanReply);
 
-  // Post-proceso: si la IA listó barriles 1-9 pero omitió la opción 10, inyectarla (mismo método IA, garantía opción 10)
-  const tieneListaBarriles9 = /\n9\.\s+\*[^*]+\*[^\n]*/i.test(cleanReply);
-  const careceOpcion10 = !/10\.\s+(\*)?Otros/i.test(cleanReply);
-  if (tieneListaBarriles9 && careceOpcion10) {
+  // Post-proceso: si la IA listó productos numerados pero omitió el último, inyectar opción "Otros" si hay más de 9 productos
+  const tieneLista9 = /\n9\.\s+\*[^*]+\*[^\n]*/i.test(cleanReply);
+  const careceOpcion10 = !/10\.\s+(\*)?[^*]+/i.test(cleanReply);
+  const hayMasDe9 = catalog.length > 9;
+  if (tieneLista9 && careceOpcion10 && hayMasDe9) {
     cleanReply = cleanReply.replace(
-      /(\n9\.\s+\*[^*]+\*[^\n]*)(\n+\s*¿Cuál de estos (?:barriles|productos) te interesa\?)/i,
-      "$1\n\n10. *Otros* (gorras, ponchos, carbón, etc.)$2"
+      /(\n9\.\s+\*[^*]+\*[^\n]*)(\n+\s*¿Cuál de estos productos te interesa\?)/i,
+      "$1\n\n10. *Otros productos*$2"
     );
   }
 
@@ -608,7 +591,7 @@ Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderació
     };
   }
 
-  // FUERA_DE_ALCANCE: mensaje entendible pero no sobre barriles (pizza, política, etc.)
+  // FUERA_DE_ALCANCE: mensaje entendible pero no sobre nuestros productos
   if (/FUERA_DE_ALCANCE/i.test(cleanReply)) {
     void botLog("info", "sales_flow", "IA indicó FUERA_DE_ALCANCE → scope_guard", {
       conversationId,
@@ -677,7 +660,7 @@ Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderació
 
   const lastText = lastMessageAsText(lastMessage).toLowerCase();
   const pideTodos =
-    /todos\s*(los\s+)?(productos?|barriles?|v[ií]deos?|fotos?|im[aá]genes?)|todo\s+(el\s+)?(cat[aá]logo|lo\s+que\s+tienen)|cat[aá]logo\s+completo|env[ií]ame\s+(todo|todos)|env[ií]o\s+todo|mu[eé]strame\s+todos?|quiero\s+ver\s+todos?|quiero\s+todos?|m[aá]ndame\s+todos?|all\s+(the\s+)?(products?|barrels?|videos?|photos?)|show\s+me\s+all|send\s+me\s+all|full\s+catalog|everything|todo\s+lo\s+que\s+tienen/i.test(
+    /todos\s*(los\s+)?(productos?|items?|v[ií]deos?|fotos?|im[aá]genes?)|todo\s+(el\s+)?(cat[aá]logo|lo\s+que\s+tienen)|cat[aá]logo\s+completo|env[ií]ame\s+(todo|todos)|env[ií]o\s+todo|mu[eé]strame\s+todos?|quiero\s+ver\s+todos?|quiero\s+todos?|m[aá]ndame\s+todos?|all\s+(the\s+)?(products?|items?|videos?|photos?)|show\s+me\s+all|send\s+me\s+all|full\s+catalog|everything|todo\s+lo\s+que\s+tienen/i.test(
       lastText
     );
   const matchByCatalogName =
@@ -695,7 +678,7 @@ Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderació
       lastText
     );
   const pideEspecifico =
-    /el premium|el primero|el segundo|el tercero|el cuarto|el quinto|el sexto|el s[eé]ptimo|el octavo|el noveno|el d[eé]cimo|el und[eé]cimo|el duod[eé]cimo|el vig[eé]simo|ese|esa|ese mismo|el [0-9]+|el \d+l|el grande|el pequeño|el compacto|todos|todo el|catálogo completo|envíame todo|envio todo|numero\s*[1-9]\d*|n[úu]mero\s*[1-9]\d*|(numero|n[úu]mero)\s+uno|el\s+uno|barril\s+(numero|n[úu]mero)\s+uno|el [úu]ltimo|show\s+me\s+(the\s+)?(photo[s]?|picture[s]?|video[s]?)|picture[s]?\s+of|photo[s]?\s+of|send\s+me\s+(the\s+)?(photo[s]?|picture[s]?|video[s]?)|do\s+you\s+have\s+(any\s+)?(photo[s]?|picture[s]?|video[s]?)|barrels?\s+you\s+recommend|(smallest|largest)\s+barrel|recommend/i.test(
+    /el premium|el primero|el segundo|el tercero|el cuarto|el quinto|el sexto|el s[eé]ptimo|el octavo|el noveno|el d[eé]cimo|el und[eé]cimo|el duod[eé]cimo|el vig[eé]simo|ese|esa|ese mismo|el [0-9]+|el \d+l|el grande|el pequeño|el compacto|todos|todo el|catálogo completo|envíame todo|envio todo|numero\s*[1-9]\d*|n[úu]mero\s*[1-9]\d*|(numero|n[úu]mero)\s+uno|el\s+uno|el [úu]ltimo|show\s+me\s+(the\s+)?(photo[s]?|picture[s]?|video[s]?)|picture[s]?\s+of|photo[s]?\s+of|send\s+me\s+(the\s+)?(photo[s]?|picture[s]?|video[s]?)|do\s+you\s+have\s+(any\s+)?(photo[s]?|picture[s]?|video[s]?)|recommend/i.test(
       lastText
     ) || productInterest != null || matchByCatalogName || referenciaUltimoEnviado || pideVideoOImagen;
 
@@ -820,7 +803,7 @@ Formato WhatsApp: *texto* = negrita. NUNCA ** ni # ## ###. Emojis con moderació
     PROMESA_ENVIO.test(cleanReply)
   ) {
     cleanReply =
-      "¿De cuál te gustaría ver fotos? Tenemos del 1 al 9 (barriles) y opción 10 (Otros). Di el número, el nombre del modelo, o *todos* para el catálogo completo.";
+      "¿De cuál te gustaría ver fotos? Di el número, el nombre del producto, o *todos* para el catálogo completo.";
     void botLog("info", "sales_flow", "Clarificación: reemplazando promesa rota por pedido de especificación", {
       conversationId,
       phone: contactPhone,

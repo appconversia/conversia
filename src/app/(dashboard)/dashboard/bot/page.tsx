@@ -496,7 +496,7 @@ export default function BotPage() {
       {tab === "probar" && (
         <div className="max-w-2xl rounded-xl border border-[#E9EDEF] bg-white p-6">
           <p className="mb-4 text-sm text-[#667781]">
-            Prueba el bot con IA (asesor virtual Yeison Jiménez Barriles: memoria conversacional, catálogo, clasificación de interés, registro de leads y escalamiento a asesor). Configura las API keys y edita el prompt del sistema en la pestaña Configuración.
+            Prueba el bot con IA (asesor virtual: memoria conversacional, catálogo, clasificación de interés, registro de leads y escalamiento a asesor). Configura las API keys y edita el prompt del sistema en la pestaña Configuración.
           </p>
           <div className="space-y-4">
             {testHistory.map((h, i) => (

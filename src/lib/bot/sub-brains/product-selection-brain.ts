@@ -6,7 +6,7 @@
 import { getProductCatalog } from "../product-catalog";
 import { botLog } from "../bot-logger";
 
-const GENERIC_WORDS = /^(barril|barriles|grande|mediano|pequeño|promo|verano|libra|libras|lb|lbs|con|el|la|de|del|y)$/i;
+const GENERIC_WORDS = /^(producto|productos|item|items|grande|mediano|pequeño|con|el|la|de|del|y)$/i;
 
 /** Normaliza para matcheo: MLP/M.L.P. → mlp */
 function normalizeForMatch(s: string): string {

@@ -1,4 +1,4 @@
-# Roadmap de mejoras - YJBarriles Chat
+# Roadmap de mejoras - WhatsApiBot
 
 ## ✅ Implementado
 

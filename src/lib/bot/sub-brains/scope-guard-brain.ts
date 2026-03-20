@@ -1,21 +1,21 @@
 /**
  * Cerebrito Scope Guard: cuando nada de lo entrenado cumple, redirige al usuario
- * con mensaje de límite (solo barriles YJ) y lista de productos (inductivo).
+ * con mensaje de límite y lista de productos (inductivo).
  * Estricto: no permite temas fuera de alcance; siempre devuelve al inicio del flujo.
  */
 import { prisma } from "@/lib/db";
 import { botLog } from "../bot-logger";
 
-const SCOPE_MESSAGE = `Estamos aquí para servirte y brindarte toda la ayuda que necesitas con los barriles de Yeison Jiménez, hechos con el corazón ❤️
+const SCOPE_MESSAGE = `Estamos aquí para servirte y brindarte toda la ayuda que necesitas con nuestros productos ❤️
 
-Pero no podemos ayudarte con eso que mencionaste. Aquí te comparto nuestros barriles:`;
+Pero no podemos ayudarte con eso que mencionaste. Aquí te comparto nuestro catálogo:`;
 
 export type ScopeGuardResult = {
   reply: string;
 };
 
 /**
- * Genera respuesta inductiva: mensaje de límite + lista de barriles + opción Otros.
+ * Genera respuesta inductiva: mensaje de límite + lista de productos.
  * Siempre devuelve al usuario al inicio del flujo (lista para que elija).
  */
 export async function buildScopeGuardReply(
@@ -41,20 +41,20 @@ export async function buildScopeGuardReply(
       );
       listBlock = `\n\nAquí están nuestros otros productos:\n\n${lines.join("\n")}\n\n¿Cuál te interesa conocer?`;
     } else {
-      listBlock = "\n\nPor el momento no tenemos otros productos disponibles. ¿Te gustaría ver nuestros barriles?";
+      listBlock = "\n\nPor el momento no tenemos otros productos disponibles. ¿Te gustaría ver el catálogo?";
     }
     return { reply: `Estamos aquí para servirte ❤️${listBlock}` };
   }
 
-  const barrilesProducts = await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: { available: true },
     orderBy: { order: "asc" },
     select: { name: true, price: true },
   });
 
   let listBlock = "";
-  if (barrilesProducts.length > 0) {
-    const lines = barrilesProducts.map(
+  if (products.length > 0) {
+    const lines = products.map(
       (p, i) => `${i + 1}. *${p.name}* - $${Number(p.price).toLocaleString()}`
     );
     listBlock = `\n\n${lines.join("\n")}\n\n¿Cuál te interesa conocer?`;

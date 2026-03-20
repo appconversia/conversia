@@ -33,7 +33,7 @@ export async function buildProductResponses(
   }
 
   const nameHint = contactName?.trim()
-    ? `El cliente se llama ${contactName.trim()}. Personaliza las descripciones para él/ella cuando sea natural (ej: "Para ti, ${contactName.trim()}, este barril...").`
+    ? `El cliente se llama ${contactName.trim()}. Personaliza las descripciones para él/ella cuando sea natural (ej: "Para ti, ${contactName.trim()}, este producto...").`
     : "No tenemos el nombre del cliente. Redacta de forma amable y directa.";
 
   const productList = products

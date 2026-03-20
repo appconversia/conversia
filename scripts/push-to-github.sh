@@ -15,7 +15,7 @@ if [ -z "$TOKEN" ]; then
   exit 1
 fi
 
-git remote set-url origin "https://x-access-token:${TOKEN}@github.com/yjbarriles/botyjbarriles.git"
+git remote set-url origin "https://x-access-token:${TOKEN}@github.com/whatsapibot/whatsapibot.git"
 git push origin main
-git remote set-url origin "https://github.com/yjbarriles/botyjbarriles.git"
+git remote set-url origin "https://github.com/whatsapibot/whatsapibot.git"
 echo "Listo."

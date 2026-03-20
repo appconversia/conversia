@@ -21,7 +21,7 @@
    - Abre **pgAdmin** (o usa `psql` desde la consola).
    - Conéctate al servidor local con el usuario `postgres` y la contraseña que pusiste.
    - Clic derecho en **Databases** → **Create** → **Database**.
-   - Nombre: por ejemplo `yjbarriles`.
+   - Nombre: por ejemplo `whatsapibot`.
    - Guardar.
 
 4. **Configurar `.env` del proyecto**
@@ -63,7 +63,7 @@ Si prefieres usar winget y te salió error de hash:
 
 5. Durante la instalación te pedirá la **contraseña del usuario `postgres`**. Anótala.
 
-6. Luego crea la base de datos `yjbarriles` en pgAdmin y configura `DATABASE_URL` en `.env` como en los pasos 3–5 de la Opción 1.
+6. Luego crea la base de datos `whatsapibot` en pgAdmin y configura `DATABASE_URL` en `.env` como en los pasos 3–5 de la Opción 1.
 
 ---
 
