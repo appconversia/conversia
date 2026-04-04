@@ -6,6 +6,7 @@ type FlowEdge = { source: string; target: string };
 type FlowJson = { nodes?: FlowNode[]; edges?: FlowEdge[] };
 
 export type FlowContext = {
+  tenantId: string;
   isFirstMessage: boolean;
   messageCountFromContact: number;
   lastMessageText: string;
@@ -25,7 +26,7 @@ export type FlowResult =
  */
 export async function getFlowResult(context: FlowContext): Promise<FlowResult> {
   const flows = await prisma.botFlow.findMany({
-    where: { isActive: true },
+    where: { isActive: true, tenantId: context.tenantId },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -115,6 +116,7 @@ export async function getFlowResult(context: FlowContext): Promise<FlowResult> {
  */
 export async function getFlowReply(context?: FlowContext): Promise<string | null> {
   const ctx = context ?? {
+    tenantId: "tenant_default",
     isFirstMessage: false,
     messageCountFromContact: 1,
     lastMessageText: "",

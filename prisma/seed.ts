@@ -4,19 +4,21 @@ import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
 const SEED_PASSWORD = process.env.SEED_PASSWORD || "Inicio-00";
+const TENANT_ID = "tenant_default";
 
 async function main() {
-  // Etiquetas de conversaciones (si no existen)
   const systemTags = [
     { slug: "bot", name: "Bot", order: 0 },
     { slug: "sin_asignar", name: "Sin Asignar", order: 1 },
     { slug: "asistidas", name: "Asistidas", order: 2 },
   ];
   for (const t of systemTags) {
-    const existing = await prisma.conversationTag.findUnique({ where: { slug: t.slug } });
+    const existing = await prisma.conversationTag.findUnique({
+      where: { tenantId_slug: { tenantId: TENANT_ID, slug: t.slug } },
+    });
     if (!existing) {
       await prisma.conversationTag.create({
-        data: { ...t, isSystem: true },
+        data: { tenantId: TENANT_ID, ...t, isSystem: true },
       });
       console.log(`Etiqueta ${t.name} creada`);
     }
@@ -24,7 +26,6 @@ async function main() {
 
   const hashedPassword = await hash(SEED_PASSWORD, 12);
 
-  // Super Admin (solo para configuración del sistema)
   const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || "superadmin@conversia.local";
   let superAdmin = await prisma.user.findUnique({ where: { email: superAdminEmail } });
   if (!superAdmin) {
@@ -35,23 +36,45 @@ async function main() {
         name: "Super Admin",
         phone: "+57 300 000 0000",
         role: "super_admin",
+        tenantId: TENANT_ID,
       },
     });
     console.log("Super Admin creado");
   } else {
     await prisma.user.update({
       where: { email: superAdminEmail },
-      data: { password: hashedPassword, role: "super_admin" },
+      data: { password: hashedPassword, role: "super_admin", tenantId: TENANT_ID },
     });
   }
 
   await prisma.appConfig.upsert({
-    where: { key: "system_protected_user_id" },
-    create: { key: "system_protected_user_id", value: superAdmin.id },
+    where: { tenantId_key: { tenantId: TENANT_ID, key: "system_protected_user_id" } },
+    create: { tenantId: TENANT_ID, key: "system_protected_user_id", value: superAdmin.id },
     update: { value: superAdmin.id },
   });
 
-  // Admin
+  const platformAdminEmail = process.env.SEED_PLATFORM_SUPER_ADMIN_EMAIL || "jhon@jhon.com";
+  const platformPassword = process.env.SEED_PLATFORM_SUPER_ADMIN_PASSWORD || "Inicio-2026";
+  const platformHash = await hash(platformPassword, 12);
+  let platformAdmin = await prisma.user.findUnique({ where: { email: platformAdminEmail } });
+  if (!platformAdmin) {
+    platformAdmin = await prisma.user.create({
+      data: {
+        email: platformAdminEmail,
+        password: platformHash,
+        name: "Super Admin Plataforma",
+        role: "super_admin",
+        tenantId: null,
+      },
+    });
+    console.log("Super admin de plataforma creado");
+  } else {
+    await prisma.user.update({
+      where: { email: platformAdminEmail },
+      data: { password: platformHash, role: "super_admin", tenantId: null },
+    });
+  }
+
   const adminEmail = "admin@conversia.local";
   let admin = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (!admin) {
@@ -62,17 +85,17 @@ async function main() {
         name: "Administrador",
         phone: "+57 300 000 0001",
         role: "admin",
+        tenantId: TENANT_ID,
       },
     });
     console.log("Admin creado");
   } else {
     await prisma.user.update({
       where: { email: adminEmail },
-      data: { password: hashedPassword, name: "Administrador", role: "admin" },
+      data: { password: hashedPassword, name: "Administrador", role: "admin", tenantId: TENANT_ID },
     });
   }
 
-  // Usuario Bot (sistema) - para mensajes enviados por IA
   const botEmail = "bot@system.conversia.local";
   let bot = await prisma.user.findUnique({ where: { email: botEmail } });
   if (!bot) {
@@ -82,17 +105,17 @@ async function main() {
         password: hashedPassword,
         name: "Bot Conversia",
         role: "sistema" as UserRole,
+        tenantId: TENANT_ID,
       },
     });
     console.log("Usuario Bot creado");
   }
   await prisma.appConfig.upsert({
-    where: { key: "bot_user_id" },
-    create: { key: "bot_user_id", value: bot!.id },
+    where: { tenantId_key: { tenantId: TENANT_ID, key: "bot_user_id" } },
+    create: { tenantId: TENANT_ID, key: "bot_user_id", value: bot!.id },
     update: { value: bot!.id },
   });
 
-  // Colaborador
   const colabEmail = "ventas@conversia.local";
   let colaborador = await prisma.user.findUnique({ where: { email: colabEmail } });
   if (!colaborador) {
@@ -103,25 +126,24 @@ async function main() {
         name: "Ventas",
         phone: "+57 300 000 0002",
         role: "colaborador",
+        tenantId: TENANT_ID,
       },
     });
     console.log("Colaborador creado");
   } else {
     await prisma.user.update({
       where: { email: colabEmail },
-      data: { password: hashedPassword, name: "Ventas", role: "colaborador" },
+      data: { password: hashedPassword, name: "Ventas", role: "colaborador", tenantId: TENANT_ID },
     });
   }
 
-  // NO se crean conversaciones ni mensajes de ejemplo - base limpia para conectar a nueva cuenta Meta
-
-  // Flujos del bot: principal (saludo + IA)
-  await prisma.botFlow.updateMany({ data: { isActive: false } });
+  await prisma.botFlow.updateMany({ where: { tenantId: TENANT_ID }, data: { isActive: false } });
 
   const saludoInicialTexto =
     "Bienvenido a Conversia. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
 
   const flowPrincipal = {
+    tenantId: TENANT_ID,
     name: "Flujo principal Conversia",
     description:
       "Primer mensaje: saludo. Resto: IA con memoria, catálogo, clasificación de interés y handoff.",
@@ -149,7 +171,7 @@ async function main() {
     isActive: true,
   };
   const existingPrincipal = await prisma.botFlow.findFirst({
-    where: { name: flowPrincipal.name },
+    where: { tenantId: TENANT_ID, name: flowPrincipal.name },
   });
   if (!existingPrincipal) {
     await prisma.botFlow.create({ data: flowPrincipal });
@@ -163,6 +185,7 @@ async function main() {
   }
 
   const flowHola = {
+    tenantId: TENANT_ID,
     name: "Saludo inicial (simple)",
     description: "Respuesta fija 'hola' en cada mensaje (sin IA)",
     flowJson: JSON.stringify({
@@ -175,7 +198,7 @@ async function main() {
     isActive: false,
   };
   const existingHola = await prisma.botFlow.findFirst({
-    where: { name: flowHola.name },
+    where: { tenantId: TENANT_ID, name: flowHola.name },
   });
   if (!existingHola) {
     await prisma.botFlow.create({ data: flowHola });
@@ -187,25 +210,33 @@ async function main() {
     });
   }
 
-  // Categoría ejemplo (solo si no existe)
-  let catEjemplo = await prisma.category.findFirst({ where: { name: "categoria ejemplo" } });
+  let catEjemplo = await prisma.category.findFirst({
+    where: { tenantId: TENANT_ID, name: "categoria ejemplo" },
+  });
   if (!catEjemplo) {
     catEjemplo = await prisma.category.create({
-      data: { name: "categoria ejemplo", order: 0 },
+      data: { tenantId: TENANT_ID, name: "categoria ejemplo", order: 0 },
     });
     console.log("Categoría ejemplo creada");
   }
 
-  // Productos ejemplo genéricos (solo si no existen)
   const productosEjemplo = [
     { name: "Producto ejemplo 1", description: "Descripción del producto ejemplo 1.", price: 10000, characteristics: '{"material":"genérico","tallas":"única"}' },
     { name: "Producto ejemplo 2", description: "Descripción del producto ejemplo 2.", price: 15000, characteristics: '{"material":"genérico"}' },
-    { name: "Producto ejemplo 3", description: "Descripción del producto ejemplo 3.", price: 20000, characteristics: '{}' },
+    { name: "Producto ejemplo 3", description: "Descripción del producto ejemplo 3.", price: 20000, characteristics: "{}" },
   ];
-  const maxOrder = (await prisma.product.findFirst({ orderBy: { order: "desc" }, select: { order: true } }))?.order ?? -1;
+  const maxOrder = (
+    await prisma.product.findFirst({
+      where: { category: { tenantId: TENANT_ID } },
+      orderBy: { order: "desc" },
+      select: { order: true },
+    })
+  )?.order ?? -1;
   let order = maxOrder + 1;
   for (const p of productosEjemplo) {
-    const existing = await prisma.product.findFirst({ where: { name: p.name, categoryId: catEjemplo!.id } });
+    const existing = await prisma.product.findFirst({
+      where: { name: p.name, categoryId: catEjemplo!.id },
+    });
     if (!existing) {
       await prisma.product.create({
         data: {

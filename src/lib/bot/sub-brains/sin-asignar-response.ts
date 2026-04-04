@@ -10,10 +10,11 @@ const FALLBACK_SIN_ASIGNAR = "Tu solicitud ya está en proceso. Un asesor te ate
  * Fallback a mensaje fijo si la IA falla o no hay credenciales.
  */
 export async function generateSinAsignarResponse(
+  tenantId: string,
   lastMessageText: string,
   contactName?: string | null
 ): Promise<string> {
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds) {
     return FALLBACK_SIN_ASIGNAR;
   }

@@ -17,8 +17,8 @@ export function getRandomTypingDelayMs(): number {
  * Marca un mensaje como leído en WhatsApp (check azul).
  * Usar cuando recibimos un mensaje del usuario.
  */
-export async function sendWhatsAppRead(toPhone: string, messageId: string): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+export async function sendWhatsAppRead(tenantId: string, toPhone: string, messageId: string): Promise<SendResult> {
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -57,8 +57,8 @@ export async function sendWhatsAppRead(toPhone: string, messageId: string): Prom
  * Envía indicador de "escribiendo" + marca como leído.
  * El typing se oculta automáticamente al enviar un mensaje o tras ~25s.
  */
-export async function sendWhatsAppTypingAndRead(toPhone: string, messageId: string): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+export async function sendWhatsAppTypingAndRead(tenantId: string, toPhone: string, messageId: string): Promise<SendResult> {
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -99,12 +99,13 @@ export async function sendWhatsAppTypingAndRead(toPhone: string, messageId: stri
  * Usar para respuestas del bot.
  */
 export async function withBotTyping<T>(
+  tenantId: string,
   toPhone: string,
   messageId: string | undefined,
   sendFn: () => Promise<T>
 ): Promise<T> {
   if (messageId) {
-    await sendWhatsAppTypingAndRead(toPhone, messageId);
+    await sendWhatsAppTypingAndRead(tenantId, toPhone, messageId);
     await new Promise((r) => setTimeout(r, getRandomTypingDelayMs()));
   }
   return sendFn();
@@ -135,11 +136,12 @@ function splitLongMessage(text: string): string[] {
 }
 
 export async function sendWhatsAppText(
+  tenantId: string,
   toPhone: string,
   text: string,
   contextMessageId?: string
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -197,13 +199,14 @@ const CTA_RETRY_DELAY_MS = 1000;
  * Envía texto con reintentos. Garantiza hasta 3 intentos para mensajes críticos (ej. CTA bienvenida).
  */
 export async function sendWhatsAppTextWithRetry(
+  tenantId: string,
   toPhone: string,
   text: string,
   contextMessageId?: string
 ): Promise<SendResult> {
   let lastError: string | undefined;
   for (let attempt = 1; attempt <= CTA_RETRY_ATTEMPTS; attempt++) {
-    const result = await sendWhatsAppText(toPhone, text, contextMessageId);
+    const result = await sendWhatsAppText(tenantId, toPhone, text, contextMessageId);
     if (result.ok) return result;
     lastError = result.error;
     void botLog("warn", "whatsapp_send", `Reintento ${attempt}/${CTA_RETRY_ATTEMPTS} falló`, {
@@ -222,27 +225,29 @@ export async function sendWhatsAppTextWithRetry(
  * Usar para mensajes que deben llegar sí o sí (ej. tras fotos de bienvenida).
  */
 export async function sendGuaranteedCtaWithTyping(
+  tenantId: string,
   toPhone: string,
   messageId: string | undefined,
   ctaText: string
 ): Promise<SendResult> {
   if (messageId) {
-    await sendWhatsAppTypingAndRead(toPhone, messageId);
+    await sendWhatsAppTypingAndRead(tenantId, toPhone, messageId);
     await new Promise((r) => setTimeout(r, getRandomTypingDelayMs()));
   }
-  return sendWhatsAppTextWithRetry(toPhone, ctaText);
+  return sendWhatsAppTextWithRetry(tenantId, toPhone, ctaText);
 }
 
 /**
  * Envía imagen por link directo (método estable). Meta descarga desde la URL y entrega al usuario.
  */
 export async function sendWhatsAppImage(
+  tenantId: string,
   toPhone: string,
   imageUrl: string,
   caption?: string,
   contextMessageId?: string
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -285,12 +290,13 @@ export async function sendWhatsAppImage(
 }
 
 export async function sendWhatsAppVideo(
+  tenantId: string,
   toPhone: string,
   videoUrl: string,
   caption?: string,
   contextMessageId?: string
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -333,11 +339,12 @@ export async function sendWhatsAppVideo(
 }
 
 export async function sendWhatsAppAudio(
+  tenantId: string,
   toPhone: string,
   audioUrl: string,
   contextMessageId?: string
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -375,13 +382,14 @@ export async function sendWhatsAppAudio(
 }
 
 export async function sendWhatsAppDocument(
+  tenantId: string,
   toPhone: string,
   documentUrl: string,
   filename?: string,
   caption?: string,
   contextMessageId?: string
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };
@@ -430,12 +438,13 @@ export type TemplateComponent = {
  * Envía una plantilla de WhatsApp (para reactivar conversación fuera de ventana 24h).
  */
 export async function sendWhatsAppTemplate(
+  tenantId: string,
   toPhone: string,
   templateName: string,
   languageCode: string,
   components?: TemplateComponent[]
 ): Promise<SendResult> {
-  const creds = await getWhatsAppCredentials();
+  const creds = await getWhatsAppCredentials(tenantId);
   if (!creds) {
     void botLog("error", "whatsapp_send", "Credenciales WhatsApp no configuradas", { phone: toPhone });
     return { ok: false, error: "WhatsApp no configurado" };

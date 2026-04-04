@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import { getBotUserId } from "@/lib/config";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 import { sendGuaranteedCtaWithTyping } from "./whatsapp-send";
 import { botLog } from "./bot-logger";
 
@@ -24,15 +23,17 @@ export async function processPendingWelcomeCtas(): Promise<{ sent: number; error
     if (!ctaText || !phone) continue;
 
     try {
-      const botUserId = await getBotUserId();
+      const tenantId = c.tenantId;
+      const botUserId = await getBotUserId(tenantId);
       const result = await sendGuaranteedCtaWithTyping(
+        tenantId,
         phone,
         c.pendingWelcomeCtaMsgId ?? undefined,
         ctaText
       );
 
       if (botUserId) {
-        const message = await prisma.message.create({
+        await prisma.message.create({
           data: {
             conversationId: c.id,
             senderId: botUserId,
@@ -40,26 +41,7 @@ export async function processPendingWelcomeCtas(): Promise<{ sent: number; error
             type: "text",
             whatsappMessageId: result.ok ? result.messageId ?? null : null,
           },
-          include: { sender: { select: { id: true, name: true, email: true } } },
         });
-
-        const pusher = getPusherServer();
-        if (pusher) {
-          pusher
-            .trigger(`${PUSHER_CHANNEL_PREFIX}${c.id}`, "new_message", {
-              id: message.id,
-              content: message.content,
-              type: message.type,
-              mediaUrl: message.mediaUrl,
-              mediaFilename: message.mediaFilename,
-              senderId: message.senderId,
-              sender: message.sender,
-              status: message.status,
-              createdAt: message.createdAt,
-              fromContact: false,
-            })
-            .catch((e) => console.error("Pusher trigger:", e));
-        }
       }
 
       await prisma.conversation.update({

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 
 export type LeadInput = {
+  tenantId: string;
   phone: string;
   name?: string | null;
   productInterest?: string | null;
@@ -15,6 +16,7 @@ export type LeadInput = {
  * Crea o actualiza un lead por teléfono. Si ya existe, actualiza campos no vacíos.
  */
 export async function upsertLead(input: LeadInput): Promise<void> {
+  const { tenantId } = input;
   const phone = input.phone.replace(/\D/g, "").trim();
   if (!phone) return;
 
@@ -29,7 +31,7 @@ export async function upsertLead(input: LeadInput): Promise<void> {
   };
 
   const existing = await prisma.lead.findFirst({
-    where: { phone },
+    where: { tenantId, phone },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -49,6 +51,7 @@ export async function upsertLead(input: LeadInput): Promise<void> {
   } else {
     await prisma.lead.create({
       data: {
+        tenantId,
         phone,
         name: data.name ?? null,
         productInterest: data.productInterest ?? null,

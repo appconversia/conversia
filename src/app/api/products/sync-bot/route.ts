@@ -8,9 +8,12 @@ export async function POST() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   try {
-    const result = await syncProductsWithBot();
+    const result = await syncProductsWithBot(session.tenantId);
     return NextResponse.json({
       ok: true,
       message: `Sincronizado: ${result.catalogCount} imágenes en catálogo, ${result.trainingLength} caracteres de contexto para el bot.`,

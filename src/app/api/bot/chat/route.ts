@@ -9,7 +9,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const creds = await getBotAICredentials();
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
+  const creds = await getBotAICredentials(session.tenantId);
   if (!creds) {
     return NextResponse.json({ error: "Bot con IA no configurado. Ve a Configuración." }, { status: 400 });
   }

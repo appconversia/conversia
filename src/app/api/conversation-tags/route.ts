@@ -8,8 +8,13 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
+
   try {
     const tags = await prisma.conversationTag.findMany({
+      where: { tenantId: session.tenantId },
       orderBy: { order: "asc" },
       include: { _count: { select: { conversations: true } } },
     });
@@ -24,6 +29,7 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   try {
     const body = await request.json() as { name: string; order?: number };
@@ -31,6 +37,7 @@ export async function POST(request: Request) {
 
     const slug = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const maxOrder = await prisma.conversationTag.findFirst({
+      where: { tenantId: session.tenantId },
       orderBy: { order: "desc" },
       select: { order: true },
     });
@@ -38,6 +45,7 @@ export async function POST(request: Request) {
 
     const tag = await prisma.conversationTag.create({
       data: {
+        tenantId: session.tenantId,
         name: body.name.trim(),
         slug,
         isSystem: false,

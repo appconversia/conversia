@@ -9,8 +9,14 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
 
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
+  const tenantId = session.tenantId;
+
   try {
     const categories = await prisma.category.findMany({
+      where: { tenantId },
       orderBy: { order: "asc" },
       include: { _count: { select: { products: true } } },
     });
@@ -25,12 +31,16 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+
+  const tenantId = session.tenantId;
 
   try {
     const body = await request.json() as { name: string; order?: number };
     if (!body.name?.trim()) return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
 
     const maxOrder = await prisma.category.findFirst({
+      where: { tenantId },
       orderBy: { order: "desc" },
       select: { order: true },
     });
@@ -38,6 +48,7 @@ export async function POST(request: Request) {
 
     const category = await prisma.category.create({
       data: {
+        tenantId,
         name: body.name.trim(),
         order,
       },

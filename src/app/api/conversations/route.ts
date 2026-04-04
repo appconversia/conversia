@@ -210,8 +210,13 @@ export async function POST(request: Request) {
     }
   }
 
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
+
   const conversation = await prisma.conversation.create({
     data: {
+      tenantId: session.tenantId,
       participants: {
         create: [{ userId: session.id }, { userId: otherUserId }],
       },

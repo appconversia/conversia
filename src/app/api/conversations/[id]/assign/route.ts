@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 
 const ADMIN_ROLES = ["super_admin", "admin"];
 
@@ -36,6 +35,11 @@ export async function POST(
 
   if (!conv) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
+  if (session.tenantId && session.tenantId !== conv.tenantId) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const tenantId = conv.tenantId;
   const isAdmin = ADMIN_ROLES.includes(session.role);
   const assignedToSomeoneElse = conv.assignedToId && conv.assignedToId !== session.id;
 
@@ -46,7 +50,10 @@ export async function POST(
     if (conv.channel !== "bot") {
       return NextResponse.json({ error: "Solo conversaciones del canal bot pueden volver al bot" }, { status: 400 });
     }
-    const botTag = await prisma.conversationTag.findUnique({ where: { slug: "bot" }, select: { id: true } });
+    const botTag = await prisma.conversationTag.findUnique({
+      where: { tenantId_slug: { tenantId, slug: "bot" } },
+      select: { id: true },
+    });
     await prisma.conversation.update({
       where: { id: conversationId },
       data: {
@@ -55,12 +62,6 @@ export async function POST(
         ...(botTag && { conversationTagId: botTag.id }),
       },
     });
-    const payload = { assignedTo: null, backToBot: true };
-    const pusher = getPusherServer();
-    if (pusher) {
-      pusher.trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "assignment_changed", payload).catch((e) => console.error("Pusher trigger:", e));
-      pusher.trigger("conversations-updates", "assignment_changed", { conversationId, ...payload }).catch((e) => console.error("Pusher trigger:", e));
-    }
     return NextResponse.json({ assignedTo: null, backToBot: true });
   }
 
@@ -68,8 +69,8 @@ export async function POST(
     if (!isAdmin) {
       return NextResponse.json({ error: "Solo administradores pueden asignar a otro usuario" }, { status: 403 });
     }
-    const targetUser = await prisma.user.findUnique({
-      where: { id: assignToUserId, active: true },
+    const targetUser = await prisma.user.findFirst({
+      where: { id: assignToUserId, active: true, tenantId },
       select: { id: true, name: true, email: true },
     });
     if (!targetUser) {
@@ -81,7 +82,10 @@ export async function POST(
         data: { conversationId, userId: assignToUserId },
       });
     }
-    const asistidasTag = await prisma.conversationTag.findUnique({ where: { slug: "asistidas" }, select: { id: true } });
+    const asistidasTag = await prisma.conversationTag.findUnique({
+      where: { tenantId_slug: { tenantId, slug: "asistidas" } },
+      select: { id: true },
+    });
     await prisma.conversation.update({
       where: { id: conversationId },
       data: {
@@ -114,7 +118,10 @@ export async function POST(
         { status: 403 }
       );
     }
-    const sinAsignarTag = await prisma.conversationTag.findUnique({ where: { slug: "sin_asignar" }, select: { id: true } });
+    const sinAsignarTag = await prisma.conversationTag.findUnique({
+      where: { tenantId_slug: { tenantId, slug: "sin_asignar" } },
+      select: { id: true },
+    });
     await prisma.conversation.update({
       where: { id: conversationId },
       data: {
@@ -130,13 +137,6 @@ export async function POST(
       assignedTo: { select: { id: true, name: true, email: true } },
     },
   });
-
-  const payload = { assignedTo: updated?.assignedTo ?? null };
-  const pusher = getPusherServer();
-  if (pusher) {
-    pusher.trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "assignment_changed", payload).catch((e) => console.error("Pusher trigger:", e));
-    pusher.trigger("conversations-updates", "assignment_changed", { conversationId, ...payload }).catch((e) => console.error("Pusher trigger:", e));
-  }
 
   return NextResponse.json({
     assignedTo: updated?.assignedTo ?? null,

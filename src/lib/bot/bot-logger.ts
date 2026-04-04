@@ -22,6 +22,8 @@ export type BotLogStage =
   | "other";
 
 export interface BotLogContext {
+  /** Si no se indica, se usa tenant_default (logs de rutas sin contexto de organización). */
+  tenantId?: string;
   conversationId?: string;
   contactId?: string;
   phone?: string;
@@ -45,6 +47,7 @@ export async function botLog(
   try {
     await prisma.botLog.create({
       data: {
+        tenantId: ctx?.tenantId ?? "tenant_default",
         level,
         stage,
         message,

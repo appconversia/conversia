@@ -1,11 +1,10 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { getWebhookVerifyToken } from "@/lib/config";
+import { findTenantIdByWebhookVerifyToken, findTenantIdByWhatsAppPhoneNumberId } from "@/lib/config";
 import { routeIncomingMessage } from "@/lib/bot/router";
 import { sendWhatsAppRead } from "@/lib/bot/whatsapp-send";
 import { botLog } from "@/lib/bot/bot-logger";
 import { prisma } from "@/lib/db";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 
 /** Verifica X-Hub-Signature-256 con el App Secret de Meta (recomendado en producción). */
 function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
@@ -23,9 +22,8 @@ function verifyWebhookSignature(rawBody: string, signatureHeader: string | null)
 
 /**
  * Webhook de WhatsApp Cloud API (Meta)
- * GET: Verificación de la URL de callback
+ * GET: Verificación de la URL de callback (token por tenant en AppConfig)
  * POST: Recibe mensajes → Router → Main Brain → Sub-brains
- * En producción conviene definir WHATSAPP_APP_SECRET y verificar la firma.
  */
 export const maxDuration = 120;
 
@@ -39,8 +37,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
   }
 
-  const expectedToken = await getWebhookVerifyToken();
-  if (!expectedToken || token !== expectedToken) {
+  if (!token) {
+    return NextResponse.json({ error: "Invalid verify token" }, { status: 403 });
+  }
+
+  const tenantId = await findTenantIdByWebhookVerifyToken(token);
+  if (!tenantId) {
     return NextResponse.json({ error: "Invalid verify token" }, { status: 403 });
   }
 
@@ -54,11 +56,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const expectedToken = await getWebhookVerifyToken();
-  if (!expectedToken) {
-    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
-  }
-
   const rawBody = await request.text();
   const signature = request.headers.get("x-hub-signature-256");
   if (process.env.WHATSAPP_APP_SECRET && !verifyWebhookSignature(rawBody, signature)) {
@@ -83,14 +80,19 @@ export async function POST(request: NextRequest) {
       for (const change of changes) {
         if (change.field === "messages") {
           const value = (change.value ?? {}) as {
+            metadata?: { phone_number_id?: string };
             messages?: Array<Record<string, unknown>>;
             statuses?: Array<{ id: string; status?: string; recipient_id?: string }>;
             contacts?: Array<{ wa_id?: string; waba_id?: string; profile?: { name?: string } }>;
           };
 
+          const phoneNumberId = value.metadata?.phone_number_id;
+          const tenantIdFromMeta = phoneNumberId
+            ? await findTenantIdByWhatsAppPhoneNumberId(String(phoneNumberId))
+            : null;
+
           // Actualizar estados de mensajes enviados por nosotros (delivered, read)
           const statuses = Array.isArray(value.statuses) ? value.statuses : [];
-          const pusher = getPusherServer();
           for (const st of statuses) {
             const status = String(st.status || "").toLowerCase();
             if (status === "delivered" || status === "read") {
@@ -103,16 +105,15 @@ export async function POST(request: NextRequest) {
                   where: { whatsappMessageId: st.id },
                   data: { status: status === "read" ? "read" : "delivered" },
                 });
-                if (pusher) {
-                  pusher
-                    .trigger(`${PUSHER_CHANNEL_PREFIX}${msg.conversationId}`, "message_status", {
-                      id: msg.id,
-                      status: status === "read" ? "read" : "delivered",
-                    })
-                    .catch(() => {});
-                }
               }
             }
+          }
+
+          if (!tenantIdFromMeta) {
+            void botLog("warn", "webhook", "Sin tenant para phone_number_id; mensajes omitidos", {
+              metadata: { phoneNumberId: phoneNumberId ?? null },
+            });
+            continue;
           }
 
           const messages = Array.isArray(value.messages) ? value.messages : [];
@@ -132,7 +133,15 @@ export async function POST(request: NextRequest) {
 
             const ctx = msg.context as { id?: string } | undefined;
             const msgType = String(msg.type || "text");
-            const payload: { phone: string; contactName?: string; text?: string; type: string; mediaId?: string; messageId?: string; quotedMessageId?: string } = {
+            const payload: {
+              phone: string;
+              contactName?: string;
+              text?: string;
+              type: string;
+              mediaId?: string;
+              messageId?: string;
+              quotedMessageId?: string;
+            } = {
               phone: from,
               contactName: contactMap.get(from) ?? value.contacts?.find((c) => c.wa_id === from)?.profile?.name,
               type: msgType,
@@ -142,7 +151,7 @@ export async function POST(request: NextRequest) {
             if (ctx?.id) payload.quotedMessageId = String(ctx.id);
 
             if (payload.messageId) {
-              sendWhatsAppRead(from, payload.messageId).catch(() => {});
+              sendWhatsAppRead(tenantIdFromMeta, from, payload.messageId).catch(() => {});
             }
 
             if (msgType === "text" && (msg.text as { body?: string } | undefined)?.body) {
@@ -180,7 +189,6 @@ export async function POST(request: NextRequest) {
               else continue;
               payload.type = "text";
             } else if (msgType === "button" && (msg.button as { text?: string } | undefined)?.text) {
-              // Respuesta de botón Quick Reply en plantilla (ej. "Sí, me interesa")
               const btn = msg.button as { text: string };
               payload.text = btn.text;
               payload.type = "text";
@@ -196,7 +204,7 @@ export async function POST(request: NextRequest) {
               phone: from,
               metadata: { type: msgType, hasText: !!payload.text?.trim(), mediaId: !!payload.mediaId },
             });
-            const routeResult = await routeIncomingMessage(payload);
+            const routeResult = await routeIncomingMessage(payload, { tenantId: tenantIdFromMeta });
             if (!routeResult.ok) {
               void botLog("error", "webhook", `Router falló: ${routeResult.error}`, {
                 phone: from,

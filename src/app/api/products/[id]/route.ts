@@ -9,10 +9,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const product = await prisma.product.findFirst({
+    where: { id, category: { tenantId: session.tenantId } },
     include: { category: { select: { id: true, name: true } } },
   });
   if (!product) return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
@@ -31,8 +32,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   const { id } = await params;
+  const existing = await prisma.product.findFirst({
+    where: { id, category: { tenantId: session.tenantId } },
+    select: { id: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
   const body = await request.json() as {
     name?: string;
     description?: string;
@@ -62,7 +69,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     },
     include: { category: { select: { id: true, name: true } } },
   });
-  await syncProductsWithBot().catch((err) => console.error("syncProductsWithBot after update:", err));
+  await syncProductsWithBot(session.tenantId).catch((err) => console.error("syncProductsWithBot after update:", err));
   return NextResponse.json({
     ...product,
     price: Number(product.price),
@@ -77,9 +84,15 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   const { id } = await params;
+  const existing = await prisma.product.findFirst({
+    where: { id, category: { tenantId: session.tenantId } },
+    select: { id: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
   await prisma.product.delete({ where: { id } });
-  await syncProductsWithBot().catch((err) => console.error("syncProductsWithBot after delete:", err));
+  await syncProductsWithBot(session.tenantId).catch((err) => console.error("syncProductsWithBot after delete:", err));
   return NextResponse.json({ ok: true });
 }

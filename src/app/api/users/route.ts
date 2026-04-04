@@ -19,9 +19,14 @@ export async function GET() {
         { status: 403 }
       );
     }
+    if (!session.tenantId) {
+      return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+    }
 
+    const tenantId = session.tenantId;
     const [users, protectedUserId] = await Promise.all([
       prisma.user.findMany({
+        where: { tenantId },
         select: {
           id: true,
           email: true,
@@ -33,7 +38,7 @@ export async function GET() {
         },
         orderBy: { createdAt: "desc" },
       }),
-      getProtectedUserId(),
+      getProtectedUserId(tenantId),
     ]);
     return NextResponse.json({ users, protectedUserIds: protectedUserId ? [protectedUserId] : [] });
   } catch (e) {
@@ -58,6 +63,9 @@ export async function POST(request: Request) {
       { status: 403 }
     );
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   try {
     const body = await request.json();
@@ -81,6 +89,7 @@ export async function POST(request: Request) {
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
+        tenantId: session.tenantId,
         email,
         password: hashedPassword,
         name,

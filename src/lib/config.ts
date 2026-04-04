@@ -22,13 +22,15 @@ const KEYS = {
   BOT_BATCH_CONFIG: "bot_batch_config",
 } as const;
 
+export { KEYS };
+
 export type WhatsAppConfig = {
   accessToken: string;
   phoneNumberId: string;
   businessAccountId: string;
   webhookVerifyToken: string;
   enabled: boolean;
-  webhookUrl: string; // derivada, no se guarda
+  webhookUrl: string;
 };
 
 export type BotProvider = "openai" | "anthropic" | "google";
@@ -55,35 +57,46 @@ export type AppConfigData = {
   appBaseUrl: string;
 };
 
-async function getValue(key: string): Promise<string | null> {
+async function getValue(tenantId: string, key: string): Promise<string | null> {
   const row = await prisma.appConfig.findUnique({
-    where: { key },
+    where: { tenantId_key: { tenantId, key } },
   });
   return row?.value ?? null;
 }
 
-async function setValue(key: string, value: string | null): Promise<void> {
+async function setValue(tenantId: string, key: string, value: string | null): Promise<void> {
   if (value === null || value === "") {
-    await prisma.appConfig.deleteMany({ where: { key } });
+    await prisma.appConfig.deleteMany({ where: { tenantId, key } });
     return;
   }
   await prisma.appConfig.upsert({
-    where: { key },
-    create: { key, value },
+    where: { tenantId_key: { tenantId, key } },
+    create: { tenantId, key, value },
     update: { value },
   });
 }
 
-export async function getWhatsAppConfig(): Promise<WhatsAppConfig> {
-  const [accessToken, phoneNumberId, businessAccountId, webhookVerifyToken, enabled, baseUrl] =
-    await Promise.all([
-      getValue(KEYS.WHATSAPP_ACCESS_TOKEN),
-      getValue(KEYS.WHATSAPP_PHONE_NUMBER_ID),
-      getValue(KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
-      getValue(KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
-      getValue(KEYS.WHATSAPP_ENABLED),
-      getValue(KEYS.APP_BASE_URL),
-    ]);
+/** Resuelve tenant por el ID de número de teléfono de WhatsApp Cloud API (multi-tenant). */
+export async function findTenantIdByWhatsAppPhoneNumberId(phoneNumberId: string): Promise<string | null> {
+  const row = await prisma.appConfig.findFirst({
+    where: {
+      key: KEYS.WHATSAPP_PHONE_NUMBER_ID,
+      value: phoneNumberId,
+    },
+    select: { tenantId: true },
+  });
+  return row?.tenantId ?? null;
+}
+
+export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfig> {
+  const [accessToken, phoneNumberId, businessAccountId, webhookVerifyToken, enabled, baseUrl] = await Promise.all([
+    getValue(tenantId, KEYS.WHATSAPP_ACCESS_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_PHONE_NUMBER_ID),
+    getValue(tenantId, KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
+    getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_ENABLED),
+    getValue(tenantId, KEYS.APP_BASE_URL),
+  ]);
 
   const appBase = resolveAppBaseUrl(baseUrl);
 
@@ -97,27 +110,35 @@ export async function getWhatsAppConfig(): Promise<WhatsAppConfig> {
   };
 }
 
-/** Usuario del bot (sistema) - para mensajes enviados por IA */
-export async function getBotUserId(): Promise<string | null> {
-  return getValue(KEYS.BOT_USER_ID);
+export async function getBotUserId(tenantId: string): Promise<string | null> {
+  return getValue(tenantId, KEYS.BOT_USER_ID);
 }
 
-/** Usuario protegido (no editable/eliminable) - consultado desde BD */
-export async function getProtectedUserId(): Promise<string | null> {
-  return getValue(KEYS.SYSTEM_PROTECTED_USER_ID);
+export async function getProtectedUserId(tenantId: string): Promise<string | null> {
+  return getValue(tenantId, KEYS.SYSTEM_PROTECTED_USER_ID);
 }
 
-export async function getWebhookVerifyToken(): Promise<string | null> {
-  return getValue(KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN);
+export async function getWebhookVerifyTokenForTenant(tenantId: string): Promise<string | null> {
+  return getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN);
 }
 
-/** Para enviar mensajes: obtiene credenciales completas */
-export async function getWhatsAppCredentials(): Promise<{
+/** GET del webhook de Meta: localiza el tenant por el verify_token configurado en AppConfig. */
+export async function findTenantIdByWebhookVerifyToken(token: string): Promise<string | null> {
+  const t = token?.trim();
+  if (!t) return null;
+  const row = await prisma.appConfig.findFirst({
+    where: { key: KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN, value: t },
+    select: { tenantId: true },
+  });
+  return row?.tenantId ?? null;
+}
+
+export async function getWhatsAppCredentials(tenantId: string): Promise<{
   accessToken: string;
   phoneNumberId: string;
   businessAccountId: string;
 } | null> {
-  const config = await getWhatsAppConfig();
+  const config = await getWhatsAppConfig(tenantId);
   if (!config.enabled || !config.accessToken || !config.phoneNumberId) return null;
   return {
     accessToken: config.accessToken,
@@ -126,7 +147,6 @@ export async function getWhatsAppCredentials(): Promise<{
   };
 }
 
-/** Resuelve la URL base: prioridad: BD > host del request (si disponible) > env > Vercel > localhost */
 export function resolveAppBaseUrl(storedBaseUrl: string | null, requestHeaders?: Headers): string {
   if (storedBaseUrl?.trim()) return storedBaseUrl.replace(/\/$/, "");
   const host = requestHeaders?.get("x-forwarded-host") || requestHeaders?.get("host");
@@ -136,7 +156,7 @@ export function resolveAppBaseUrl(storedBaseUrl: string | null, requestHeaders?:
   return "http://localhost:3000";
 }
 
-export async function getAppConfigForUI(request?: Request): Promise<AppConfigData> {
+export async function getAppConfigForUI(tenantId: string, request?: Request): Promise<AppConfigData> {
   const [
     accessToken,
     phoneNumberId,
@@ -155,22 +175,22 @@ export async function getAppConfigForUI(request?: Request): Promise<AppConfigDat
     temperature,
     maxTokens,
   ] = await Promise.all([
-    getValue(KEYS.WHATSAPP_ACCESS_TOKEN),
-    getValue(KEYS.WHATSAPP_PHONE_NUMBER_ID),
-    getValue(KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
-    getValue(KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
-    getValue(KEYS.WHATSAPP_ENABLED),
-    getValue(KEYS.APP_BASE_URL),
-    getValue(KEYS.BOT_OPENAI_API_KEY),
-    getValue(KEYS.BOT_ANTHROPIC_API_KEY),
-    getValue(KEYS.BOT_GOOGLE_API_KEY),
-    getValue(KEYS.BOT_DEFAULT_PROVIDER),
-    getValue(KEYS.BOT_ENABLED),
-    getValue(KEYS.BOT_N8N_WEBHOOK_URL),
-    getValue(KEYS.BOT_SYSTEM_PROMPT),
-    getValue(KEYS.BOT_MODEL),
-    getValue(KEYS.BOT_TEMPERATURE),
-    getValue(KEYS.BOT_MAX_TOKENS),
+    getValue(tenantId, KEYS.WHATSAPP_ACCESS_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_PHONE_NUMBER_ID),
+    getValue(tenantId, KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
+    getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_ENABLED),
+    getValue(tenantId, KEYS.APP_BASE_URL),
+    getValue(tenantId, KEYS.BOT_OPENAI_API_KEY),
+    getValue(tenantId, KEYS.BOT_ANTHROPIC_API_KEY),
+    getValue(tenantId, KEYS.BOT_GOOGLE_API_KEY),
+    getValue(tenantId, KEYS.BOT_DEFAULT_PROVIDER),
+    getValue(tenantId, KEYS.BOT_ENABLED),
+    getValue(tenantId, KEYS.BOT_N8N_WEBHOOK_URL),
+    getValue(tenantId, KEYS.BOT_SYSTEM_PROMPT),
+    getValue(tenantId, KEYS.BOT_MODEL),
+    getValue(tenantId, KEYS.BOT_TEMPERATURE),
+    getValue(tenantId, KEYS.BOT_MAX_TOKENS),
   ]);
 
   const appBase = resolveAppBaseUrl(baseUrl, request?.headers);
@@ -178,9 +198,7 @@ export async function getAppConfigForUI(request?: Request): Promise<AppConfigDat
   const webhookUrl = `${appBase.replace(/\/$/, "")}/api/webhook/whatsapp`;
 
   const validProvider: BotProvider =
-    botProvider === "openai" || botProvider === "anthropic" || botProvider === "google"
-      ? botProvider
-      : "openai";
+    botProvider === "openai" || botProvider === "anthropic" || botProvider === "google" ? botProvider : "openai";
 
   return {
     whatsapp: {
@@ -211,9 +229,8 @@ export async function getAppConfigForUI(request?: Request): Promise<AppConfigDat
   };
 }
 
-export async function saveWhatsAppConfig(data: Partial<WhatsAppConfig>): Promise<void> {
+export async function saveWhatsAppConfig(tenantId: string, data: Partial<WhatsAppConfig>): Promise<void> {
   const updates: Array<[string, string | null]> = [];
-  // accessToken: solo actualizar si se provee un valor no vacío
   if (data.accessToken !== undefined && data.accessToken.trim() !== "") {
     updates.push([KEYS.WHATSAPP_ACCESS_TOKEN, data.accessToken.trim()]);
   }
@@ -223,15 +240,15 @@ export async function saveWhatsAppConfig(data: Partial<WhatsAppConfig>): Promise
   if (data.enabled !== undefined) updates.push([KEYS.WHATSAPP_ENABLED, data.enabled ? "true" : "false"]);
 
   for (const [key, value] of updates) {
-    await setValue(key, value);
+    await setValue(tenantId, key, value);
   }
 }
 
-export async function saveAppBaseUrl(url: string): Promise<void> {
-  await setValue(KEYS.APP_BASE_URL, url && url.trim() ? url.trim() : null);
+export async function saveAppBaseUrl(tenantId: string, url: string): Promise<void> {
+  await setValue(tenantId, KEYS.APP_BASE_URL, url && url.trim() ? url.trim() : null);
 }
 
-export async function saveBotConfig(data: Partial<BotConfig>): Promise<void> {
+export async function saveBotConfig(tenantId: string, data: Partial<BotConfig>): Promise<void> {
   const updates: Array<[string, string | null]> = [];
   if (data.openaiApiKey !== undefined && data.openaiApiKey.trim() !== "") {
     updates.push([KEYS.BOT_OPENAI_API_KEY, data.openaiApiKey.trim()]);
@@ -251,12 +268,11 @@ export async function saveBotConfig(data: Partial<BotConfig>): Promise<void> {
   if (data.maxTokens !== undefined) updates.push([KEYS.BOT_MAX_TOKENS, String(data.maxTokens)]);
 
   for (const [key, value] of updates) {
-    await setValue(key, value);
+    await setValue(tenantId, key, value);
   }
 }
 
-/** Obtiene credenciales y parámetros de IA para uso server-side */
-export async function getBotAICredentials(): Promise<{
+export async function getBotAICredentials(tenantId: string): Promise<{
   provider: BotProvider;
   openaiKey: string | null;
   anthropicKey: string | null;
@@ -267,20 +283,19 @@ export async function getBotAICredentials(): Promise<{
   maxTokens: number;
 } | null> {
   const [openai, anthropic, google, provider, enabled, systemPrompt, model, temperature, maxTokens] = await Promise.all([
-    getValue(KEYS.BOT_OPENAI_API_KEY),
-    getValue(KEYS.BOT_ANTHROPIC_API_KEY),
-    getValue(KEYS.BOT_GOOGLE_API_KEY),
-    getValue(KEYS.BOT_DEFAULT_PROVIDER),
-    getValue(KEYS.BOT_ENABLED),
-    getValue(KEYS.BOT_SYSTEM_PROMPT),
-    getValue(KEYS.BOT_MODEL),
-    getValue(KEYS.BOT_TEMPERATURE),
-    getValue(KEYS.BOT_MAX_TOKENS),
+    getValue(tenantId, KEYS.BOT_OPENAI_API_KEY),
+    getValue(tenantId, KEYS.BOT_ANTHROPIC_API_KEY),
+    getValue(tenantId, KEYS.BOT_GOOGLE_API_KEY),
+    getValue(tenantId, KEYS.BOT_DEFAULT_PROVIDER),
+    getValue(tenantId, KEYS.BOT_ENABLED),
+    getValue(tenantId, KEYS.BOT_SYSTEM_PROMPT),
+    getValue(tenantId, KEYS.BOT_MODEL),
+    getValue(tenantId, KEYS.BOT_TEMPERATURE),
+    getValue(tenantId, KEYS.BOT_MAX_TOKENS),
   ]);
   if (enabled !== "true") return null;
 
-  const p: BotProvider =
-    provider === "anthropic" || provider === "google" ? provider : "openai";
+  const p: BotProvider = provider === "anthropic" || provider === "google" ? provider : "openai";
 
   return {
     provider: p,
@@ -294,7 +309,6 @@ export async function getBotAICredentials(): Promise<{
   };
 }
 
-/** Configuración de agrupación de mensajes (estilo Redis): delay y tamaño máximo de lote */
 export type BotBatchConfig = {
   enabled: boolean;
   delayMs: number;
@@ -307,28 +321,30 @@ const DEFAULT_BATCH_CONFIG: BotBatchConfig = {
   maxBatchSize: 10,
 };
 
-export async function getBatchConfig(): Promise<BotBatchConfig> {
-  const raw = await getValue(KEYS.BOT_BATCH_CONFIG);
+export async function getBatchConfig(tenantId: string): Promise<BotBatchConfig> {
+  const raw = await getValue(tenantId, KEYS.BOT_BATCH_CONFIG);
   if (!raw) return DEFAULT_BATCH_CONFIG;
   try {
     const parsed = JSON.parse(raw) as Partial<BotBatchConfig>;
     return {
       enabled: parsed.enabled ?? DEFAULT_BATCH_CONFIG.enabled,
-      delayMs: typeof parsed.delayMs === "number" ? Math.max(500, Math.min(30000, parsed.delayMs)) : DEFAULT_BATCH_CONFIG.delayMs,
-      maxBatchSize: typeof parsed.maxBatchSize === "number" ? Math.max(1, Math.min(50, parsed.maxBatchSize)) : DEFAULT_BATCH_CONFIG.maxBatchSize,
+      delayMs:
+        typeof parsed.delayMs === "number" ? Math.max(500, Math.min(30000, parsed.delayMs)) : DEFAULT_BATCH_CONFIG.delayMs,
+      maxBatchSize:
+        typeof parsed.maxBatchSize === "number" ? Math.max(1, Math.min(50, parsed.maxBatchSize)) : DEFAULT_BATCH_CONFIG.maxBatchSize,
     };
   } catch {
     return DEFAULT_BATCH_CONFIG;
   }
 }
 
-export async function setBatchConfig(config: Partial<BotBatchConfig>): Promise<BotBatchConfig> {
-  const current = await getBatchConfig();
+export async function setBatchConfig(tenantId: string, config: Partial<BotBatchConfig>): Promise<BotBatchConfig> {
+  const current = await getBatchConfig(tenantId);
   const next: BotBatchConfig = {
     enabled: config.enabled ?? current.enabled,
     delayMs: config.delayMs !== undefined ? Math.max(500, Math.min(30000, config.delayMs)) : current.delayMs,
     maxBatchSize: config.maxBatchSize !== undefined ? Math.max(1, Math.min(50, config.maxBatchSize)) : current.maxBatchSize,
   };
-  await setValue(KEYS.BOT_BATCH_CONFIG, JSON.stringify(next));
+  await setValue(tenantId, KEYS.BOT_BATCH_CONFIG, JSON.stringify(next));
   return next;
 }

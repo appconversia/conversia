@@ -48,8 +48,11 @@ export async function GET() {
   if (!SUPER_ADMIN_ROLES.includes(session.role)) {
     return NextResponse.json({ error: "Solo super administradores" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
-  const config = await getWhatsAppConfig();
+  const config = await getWhatsAppConfig(session.tenantId);
   if (!config.accessToken || !config.phoneNumberId) {
     return NextResponse.json(
       { error: "Configura WhatsApp (Access Token y Phone Number ID) en Configuración" },
@@ -100,8 +103,11 @@ export async function PUT(request: Request) {
   if (!SUPER_ADMIN_ROLES.includes(session.role)) {
     return NextResponse.json({ error: "Solo super administradores" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
-  const config = await getWhatsAppConfig();
+  const config = await getWhatsAppConfig(session.tenantId);
   if (!config.accessToken || !config.phoneNumberId) {
     return NextResponse.json(
       { error: "Configura WhatsApp (Access Token y Phone Number ID) en Configuración" },

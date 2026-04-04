@@ -100,6 +100,7 @@ export type ProductSelectionResult = {
  * Retorna handled: true solo si detecta y resuelve exactamente 2+ productos (no 0, no 1).
  */
 export async function processProductSelection(
+  tenantId: string,
   lastMessage: unknown,
   conversationId?: string
 ): Promise<ProductSelectionResult> {
@@ -108,7 +109,7 @@ export async function processProductSelection(
 
   if (!PIDE_ALGUNOS.test(lastText)) return { handled: false };
 
-  const catalog = await getProductCatalog();
+  const catalog = await getProductCatalog(tenantId);
   const productNames = getUniqueProductNames(catalog);
   if (productNames.length === 0) return { handled: false };
 

@@ -31,7 +31,16 @@ export async function createSession(userId: string): Promise<string> {
   return token;
 }
 
-export async function getSession(): Promise<{ id: string; email: string; name: string | null; role: string } | null> {
+export type SessionUser = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: "super_admin" | "admin" | "colaborador" | "sistema";
+  /** null = super administrador de plataforma (SaaS) */
+  tenantId: string | null;
+};
+
+export async function getSession(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -51,8 +60,13 @@ export async function getSession(): Promise<{ id: string; email: string; name: s
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
-    role: role as "super_admin" | "admin" | "colaborador",
+    role: role as SessionUser["role"],
+    tenantId: session.user.tenantId ?? null,
   };
+}
+
+export function isPlatformSuperAdmin(session: SessionUser | null): boolean {
+  return !!session && session.role === "super_admin" && session.tenantId === null;
 }
 
 export async function deleteSession(token: string): Promise<void> {

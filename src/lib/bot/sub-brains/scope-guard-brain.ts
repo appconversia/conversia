@@ -19,6 +19,7 @@ export type ScopeGuardResult = {
  * Siempre devuelve al usuario al inicio del flujo (lista para que elija).
  */
 export async function buildScopeGuardReply(
+  tenantId: string,
   contactName?: string | null,
   conversationId?: string,
   showOtrosMenu?: boolean
@@ -30,7 +31,7 @@ export async function buildScopeGuardReply(
 
   if (showOtrosMenu) {
     const otrosProducts = await prisma.product.findMany({
-      where: { available: true },
+      where: { available: true, category: { tenantId } },
       orderBy: { order: "asc" },
       select: { name: true, price: true },
     });
@@ -47,7 +48,7 @@ export async function buildScopeGuardReply(
   }
 
   const products = await prisma.product.findMany({
-    where: { available: true },
+    where: { available: true, category: { tenantId } },
     orderBy: { order: "asc" },
     select: { name: true, price: true },
   });
@@ -60,7 +61,7 @@ export async function buildScopeGuardReply(
     listBlock = `\n\n${lines.join("\n")}\n\n¿Cuál te interesa conocer?`;
   } else {
     const allProducts = await prisma.product.findMany({
-      where: { available: true },
+      where: { available: true, category: { tenantId } },
       orderBy: { order: "asc" },
       select: { name: true, price: true },
     });

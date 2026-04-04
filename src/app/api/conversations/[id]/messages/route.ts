@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 import {
   sendWhatsAppText,
   sendWhatsAppImage,
@@ -157,29 +156,30 @@ export async function POST(
         });
       });
 
+      const tenantId = conv.tenantId;
       let whatsappMessageId: string | null = null;
       if (isWhatsAppContact && conv.contact) {
         if (type === "text") {
-          const r = await sendWhatsAppText(conv.contact.phone, content, contextWhatsAppId);
+          const r = await sendWhatsAppText(tenantId, conv.contact.phone, content, contextWhatsAppId);
           whatsappMessageId = r.messageId ?? null;
         } else if (mediaUrl && (type === "image" || type === "sticker")) {
-          const r = await sendWhatsAppImage(conv.contact.phone, mediaUrl, content || undefined, contextWhatsAppId);
+          const r = await sendWhatsAppImage(tenantId, conv.contact.phone, mediaUrl, content || undefined, contextWhatsAppId);
           whatsappMessageId = r.messageId ?? null;
         } else if (mediaUrl && type === "video") {
-          const r = await sendWhatsAppVideo(conv.contact.phone, mediaUrl, content || undefined, contextWhatsAppId);
+          const r = await sendWhatsAppVideo(tenantId, conv.contact.phone, mediaUrl, content || undefined, contextWhatsAppId);
           whatsappMessageId = r.messageId ?? null;
         } else if (mediaUrl && type === "audio") {
-          const r = await sendWhatsAppAudio(conv.contact.phone, mediaUrl, contextWhatsAppId);
+          const r = await sendWhatsAppAudio(tenantId, conv.contact.phone, mediaUrl, contextWhatsAppId);
           whatsappMessageId = r.messageId ?? null;
         } else if (mediaUrl && type === "document") {
           const docFilename = mediaFilename || (() => {
             const ext = mediaUrl.split(".").pop()?.split("?")[0] || "pdf";
             return `documento.${ext}`;
           })();
-          const r = await sendWhatsAppDocument(conv.contact.phone, mediaUrl, docFilename, content || undefined, contextWhatsAppId);
+          const r = await sendWhatsAppDocument(tenantId, conv.contact.phone, mediaUrl, docFilename, content || undefined, contextWhatsAppId);
           whatsappMessageId = r.messageId ?? null;
         } else if (mediaUrl) {
-          const r = await sendWhatsAppText(conv.contact.phone, content || mediaFilename || "Archivo adjunto");
+          const r = await sendWhatsAppText(tenantId, conv.contact.phone, content || mediaFilename || "Archivo adjunto");
           whatsappMessageId = r.messageId ?? null;
         }
         if (whatsappMessageId) {
@@ -222,11 +222,6 @@ export async function POST(
         fromContact: false,
         replyTo,
       };
-
-      const pusher = getPusherServer();
-      if (pusher) {
-        pusher.trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", payload).catch((e) => console.error("Pusher trigger:", e));
-      }
 
       return NextResponse.json({
         message: payload,

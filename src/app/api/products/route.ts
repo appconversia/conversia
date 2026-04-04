@@ -9,9 +9,11 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   try {
     const products = await prisma.product.findMany({
+      where: { category: { tenantId: session.tenantId } },
       include: { category: { select: { id: true, name: true } } },
       orderBy: [{ order: "asc" }],
     });
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   if (!ADMIN_ROLES.includes(session.role)) return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+  if (!session.tenantId) return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
 
   try {
     const body = await request.json() as {
@@ -51,12 +54,18 @@ export async function POST(request: Request) {
 
     let categoryId = body.categoryId?.trim();
     if (!categoryId) {
-      const firstCat = await prisma.category.findFirst({ orderBy: { order: "asc" }, select: { id: true } });
+      const firstCat = await prisma.category.findFirst({
+        where: { tenantId: session.tenantId },
+        orderBy: { order: "asc" },
+        select: { id: true },
+      });
       if (!firstCat) return NextResponse.json({ error: "No hay categorías. Crea al menos una en Categorías." }, { status: 400 });
       categoryId = firstCat.id;
     }
 
-    const count = await prisma.product.count();
+    const count = await prisma.product.count({
+      where: { category: { tenantId: session.tenantId } },
+    });
     const product = await prisma.product.create({
       data: {
         name: body.name.trim(),
@@ -72,7 +81,7 @@ export async function POST(request: Request) {
       },
       include: { category: { select: { id: true, name: true } } },
     });
-    await syncProductsWithBot().catch((err) => console.error("syncProductsWithBot after create:", err));
+    await syncProductsWithBot(session.tenantId).catch((err) => console.error("syncProductsWithBot after create:", err));
     return NextResponse.json({
       ...product,
       price: Number(product.price),

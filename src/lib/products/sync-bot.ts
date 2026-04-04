@@ -4,8 +4,9 @@ import { saveProductCatalog } from "@/lib/bot/product-catalog";
 const BOT_PRODUCTS_TRAINING_KEY = "bot_products_training";
 
 /** Genera texto completo de todos los productos para entrenar al bot */
-export async function generateProductsTrainingText(): Promise<string> {
+export async function generateProductsTrainingText(tenantId: string): Promise<string> {
   const products = await prisma.product.findMany({
+    where: { category: { tenantId } },
     include: { category: { select: { name: true } } },
     orderBy: { order: "asc" },
   });
@@ -43,9 +44,9 @@ export async function generateProductsTrainingText(): Promise<string> {
 }
 
 /** Sincroniza productos con el bot: actualiza catálogo de imágenes y texto de entrenamiento */
-export async function syncProductsWithBot(): Promise<{ catalogCount: number; trainingLength: number }> {
+export async function syncProductsWithBot(tenantId: string): Promise<{ catalogCount: number; trainingLength: number }> {
   const products = await prisma.product.findMany({
-    where: { available: true },
+    where: { available: true, category: { tenantId } },
     orderBy: { order: "asc" },
   });
 
@@ -79,20 +80,22 @@ export async function syncProductsWithBot(): Promise<{ catalogCount: number; tra
     });
   }
 
-  await saveProductCatalog(catalogItems);
+  await saveProductCatalog(tenantId, catalogItems);
 
-  const trainingText = await generateProductsTrainingText();
+  const trainingText = await generateProductsTrainingText(tenantId);
   await prisma.appConfig.upsert({
-    where: { key: BOT_PRODUCTS_TRAINING_KEY },
-    create: { key: BOT_PRODUCTS_TRAINING_KEY, value: trainingText },
+    where: { tenantId_key: { tenantId, key: BOT_PRODUCTS_TRAINING_KEY } },
+    create: { tenantId, key: BOT_PRODUCTS_TRAINING_KEY, value: trainingText },
     update: { value: trainingText },
   });
 
   return { catalogCount: catalogItems.length, trainingLength: trainingText.length };
 }
 
-export async function getProductsTrainingText(): Promise<string> {
-  const row = await prisma.appConfig.findUnique({ where: { key: BOT_PRODUCTS_TRAINING_KEY } });
+export async function getProductsTrainingText(tenantId: string): Promise<string> {
+  const row = await prisma.appConfig.findUnique({
+    where: { tenantId_key: { tenantId, key: BOT_PRODUCTS_TRAINING_KEY } },
+  });
   return row?.value ?? "";
 }
 

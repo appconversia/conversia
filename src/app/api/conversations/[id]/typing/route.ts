@@ -48,6 +48,10 @@ export async function POST(
     return NextResponse.json({ ok: true });
   }
 
-  const result = await sendWhatsAppTypingAndRead(conv.contact.phone, lastFromContact.whatsappMessageId);
+  const result = await sendWhatsAppTypingAndRead(
+    conv.tenantId,
+    conv.contact.phone,
+    lastFromContact.whatsappMessageId
+  );
   return NextResponse.json({ ok: result.ok });
 }

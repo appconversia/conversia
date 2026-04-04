@@ -17,6 +17,10 @@ export type IncomingMessage = {
   quotedMessageId?: string;
 };
 
+export type RouteContext = {
+  tenantId: string;
+};
+
 const MEDIA_TYPE_MAP: Record<string, "image" | "audio" | "video" | "document" | "sticker"> = {
   image: "image",
   audio: "audio",
@@ -29,11 +33,15 @@ const MEDIA_TYPE_MAP: Record<string, "image" | "audio" | "video" | "document" | 
 /**
  * Router: recibe mensajes entrantes (texto, imagen, audio, video) y los enruta al cerebro principal.
  */
-export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
+export async function routeIncomingMessage(
+  msg: IncomingMessage,
+  ctx: RouteContext
+): Promise<{
   ok: boolean;
   conversationId?: string;
   error?: string;
 }> {
+  const { tenantId } = ctx;
   const phone = msg.phone.replace(/\D/g, "");
   const hasText = msg.text != null && msg.text.trim().length > 0;
   const hasMedia = !!msg.mediaId;
@@ -46,13 +54,14 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
   const { prisma } = await import("@/lib/db");
 
   let contact = await prisma.contact.findUnique({
-    where: { phone },
+    where: { tenantId_phone: { tenantId, phone } },
     include: { conversations: { where: { channel: "bot" }, take: 1, orderBy: { createdAt: "desc" } } },
   });
 
   if (!contact) {
     contact = await prisma.contact.create({
       data: {
+        tenantId,
         phone,
         name: msg.contactName?.trim() || null,
       },
@@ -70,9 +79,13 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
   let conversation = contact.conversations?.[0];
 
   if (!conversation) {
-    const botTag = await prisma.conversationTag.findUnique({ where: { slug: "bot" }, select: { id: true } });
+    const botTag = await prisma.conversationTag.findUnique({
+      where: { tenantId_slug: { tenantId, slug: "bot" } },
+      select: { id: true },
+    });
     conversation = await prisma.conversation.create({
       data: {
+        tenantId,
         channel: "bot",
         contactId: contact.id,
         ...(botTag && { conversationTagId: botTag.id }),
@@ -86,7 +99,7 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
   let mediaUrl: string | null = null;
 
   if (msg.mediaId) {
-    const creds = await getWhatsAppCredentials();
+    const creds = await getWhatsAppCredentials(tenantId);
     const mediaType = MEDIA_TYPE_MAP[msg.type] ?? "document";
     messageType = mediaType === "sticker" ? "sticker" : mediaType;
 
@@ -114,7 +127,7 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
           storedContent = part.text;
           lastMessageContent = part.text;
         } else if (part.type === "audio") {
-          const creds = await getBotAICredentials();
+          const creds = await getBotAICredentials(tenantId);
           if (creds?.openaiKey) {
             try {
               const transcript = await transcribeAudio(
@@ -257,10 +270,12 @@ export async function routeIncomingMessage(msg: IncomingMessage): Promise<{
     },
   });
   await addMessageToBatch({
+    tenantId,
     conversationId: conversation.id,
     messageId: created.id,
     processNow: () =>
       runMainBrain({
+        tenantId,
         conversationId: conversation.id,
         contactId: contact.id,
         contactPhone: phone,

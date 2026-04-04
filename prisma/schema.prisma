@@ -7,86 +7,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Plan {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  maxUsers  Int      @default(5)
+  sortOrder Int      @default(0)
+  tenants   Tenant[]
+}
+
+model Tenant {
+  id                 String              @id @default(cuid())
+  name               String
+  slug               String              @unique
+  planId             String?
+  plan               Plan?               @relation(fields: [planId], references: [id], onDelete: SetNull)
+  active             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  users              User[]
+  appConfigs         AppConfig[]
+  conversationTags   ConversationTag[]
+  contacts           Contact[]
+  conversations      Conversation[]
+  categories         Category[]
+  botFlows           BotFlow[]
+  leads              Lead[]
+  botLogs            BotLog[]
+
+  @@index([slug])
+}
+
 enum UserRole {
-  super_admin  // Administrador total (rol en BD, protegido por AppConfig)
-  admin        // Administradores
-  colaborador  // Colaboradores
-  sistema      // Bot / sistema (no login)
+  super_admin // Plataforma (tenantId null) o máximo en tenant
+  admin
+  colaborador
+  sistema
 }
 
 model User {
-  id                  String       @id @default(cuid())
-  email               String       @unique
-  password            String
-  name                String?
-  phone               String?
-  role                UserRole     @default(colaborador)
-  active              Boolean      @default(true)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  sessions            Session[]
-  messagesSent        Message[]    @relation("MessageSender")
-  participantOf       ConversationParticipant[]
-  conversationsAssigned Conversation[] @relation("ConversationAssignment")
-}
+  id                      String                      @id @default(cuid())
+  email                   String                      @unique
+  password                String
+  name                    String?
+  phone                   String?
+  role                    UserRole                    @default(colaborador)
+  active                  Boolean                     @default(true)
+  tenantId                String?
+  tenant                  Tenant?                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
+  sessions                Session[]
+  messagesSent            Message[]                   @relation("MessageSender")
+  participantOf           ConversationParticipant[]
+  conversationsAssigned   Conversation[]              @relation("ConversationAssignment")
 
+  @@index([tenantId])
+}
 
 enum ConversationChannel {
-  direct  // Contacto directo con humanos
-  bot     // Hablando con el bot (canal WhatsApp)
-  group   // Grupo de WhatsApp
+  direct
+  bot
+  group
 }
 
-// Etiquetas de conversaciones (Bot, Sin Asignar, Asistidas + custom)
 model ConversationTag {
   id             String         @id @default(cuid())
+  tenantId       String
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name           String
-  slug           String         @unique // bot | sin_asignar | asistidas | custom_xxx
-  isSystem       Boolean        @default(false) // true = protegida, no se puede borrar/modificar
+  slug           String
+  isSystem       Boolean        @default(false)
   order          Int            @default(0)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   conversations  Conversation[]
 
-  @@index([slug])
+  @@unique([tenantId, slug])
+  @@index([tenantId])
   @@index([order])
 }
 
 model Contact {
-  id               String   @id @default(cuid())
-  phone            String   @unique  // WhatsApp ID (ej. 573001234567)
-  name             String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  conversations    Conversation[]
-  messagesSent     Message[]
+  id            String         @id @default(cuid())
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  phone         String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  conversations Conversation[]
+  messagesSent  Message[]
 
-  @@index([phone])
+  @@unique([tenantId, phone])
+  @@index([tenantId])
 }
 
 model Conversation {
-  id                  String                 @id @default(cuid())
-  createdAt           DateTime               @default(now())
-  channel             ConversationChannel    @default(direct)
-  contactId           String?                // WhatsApp: contacto externo (canal bot)
-  contact             Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  groupId             String?                // WhatsApp: ID del grupo (ej. 120363...@g.us)
-  groupName           String?                // Nombre del grupo (opcional)
-  handoffRequestedAt  DateTime?              // Bot detecta interés real → pasa a sin asignar
-  assignedToId        String?
-  assignedTo          User?                  @relation("ConversationAssignment", fields: [assignedToId], references: [id], onDelete: SetNull)
-  restricted          Boolean                @default(false) // Solo admins ven pestaña Restringidos
-  lastReadAt             DateTime?              // Última vez que algún usuario leyó (global: todos ven 0 no leídos)
-  lastProductSentForBot String?                // Último producto del que enviamos fotos (para "él que me enviaste")
-  pendingWelcomeCtaText String?                @db.Text // CTA pendiente de enviar (segunda invocación)
-  pendingWelcomeCtaMsgId String?               // messageId para typing (opcional)
-  participants          ConversationParticipant[]
-  messages            Message[]
-  botBatches          BotBatch[]
-  conversationTagId    String?
-  conversationTag      ConversationTag? @relation(fields: [conversationTagId], references: [id], onDelete: SetNull)
+  id                     String                 @id @default(cuid())
+  tenantId               String
+  tenant                 Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt              DateTime               @default(now())
+  channel                ConversationChannel    @default(direct)
+  contactId              String?
+  contact                Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  groupId                String?
+  groupName              String?
+  handoffRequestedAt     DateTime?
+  assignedToId           String?
+  assignedTo             User?                  @relation("ConversationAssignment", fields: [assignedToId], references: [id], onDelete: SetNull)
+  restricted             Boolean                @default(false)
+  lastReadAt             DateTime?
+  lastProductSentForBot  String?
+  pendingWelcomeCtaText  String?                @db.Text
+  pendingWelcomeCtaMsgId String?
+  participants           ConversationParticipant[]
+  messages               Message[]
+  botBatches             BotBatch[]
+  conversationTagId      String?
+  conversationTag        ConversationTag?       @relation(fields: [conversationTagId], references: [id], onDelete: SetNull)
 
-  @@index([id])
+  @@index([tenantId])
   @@index([conversationTagId])
   @@index([channel])
   @@index([assignedToId])
@@ -100,31 +141,31 @@ model ConversationParticipant {
   conversationId String
   userId         String
   joinedAt       DateTime     @default(now())
-  lastReadAt     DateTime?    // Última vez que el usuario leyó esta conversación (para no leídos)
+  lastReadAt     DateTime?
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId])
   @@index([userId])
 }
 
 model Message {
-  id               String        @id @default(cuid())
-  conversationId   String
-  senderId         String?       // User (interno o bot)
-  senderContactId  String?       // Contact (WhatsApp externo)
-  content          String
-  type             MessageType   @default(text)
-  mediaUrl         String?
-  mediaFilename    String?
-  status           MessageStatus @default(sent)
-  whatsappMessageId String?      @unique // Deduplicar: Meta puede reenviar el mismo mensaje
-  replyToMessageId String?       // Mensaje al que se responde (cita, como WhatsApp)
-  createdAt        DateTime      @default(now())
-  conversation     Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender           User?         @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull)
-  senderContact    Contact?      @relation(fields: [senderContactId], references: [id], onDelete: SetNull)
-  batchItems       BotBatchMessage[]
+  id                  String        @id @default(cuid())
+  conversationId      String
+  senderId            String?
+  senderContactId     String?
+  content             String
+  type                MessageType   @default(text)
+  mediaUrl            String?
+  mediaFilename       String?
+  status              MessageStatus @default(sent)
+  whatsappMessageId   String?       @unique
+  replyToMessageId    String?
+  createdAt           DateTime      @default(now())
+  conversation        Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender              User?         @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull)
+  senderContact       Contact?      @relation(fields: [senderContactId], references: [id], onDelete: SetNull)
+  batchItems          BotBatchMessage[]
 
   @@index([conversationId])
   @@index([createdAt])
@@ -152,54 +193,59 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
-// Configuración de la app (solo super_admin). WhatsApp API y otros ajustes.
 model AppConfig {
   id        String   @id @default(cuid())
-  key       String   @unique
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key       String
   value     String?  @db.Text
   updatedAt DateTime @updatedAt
 
-  @@index([key])
+  @@unique([tenantId, key])
+  @@index([tenantId])
 }
 
-// Leads registrados por el bot (seguimiento comercial)
 model Lead {
-  id              String    @id @default(cuid())
-  phone           String    // WhatsApp del cliente
-  name            String?
-  productInterest String?   // Producto de interés
-  interestLevel   String?   // alto | medio | bajo
-  priority        String?   // urgente | normal | baja
-  status          String    @default("Pendiente") // Pendiente, En contacto, Cerrado, etc.
-  notes           String?   @db.Text // Resumen de la conversación
-  conversationId  String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String   @id @default(cuid())
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  phone            String
+  name             String?
+  productInterest  String?
+  interestLevel    String?
+  priority         String?
+  status           String   @default("Pendiente")
+  notes            String?  @db.Text
+  conversationId   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
+  @@index([tenantId])
   @@index([phone])
   @@index([status])
   @@index([createdAt])
 }
 
-// Categorías de productos (CRUD en dashboard)
 model Category {
   id        String    @id @default(cuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name      String
   order     Int       @default(0)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
 
+  @@index([tenantId])
   @@index([order])
 }
 
-// Productos para venta: CRUD y base de entrenamiento del bot
 model Product {
   id              String   @id @default(cuid())
   name            String
@@ -209,9 +255,9 @@ model Product {
   available       Boolean  @default(true)
   categoryId      String
   category        Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  characteristics String?  @db.Text // JSON o texto con características
-  photos          String?  @db.Text // JSON array de URLs (Vercel Blob)
-  videos          String?  @db.Text // JSON array de URLs (Vercel Blob)
+  characteristics String?  @db.Text
+  photos          String?  @db.Text
+  videos          String?  @db.Text
   order           Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -221,25 +267,26 @@ model Product {
   @@index([categoryId])
 }
 
-// Flujos del bot (estilo n8n): nodos, conexiones, condiciones, llamadas IA
 model BotFlow {
   id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name        String
   description String?  @db.Text
-  flowJson    String   @db.Text  // JSON: { nodes, edges } compatible con React Flow
+  flowJson    String   @db.Text
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([tenantId])
   @@index([isActive])
 }
 
-// Agrupación de mensajes tipo Redis: buffer por conversación para procesar varios mensajes juntos
 model BotBatch {
   id             String       @id @default(cuid())
   conversationId String
-  readyAt        DateTime     // Procesar cuando now >= readyAt
-  status         String       @default("pending") // pending | processing | processed
+  readyAt        DateTime
+  status         String       @default("pending")
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   messages       BotBatchMessage[]
@@ -260,19 +307,21 @@ model BotBatchMessage {
   @@index([batchId])
 }
 
-// Logs de diagnóstico del bot: qué pasa con cada mensaje, por qué falla, dónde se corta el flujo
 model BotLog {
-  id             String   @id @default(cuid())
-  level         String   // info | warn | error | debug
-  stage         String   // webhook | router | batch | main_brain | sales_flow | product_response | whatsapp_send | etc.
-  message       String   @db.Text
-  conversationId String?
-  contactId     String?
-  phone         String?
-  metadata      String?  @db.Text // JSON con contexto extra
-  error         String?  @db.Text // Stack trace o mensaje de error
-  createdAt     DateTime @default(now())
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  level           String
+  stage           String
+  message         String   @db.Text
+  conversationId  String?
+  contactId       String?
+  phone           String?
+  metadata        String?  @db.Text
+  error           String?  @db.Text
+  createdAt       DateTime @default(now())
 
+  @@index([tenantId])
   @@index([createdAt])
   @@index([level])
   @@index([stage])

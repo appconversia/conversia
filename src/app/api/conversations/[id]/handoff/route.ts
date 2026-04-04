@@ -23,7 +23,15 @@ export async function POST(
 
   if (!conv) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
-  const sinAsignarTag = await prisma.conversationTag.findUnique({ where: { slug: "sin_asignar" }, select: { id: true } });
+  if (session.tenantId && session.tenantId !== conv.tenantId) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const tenantId = conv.tenantId;
+  const sinAsignarTag = await prisma.conversationTag.findUnique({
+    where: { tenantId_slug: { tenantId, slug: "sin_asignar" } },
+    select: { id: true },
+  });
   await prisma.conversation.update({
     where: { id: conversationId },
     data: {

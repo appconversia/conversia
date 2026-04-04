@@ -28,10 +28,11 @@ export type PromiseAnalysisResult = {
  * y qué tipo de contenido (fotos, videos, ambos, o solo descripción).
  */
 export async function analyzePromisedSendWithAI(
+  tenantId: string,
   botReply: string,
   catalogNames: string[]
 ): Promise<PromiseAnalysisResult> {
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds) return { promisesToSend: false };
 
   const namesList = catalogNames.slice(0, 25).join(", ");
@@ -85,23 +86,22 @@ Responde ÚNICAMENTE con el JSON, sin markdown ni texto adicional.`;
  * Solo se ejecuta cuando shouldSendImages fue false (no enviamos fotos).
  */
 export async function fulfillPromisedSendIfNeeded(
+  tenantId: string,
   botReply: string,
   contactPhone: string,
   contactName: string | null | undefined,
   conversationId: string,
-  botUserId: string | null,
-  getPusherServer: () => { trigger: (ch: string, ev: string, data: unknown) => Promise<unknown> } | null,
-  PUSHER_CHANNEL_PREFIX: string
+  botUserId: string | null
 ): Promise<{ fulfilled: boolean }> {
   if (!botReply || !PROMESA_ENVIO.test(botReply)) {
     return { fulfilled: false };
   }
 
-  const catalog = await getProductCatalog();
+  const catalog = await getProductCatalog(tenantId);
   if (catalog.length === 0) return { fulfilled: false };
 
   const catalogNames = [...new Set(catalog.map((c) => c.name))];
-  const analysis = await analyzePromisedSendWithAI(botReply, catalogNames);
+  const analysis = await analyzePromisedSendWithAI(tenantId, botReply, catalogNames);
   if (!analysis.promisesToSend || !analysis.productName) {
     return { fulfilled: false };
   }
@@ -112,9 +112,9 @@ export async function fulfillPromisedSendIfNeeded(
   else if (analysis.contentType === "videos") mediaPreference = "video_only";
 
   if (analysis.contentType === "description_only") {
-    const fullDesc = await buildFullProductDescription(productFilter, contactName);
+    const fullDesc = await buildFullProductDescription(tenantId, productFilter, contactName);
     if (fullDesc) {
-      const sendResult = await sendWhatsAppText(contactPhone, fullDesc);
+      const sendResult = await sendWhatsAppText(tenantId, contactPhone, fullDesc);
       if (botUserId) {
         await prisma.message.create({
           data: {
@@ -137,6 +137,7 @@ export async function fulfillPromisedSendIfNeeded(
   }
 
   const { sent: sentMedia, failedCount, ctaMessage, lastProductName } = await sendProductImages(
+    tenantId,
     contactPhone,
     productFilter,
     contactName,
@@ -161,9 +162,8 @@ export async function fulfillPromisedSendIfNeeded(
   }
 
   if (botUserId && sentMedia.length > 0) {
-    const pusher = getPusherServer();
     for (const item of sentMedia) {
-      const message = await prisma.message.create({
+      await prisma.message.create({
         data: {
           conversationId,
           senderId: botUserId,
@@ -173,32 +173,13 @@ export async function fulfillPromisedSendIfNeeded(
           mediaFilename: item.description || null,
           whatsappMessageId: item.whatsappMessageId ?? null,
         },
-        include: {
-          sender: { select: { id: true, name: true, email: true } },
-        },
       });
-      if (pusher) {
-        pusher
-          .trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", {
-            id: message.id,
-            content: message.content,
-            type: message.type,
-            mediaUrl: message.mediaUrl,
-            mediaFilename: message.mediaFilename,
-            senderId: message.senderId,
-            sender: message.sender,
-            status: message.status,
-            createdAt: message.createdAt,
-            fromContact: false,
-          })
-          .catch((e) => console.error("Pusher trigger:", e));
-      }
     }
   }
 
   const ctaToSend = ctaMessage ?? "¿Te interesa? Si tienes dudas o quieres ayuda, un asesor te atiende 📦";
   if (sentMedia.length > 0) {
-    const sendResult = await sendWhatsAppText(contactPhone, ctaToSend);
+    const sendResult = await sendWhatsAppText(tenantId, contactPhone, ctaToSend);
     if (botUserId) {
       await prisma.message.create({
         data: {

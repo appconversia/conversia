@@ -11,9 +11,9 @@ export type ProductMedia = {
 
 const CONFIG_KEY = "bot_product_catalog";
 
-export async function getProductCatalog(): Promise<ProductMedia[]> {
+export async function getProductCatalog(tenantId: string): Promise<ProductMedia[]> {
   const row = await prisma.appConfig.findUnique({
-    where: { key: CONFIG_KEY },
+    where: { tenantId_key: { tenantId, key: CONFIG_KEY } },
   });
   if (!row?.value) return [];
   try {
@@ -24,7 +24,7 @@ export async function getProductCatalog(): Promise<ProductMedia[]> {
   }
 }
 
-export async function saveProductCatalog(items: ProductMedia[]): Promise<void> {
+export async function saveProductCatalog(tenantId: string, items: ProductMedia[]): Promise<void> {
   const valid = Array.isArray(items)
     ? items
         .filter(
@@ -40,12 +40,12 @@ export async function saveProductCatalog(items: ProductMedia[]): Promise<void> {
           url: String(i.url),
           description: String(i.description ?? ""),
           order: Number(i.order) || 0,
-          type: (i as ProductMedia).type === "video" ? "video" : "image" as const,
+          type: (i as ProductMedia).type === "video" ? ("video" as const) : ("image" as const),
         }))
     : [];
   await prisma.appConfig.upsert({
-    where: { key: CONFIG_KEY },
-    create: { key: CONFIG_KEY, value: JSON.stringify(valid) },
+    where: { tenantId_key: { tenantId, key: CONFIG_KEY } },
+    create: { tenantId, key: CONFIG_KEY, value: JSON.stringify(valid) },
     update: { value: JSON.stringify(valid) },
   });
 }

@@ -17,10 +17,13 @@ export async function GET(
   if (!isAdminOrSuperAdmin(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   const { id } = await params;
-  const user = await prisma.user.findUnique({
-    where: { id },
+  const user = await prisma.user.findFirst({
+    where: { id, tenantId: session.tenantId },
     select: {
       id: true,
       email: true,
@@ -50,9 +53,13 @@ export async function PATCH(
   if (!isAdminOrSuperAdmin(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   const { id } = await params;
   const body = await request.json();
+  const tenantId = session.tenantId;
 
   if (body.active !== undefined) {
     if (id === session.id) {
@@ -61,9 +68,9 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    const target = await prisma.user.findUnique({ where: { id } });
+    const target = await prisma.user.findFirst({ where: { id, tenantId } });
     if (!target) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-    const protectedId = await getProtectedUserId();
+    const protectedId = await getProtectedUserId(tenantId);
     if (protectedId && target.id === protectedId) {
       return NextResponse.json(
         { error: "No se puede desactivar al usuario protegido del sistema" },
@@ -85,10 +92,10 @@ export async function PATCH(
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { id } });
+  const existing = await prisma.user.findFirst({ where: { id, tenantId } });
   if (!existing) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 
-  const protectedId = await getProtectedUserId();
+  const protectedId = await getProtectedUserId(tenantId);
   if (protectedId && existing.id === protectedId) {
     return NextResponse.json(
       { error: "No se puede editar al usuario protegido del sistema" },
@@ -139,8 +146,12 @@ export async function DELETE(
   if (!isAdminOrSuperAdmin(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   const { id } = await params;
+  const tenantId = session.tenantId;
 
   if (id === session.id) {
     return NextResponse.json(
@@ -149,10 +160,10 @@ export async function DELETE(
     );
   }
 
-  const target = await prisma.user.findUnique({ where: { id } });
+  const target = await prisma.user.findFirst({ where: { id, tenantId } });
   if (!target) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 
-  const protectedId = await getProtectedUserId();
+  const protectedId = await getProtectedUserId(tenantId);
   if (protectedId && target.id === protectedId) {
     return NextResponse.json(
       { error: "No se puede eliminar al usuario protegido del sistema" },

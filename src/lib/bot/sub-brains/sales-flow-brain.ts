@@ -336,6 +336,7 @@ Respuesta del usuario: "${userTrim}"
 }
 
 export async function processSalesFlow(
+  tenantId: string,
   contactPhone: string,
   lastMessage: string | ContentPart[],
   recentHistory: { role: "user" | "assistant"; content: string }[],
@@ -345,7 +346,7 @@ export async function processSalesFlow(
   conversationId?: string,
   quotedMessage?: string
 ): Promise<SalesFlowOutput> {
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds) {
     void botLog("warn", "sales_flow", "Credenciales IA no configuradas: handoff directo", {
       conversationId,
@@ -359,8 +360,8 @@ export async function processSalesFlow(
     };
   }
 
-  const catalog = await getProductCatalog();
-  const productsTraining = await getProductsTrainingText();
+  const catalog = await getProductCatalog(tenantId);
+  const productsTraining = await getProductsTrainingText(tenantId);
   const nameContext = contactName?.trim()
     ? `\n[El cliente se llama ${contactName.trim()}. Puedes usarlo para personalizar el saludo si es apropiado.]`
     : "";
@@ -884,12 +885,13 @@ function groupCatalogByProduct(catalog: ProductMedia[]): Array<{ productId: stri
 }
 
 export async function sendProductImages(
+  tenantId: string,
   contactPhone: string,
   productFilter?: string | string[] | null,
   contactName?: string | null,
   mediaPreference: MediaPreference = "both"
 ): Promise<SendProductImagesResult> {
-  let catalog = await getProductCatalog();
+  let catalog = await getProductCatalog(tenantId);
   if (productFilter != null) {
     if (Array.isArray(productFilter) && productFilter.length > 0) {
       const filterLowers = productFilter.map((f) => f.toLowerCase().trim()).filter(Boolean);
@@ -913,7 +915,7 @@ export async function sendProductImages(
 
   const groups = groupCatalogByProduct(catalog);
   const imageItems = groups.filter((g) => g.image).map((g) => g.image!);
-  const { captions, ctaMessage } = await buildProductResponses(imageItems, contactName);
+  const { captions, ctaMessage } = await buildProductResponses(tenantId, imageItems, contactName);
   let captionIdx = 0;
 
   const sent: SentProductItem[] = [];
@@ -923,10 +925,10 @@ export async function sendProductImages(
 
   for (const group of groups) {
     if (sendVideo && group.video) {
-      const result = await sendWhatsAppVideo(contactPhone, group.video.url, undefined);
+      const result = await sendWhatsAppVideo(tenantId, contactPhone, group.video.url, undefined);
       if (!result.ok) {
         await new Promise((r) => setTimeout(r, 500));
-        const retry = await sendWhatsAppVideo(contactPhone, group.video.url, undefined);
+        const retry = await sendWhatsAppVideo(tenantId, contactPhone, group.video.url, undefined);
         if (!retry.ok) {
           failedCount++;
           void botLog("error", "send_image", `Envío video falló: ${group.name}`, {
@@ -945,10 +947,10 @@ export async function sendProductImages(
     if (sendImage && group.image) {
       const caption = captions[captionIdx] ?? group.image.description ?? group.name;
       captionIdx++;
-      let result = await sendWhatsAppImage(contactPhone, group.image.url, caption);
+      let result = await sendWhatsAppImage(tenantId, contactPhone, group.image.url, caption);
       if (!result.ok) {
         await new Promise((r) => setTimeout(r, 500));
-        result = await sendWhatsAppImage(contactPhone, group.image.url, caption);
+        result = await sendWhatsAppImage(tenantId, contactPhone, group.image.url, caption);
       }
       if (result.ok) {
         sent.push({ url: group.image.url, description: caption, type: "image", whatsappMessageId: result.messageId });

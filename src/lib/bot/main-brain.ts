@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import { getBotUserId } from "@/lib/config";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 import { botLog } from "./bot-logger";
 import { getFlowResult } from "./flow-runner";
 import { upsertLead } from "./lead-register";
@@ -31,6 +30,7 @@ function lastMessageAsText(lastMessage: string | ContentPart[]): string {
 }
 
 export type BrainInput = {
+  tenantId: string;
   conversationId: string;
   contactId: string;
   contactPhone: string;
@@ -50,8 +50,16 @@ export type BrainOutput = {
  * Flujo: SalesFlowBrain procesa → si handoff → HandoffBrain ejecuta.
  */
 export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
-  const { conversationId, contactId, contactPhone, contactName, lastMessage, quotedMessage, receivedMessageId } =
-    input;
+  const {
+    tenantId,
+    conversationId,
+    contactId,
+    contactPhone,
+    contactName,
+    lastMessage,
+    quotedMessage,
+    receivedMessageId,
+  } = input;
 
   const convState = await prisma.conversation.findUnique({
     where: { id: conversationId },
@@ -72,9 +80,11 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       phone: contactPhone,
     });
     const lastText = lastMessageAsText(lastMessage);
-    const replyText = await generateSinAsignarResponse(lastText, contactName);
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, replyText));
+    const replyText = await generateSinAsignarResponse(tenantId, lastText, contactName);
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () =>
+      sendWhatsAppText(tenantId, contactPhone, replyText)
+    );
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -116,6 +126,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       twentyFourHoursMs;
 
   const flowContext = {
+    tenantId,
     isFirstMessage: messageCountFromContact <= 1 || returningAfter24h,
     messageCountFromContact,
     lastMessageText: lastMessageAsText(lastMessage),
@@ -136,11 +147,11 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       contactId,
       phone: contactPhone,
     });
-    const botUserId = await getBotUserId();
+    const botUserId = await getBotUserId(tenantId);
     const saludo = contactName?.trim()
       ? `Hola ${contactName.trim()}, bienvenido a ${APP_NAME}. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?`
       : `Bienvenido a ${APP_NAME}. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?`;
-    const sendSaludo = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, saludo));
+    const sendSaludo = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, saludo));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -153,15 +164,15 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       });
     }
     const { sent: sentMedia, ctaMessage } = await sendProductImages(
+      tenantId,
       contactPhone,
       null,
       contactName,
       "image_only"
     );
     if (botUserId && sentMedia.length > 0) {
-      const pusher = getPusherServer();
       for (const item of sentMedia) {
-        const message = await prisma.message.create({
+        await prisma.message.create({
           data: {
             conversationId,
             senderId: botUserId,
@@ -171,27 +182,10 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
             mediaFilename: item.description || null,
             whatsappMessageId: item.whatsappMessageId ?? null,
           },
-          include: { sender: { select: { id: true, name: true, email: true } } },
         });
-        if (pusher) {
-          pusher
-            .trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", {
-              id: message.id,
-              content: message.content,
-              type: message.type,
-              mediaUrl: message.mediaUrl,
-              mediaFilename: message.mediaFilename,
-              senderId: message.senderId,
-              sender: message.sender,
-              status: message.status,
-              createdAt: message.createdAt,
-              fromContact: false,
-            })
-            .catch((e) => console.error("Pusher trigger:", e));
-        }
       }
     }
-    const withinHours = await isWithinBusinessHours();
+    const withinHours = await isWithinBusinessHours(tenantId);
     const nombre = contactName?.trim();
     const preguntaInductiva = withinHours
       ? nombre
@@ -241,8 +235,8 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
         isFirstMessage: flowContext.isFirstMessage,
       },
     });
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, flowResult.text));
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, flowResult.text));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -275,9 +269,9 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       phone: contactPhone,
       metadata: { lastText: lastTextForOtros.slice(0, 60) },
     });
-    const scopeReply = await buildScopeGuardReply(contactName, conversationId, true);
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, scopeReply.reply));
+    const scopeReply = await buildScopeGuardReply(tenantId, contactName, conversationId, true);
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, scopeReply.reply));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -294,6 +288,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
 
   // Cerebrito híbrido: preguntas puntuales (accesorios, dimensiones, etc.) → consulta BD + IA redacta
   const detailResult = await processProductDetailQuestion(
+    tenantId,
     lastMessage,
     conv?.lastProductSentForBot ?? undefined,
     contactName,
@@ -307,8 +302,8 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       contactId,
       phone: contactPhone,
     });
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, replyText));
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, replyText));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -324,7 +319,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
   }
 
   // Cerebrito híbrido: pide algunos (varios productos) → envía imagen y video de esas
-  const selectionResult = await processProductSelection(lastMessage, conversationId);
+  const selectionResult = await processProductSelection(tenantId, lastMessage, conversationId);
   if (selectionResult.handled && selectionResult.productNames && selectionResult.productNames.length >= 2) {
     void botLog("info", "main_brain", "Pide algunos: enviando imagen y video seleccionados", {
       conversationId,
@@ -332,10 +327,10 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       phone: contactPhone,
       metadata: { count: selectionResult.productNames.length },
     });
-    const botUserId = await getBotUserId();
+    const botUserId = await getBotUserId(tenantId);
     if (selectionResult.reply) {
       const selReply = selectionResult.reply;
-      const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, selReply));
+      const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, selReply));
       if (botUserId) {
         await prisma.message.create({
           data: {
@@ -349,6 +344,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       }
     }
     const { sent: sentMedia, ctaMessage, lastProductName } = await sendProductImages(
+      tenantId,
       contactPhone,
       selectionResult.productNames,
       contactName
@@ -360,9 +356,8 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       });
     }
     if (botUserId && sentMedia.length > 0) {
-      const pusher = getPusherServer();
       for (const item of sentMedia) {
-        const message = await prisma.message.create({
+        await prisma.message.create({
           data: {
             conversationId,
             senderId: botUserId,
@@ -372,33 +367,16 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
             mediaFilename: item.description || null,
             whatsappMessageId: item.whatsappMessageId ?? null,
           },
-          include: { sender: { select: { id: true, name: true, email: true } } },
         });
-        if (pusher) {
-          pusher
-            .trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", {
-              id: message.id,
-              content: message.content,
-              type: message.type,
-              mediaUrl: message.mediaUrl,
-              mediaFilename: message.mediaFilename,
-              senderId: message.senderId,
-              sender: message.sender,
-              status: message.status,
-              createdAt: message.createdAt,
-              fromContact: false,
-            })
-            .catch((e) => console.error("Pusher trigger:", e));
-        }
       }
     }
-    const withinHours = await isWithinBusinessHours();
+    const withinHours = await isWithinBusinessHours(tenantId);
     const mensajeCTA = withinHours
       ? "¿Alguna duda o quieres más detalles? Un asesor te ayuda ✨"
       : "¿Te interesa? Si tienes dudas, un asesor te atiende cuando esté disponible 📦";
     const ctaToSend = ctaMessage || mensajeCTA;
     if (ctaToSend) {
-      const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, ctaToSend));
+      const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, ctaToSend));
       if (botUserId) {
         await prisma.message.create({
           data: {
@@ -418,9 +396,9 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
   const lastText = lastMessageAsText(lastMessage).trim().toLowerCase();
   const pideMenuOtros = /^(10|otros|diez|opci[oó]n\s*10|la\s+10|el\s+10|quiero\s+ver\s+otros|ver\s+otros)$/i.test(lastText);
   if (pideMenuOtros) {
-    const scopeReply = await buildScopeGuardReply(contactName, conversationId, true);
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, scopeReply.reply));
+    const scopeReply = await buildScopeGuardReply(tenantId, contactName, conversationId, true);
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, scopeReply.reply));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -446,6 +424,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     },
   });
   const salesResult: SalesFlowOutput = await processSalesFlow(
+    tenantId,
     contactPhone,
     lastMessage,
     historyForAI,
@@ -458,9 +437,9 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
 
   // Scope Guard: NO_ENTIENDO o FUERA_DE_ALCANCE → mensaje límite + lista inductiva
   if (salesResult.scopeGuardTriggered) {
-    const scopeReply = await buildScopeGuardReply(contactName, conversationId);
-    const botUserId = await getBotUserId();
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, scopeReply.reply));
+    const scopeReply = await buildScopeGuardReply(tenantId, contactName, conversationId);
+    const botUserId = await getBotUserId(tenantId);
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, scopeReply.reply));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -476,7 +455,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
   }
 
   let handoffExecuted = false;
-  const botUserId = await getBotUserId();
+  const botUserId = await getBotUserId(tenantId);
 
   if (salesResult.handoffRequired) {
     void botLog("info", "main_brain", "Handoff ejecutado", {
@@ -485,18 +464,18 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
       phone: contactPhone,
       metadata: { reason: "salesResult.handoffRequired=true" },
     });
-    await executeHandoff(conversationId);
+    await executeHandoff(conversationId, tenantId);
     handoffExecuted = true;
   }
 
-  const withinHours = await isWithinBusinessHours();
+  const withinHours = await isWithinBusinessHours(tenantId);
   const mensajeInductivoHandoff = withinHours
     ? "En contados instantes uno de nuestros asesores te brindará más detalles para que finalices tu compra. ¡Gracias por tu interés!"
     : "Ya tienes toda la información que necesitas. Nuestros agentes te atenderán en cuanto estén disponibles.";
 
   let replyToSend: string;
   if (salesResult.sendFullDescription) {
-    const fullDesc = await buildFullProductDescription(salesResult.sendFullDescription, contactName);
+    const fullDesc = await buildFullProductDescription(tenantId, salesResult.sendFullDescription, contactName);
     replyToSend = (fullDesc ?? salesResult.reply) || "Un asesor te enviará la información en breve.";
     if (salesResult.handoffRequired) {
       replyToSend = `${replyToSend}\n\n${mensajeInductivoHandoff}`;
@@ -532,7 +511,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
 
   // 1) Enviar SIEMPRE el texto de respuesta ANTES de cualquier imagen/video (orden correcto en chat)
   if (replyToSend) {
-    const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, replyToSend));
+    const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, replyToSend));
     if (botUserId) {
       await prisma.message.create({
         data: {
@@ -568,6 +547,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
   );
   if (shouldSendImages) {
     const { sent: sentMedia, failedCount, ctaMessage, lastProductName } = await sendProductImages(
+      tenantId,
       contactPhone,
       salesResult.productFilter ?? salesResult.productInterest,
       contactName,
@@ -595,7 +575,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     if (failedCount > 0) {
       const fallbackMsg =
         "Disculpa, hubo un problema al enviar algunas imágenes. Un asesor te las enviará en breve.";
-      const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, fallbackMsg));
+      const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, fallbackMsg));
       if (botUserId) {
         await prisma.message.create({
           data: {
@@ -608,14 +588,13 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
         });
       }
       if (!handoffExecuted) {
-        await executeHandoff(conversationId);
+        await executeHandoff(conversationId, tenantId);
         handoffExecuted = true;
       }
     }
     if (botUserId && sentMedia.length > 0) {
-      const pusher = getPusherServer();
       for (const item of sentMedia) {
-        const message = await prisma.message.create({
+        await prisma.message.create({
           data: {
             conversationId,
             senderId: botUserId,
@@ -625,32 +604,13 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
             mediaFilename: item.description || null,
             whatsappMessageId: item.whatsappMessageId ?? null,
           },
-          include: {
-            sender: { select: { id: true, name: true, email: true } },
-          },
         });
-        if (pusher) {
-          pusher
-            .trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", {
-              id: message.id,
-              content: message.content,
-              type: message.type,
-              mediaUrl: message.mediaUrl,
-              mediaFilename: message.mediaFilename,
-              senderId: message.senderId,
-              sender: message.sender,
-              status: message.status,
-              createdAt: message.createdAt,
-              fromContact: false,
-            })
-            .catch((e) => console.error("Pusher trigger:", e));
-        }
       }
     }
     // CTA SIEMPRE después de cada imagen con su descripción (mensaje separado al final). Preferir el de la IA (personalizado).
     const ctaToSend = salesResult.ctaMessage ?? ctaMessage;
     if (sentMedia.length > 0 && ctaToSend) {
-      const sendResult = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, ctaToSend));
+      const sendResult = await withBotTyping(tenantId, contactPhone, receivedMessageId, () => sendWhatsAppText(tenantId, contactPhone, ctaToSend));
       if (botUserId) {
         await prisma.message.create({
           data: {
@@ -669,13 +629,12 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     if (!salesResult.sendFullDescription) {
       try {
         await fulfillPromisedSendIfNeeded(
+          tenantId,
           replyToSend,
           contactPhone,
           contactName,
           conversationId,
-          botUserId,
-          getPusherServer,
-          PUSHER_CHANNEL_PREFIX
+          botUserId
         );
       } catch (e) {
         void botLog("warn", "main_brain", "Contingencia promesa falló sin afectar flujo", {
@@ -714,6 +673,7 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
           ? "normal"
           : "baja";
     await upsertLead({
+      tenantId,
       phone: contactPhone,
       name: contact?.name ?? contactName ?? undefined,
       conversationId,

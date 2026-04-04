@@ -73,11 +73,12 @@ function formatCharacteristics(charJson: string | null): string {
   }
 }
 
-function findProductByName(productName: string) {
+function findProductByName(tenantId: string, productName: string) {
   return prisma.product.findFirst({
     where: {
       name: { contains: productName, mode: "insensitive" },
       available: true,
+      category: { tenantId },
     },
     select: { name: true, description: true, price: true, characteristics: true, stock: true },
   });
@@ -128,6 +129,7 @@ export type ProductDetailQuestionResult = {
  * Si no detecta o no puede resolver producto, retorna handled: false para que el flujo normal continúe.
  */
 export async function processProductDetailQuestion(
+  tenantId: string,
   lastMessage: string | { type: string; text?: string }[],
   lastProductSent: string | undefined,
   contactName?: string | null,
@@ -141,7 +143,7 @@ export async function processProductDetailQuestion(
     return { handled: false };
   }
 
-  const catalog = await getProductCatalog();
+  const catalog = await getProductCatalog(tenantId);
   // Si responden a un mensaje citado (ej. "info de este"), usar quotedMessage para resolver producto
   const textToResolve = quotedMessage?.trim() ? `${quotedMessage} ${lastText}` : lastText;
   const productName =
@@ -155,7 +157,7 @@ export async function processProductDetailQuestion(
     return { handled: false };
   }
 
-  const product = await findProductByName(productName);
+  const product = await findProductByName(tenantId, productName);
   if (!product) {
     void botLog("warn", "product_detail", "Producto no encontrado en BD", {
       conversationId,
@@ -164,7 +166,7 @@ export async function processProductDetailQuestion(
     return { handled: false };
   }
 
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds) {
     void botLog("warn", "product_detail", "Sin credenciales IA: no se puede redactar respuesta", { conversationId });
     return { handled: false };

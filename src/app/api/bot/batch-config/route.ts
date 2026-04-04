@@ -10,11 +10,14 @@ function canEditBotConfig(role: string): boolean {
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
   if (!canEditBotConfig(session.role)) {
     return NextResponse.json({ error: "Sin permisos", canEdit: false }, { status: 403 });
   }
   try {
-    const config = await getBatchConfig();
+    const config = await getBatchConfig(session.tenantId);
     return NextResponse.json({ batch: config, canEdit: true });
   } catch (err) {
     console.error("GET /api/bot/batch-config error:", err);
@@ -25,13 +28,16 @@ export async function GET() {
 export async function PUT(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
   if (!canEditBotConfig(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
   try {
     const body = (await request.json()) as { batch?: Partial<BotBatchConfig> };
     if (!body.batch) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
-    const next = await setBatchConfig(body.batch);
+    const next = await setBatchConfig(session.tenantId, body.batch);
     return NextResponse.json({ batch: next, canEdit: true });
   } catch (err) {
     console.error("PUT /api/bot/batch-config error:", err);

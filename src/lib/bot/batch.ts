@@ -15,11 +15,12 @@ export type AddToBatchResult = "processed_immediately" | "added_to_batch";
  * Añade un mensaje a un lote existente o crea uno nuevo. Si batching está deshabilitado, retorna "processed_immediately".
  */
 export async function addMessageToBatch(params: {
+  tenantId: string;
   conversationId: string;
   messageId: string;
   processNow: () => Promise<void>;
 }): Promise<AddToBatchResult> {
-  const config = await getBatchConfig();
+  const config = await getBatchConfig(params.tenantId);
   if (!config.enabled) {
     void botLog("info", "batch", "Batch deshabilitado: procesamiento inmediato", {
       conversationId: params.conversationId,
@@ -143,6 +144,7 @@ export async function processReadyBatches(): Promise<{ processed: number; errors
       });
 
       await runMainBrain({
+        tenantId: conv.tenantId,
         conversationId: batch.conversationId,
         contactId,
         contactPhone,

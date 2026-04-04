@@ -30,8 +30,11 @@ export async function GET(request: Request) {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
-  const config = await getWhatsAppConfig();
+  const config = await getWhatsAppConfig(session.tenantId);
   if (!config.accessToken || !config.businessAccountId) {
     return NextResponse.json(
       { error: "Configura Access Token y Business Account ID en Configuración" },

@@ -12,8 +12,12 @@ export async function GET() {
   if (!ADMIN_ROLES.includes(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   const flows = await prisma.botFlow.findMany({
+    where: { tenantId: session.tenantId },
     orderBy: { updatedAt: "desc" },
   });
   return NextResponse.json({ flows });
@@ -27,6 +31,9 @@ export async function POST(request: Request) {
   if (!ADMIN_ROLES.includes(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
 
   try {
     const body = await request.json();
@@ -35,7 +42,7 @@ export async function POST(request: Request) {
     const flowJson = typeof body.flowJson === "string" ? body.flowJson : JSON.stringify({ nodes: [], edges: [] });
 
     const flow = await prisma.botFlow.create({
-      data: { name, description, flowJson, isActive: false },
+      data: { tenantId: session.tenantId, name, description, flowJson, isActive: false },
     });
     return NextResponse.json({ flow });
   } catch (err) {

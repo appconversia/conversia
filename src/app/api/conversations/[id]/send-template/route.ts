@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { getPusherServer, PUSHER_CHANNEL_PREFIX } from "@/lib/pusher";
 import { sendWhatsAppTemplate } from "@/lib/bot/whatsapp-send";
 
 export async function POST(
@@ -54,6 +53,7 @@ export async function POST(
       : undefined;
 
   const result = await sendWhatsAppTemplate(
+    conv.tenantId,
     conv.contact.phone,
     templateName,
     languageCode,
@@ -76,24 +76,6 @@ export async function POST(
       sender: { select: { id: true, name: true, email: true } },
     },
   });
-
-  const pusher = getPusherServer();
-  if (pusher) {
-    pusher
-      .trigger(`${PUSHER_CHANNEL_PREFIX}${conversationId}`, "new_message", {
-        id: message.id,
-        content: message.content,
-        type: message.type,
-        mediaUrl: null,
-        mediaFilename: null,
-        senderId: message.senderId,
-        sender: message.sender,
-        status: message.status,
-        createdAt: message.createdAt,
-        fromContact: false,
-      })
-      .catch((e) => console.error("Pusher trigger:", e));
-  }
 
   return NextResponse.json({ ok: true, message });
 }

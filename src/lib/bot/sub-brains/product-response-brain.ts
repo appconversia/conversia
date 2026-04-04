@@ -18,10 +18,11 @@ const WHATSAPP_CAPTION_MAX = 1024;
  * - Valida que las descripciones sean aptas para envío
  */
 export async function buildProductResponses(
+  tenantId: string,
   products: ProductMedia[],
   contactName?: string | null
 ): Promise<ProductCaptionResult> {
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds || products.length === 0) {
     void botLog("info", "product_response", "Fallback: sin creds o sin productos", {
       metadata: { productsCount: products.length },
@@ -123,12 +124,16 @@ function fallbackResult(products: ProductMedia[]): ProductCaptionResult {
   };
 }
 
-/** Busca Product por nombre (fuzzy: contiene) */
-async function findProductByName(productName: string): Promise<{ name: string; description: string; price: unknown; characteristics: string | null } | null> {
+/** Busca Product por nombre (fuzzy: contiene), acotado al tenant vía categoría */
+async function findProductByName(
+  tenantId: string,
+  productName: string
+): Promise<{ name: string; description: string; price: unknown; characteristics: string | null } | null> {
   const p = await prisma.product.findFirst({
     where: {
       name: { contains: productName, mode: "insensitive" },
       available: true,
+      category: { tenantId },
     },
     select: { name: true, description: true, price: true, characteristics: true },
   });
@@ -140,10 +145,11 @@ async function findProductByName(productName: string): Promise<{ name: string; d
  * basada en la original (sin omitir nada), bien organizada para WhatsApp.
  */
 export async function buildFullProductDescription(
+  tenantId: string,
   productName: string,
   contactName?: string | null
 ): Promise<string | null> {
-  const product = await findProductByName(productName);
+  const product = await findProductByName(tenantId, productName);
   if (!product) {
     void botLog("warn", "product_response", "Producto no encontrado para descripción completa", {
       metadata: { productName },
@@ -151,7 +157,7 @@ export async function buildFullProductDescription(
     return null;
   }
 
-  const creds = await getBotAICredentials();
+  const creds = await getBotAICredentials(tenantId);
   if (!creds) {
     return buildFallbackFullDescription(product);
   }

@@ -12,6 +12,9 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
+  }
   if (!canEditBotConfig(session.role)) {
     return NextResponse.json(
       { error: "Solo administradores pueden configurar el bot", canEdit: false },
@@ -20,7 +23,7 @@ export async function GET() {
   }
 
   try {
-    const config = await getAppConfigForUI();
+    const config = await getAppConfigForUI(session.tenantId);
     return NextResponse.json({ bot: config.bot, canEdit: true });
   } catch (err) {
     console.error("GET /api/bot/config error:", err);
@@ -32,6 +35,9 @@ export async function PUT(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+  if (!session.tenantId) {
+    return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
   }
   if (!canEditBotConfig(session.role)) {
     return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
@@ -45,7 +51,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
     }
 
-    await saveBotConfig({
+    await saveBotConfig(session.tenantId, {
       openaiApiKey: typeof bot.openaiApiKey === "string" && bot.openaiApiKey.trim() ? bot.openaiApiKey.trim() : undefined,
       anthropicApiKey: typeof bot.anthropicApiKey === "string" && bot.anthropicApiKey.trim() ? bot.anthropicApiKey.trim() : undefined,
       googleApiKey: typeof bot.googleApiKey === "string" && bot.googleApiKey.trim() ? bot.googleApiKey.trim() : undefined,
@@ -58,7 +64,7 @@ export async function PUT(request: Request) {
       maxTokens: bot.maxTokens,
     });
 
-    const config = await getAppConfigForUI();
+    const config = await getAppConfigForUI(session.tenantId);
     return NextResponse.json({ bot: config.bot, canEdit: true });
   } catch (err) {
     console.error("PUT /api/bot/config error:", err);
