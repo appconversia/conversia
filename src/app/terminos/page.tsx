@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Términos del Servicio | WhatsApiBot",
-  description: "Términos y condiciones del servicio WhatsApiBot para WhatsApp Business.",
+  title: "Términos del Servicio | Conversia",
+  description: "Términos y condiciones del servicio Conversia para WhatsApp Business.",
 };
 
 export default function TerminosPage() {
@@ -57,7 +57,7 @@ export default function TerminosPage() {
             <h2 className="mb-3 text-xl font-semibold">4. Privacidad y datos</h2>
             <p className="leading-relaxed">
               El tratamiento de tus datos personales se rige por nuestra{" "}
-              <a href="/privacidad" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="/privacidad" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 Política de Privacidad
               </a>
               . Al usar el Servicio, también aceptas dicha política.
@@ -104,7 +104,7 @@ export default function TerminosPage() {
             <h2 className="mb-3 text-xl font-semibold">9. Contacto</h2>
             <p className="leading-relaxed">
               Para consultas sobre estos términos:{" "}
-              <a href="mailto:contacto@tudominio.com" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="mailto:contacto@tudominio.com" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 contacto@tudominio.com
               </a>
             </p>

@@ -117,7 +117,7 @@ export default function CategoriasPage() {
         </div>
         <button
           onClick={openCreate}
-          className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a]"
+          className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-conversia-primary-hover"
         >
           Agregar categoría
         </button>
@@ -135,7 +135,7 @@ export default function CategoriasPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
         </div>
       ) : categories.length === 0 ? (
         <div className="rounded-xl border border-[#E9EDEF] bg-white p-12 text-center text-[#667781]">
@@ -159,7 +159,7 @@ export default function CategoriasPage() {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => openEdit(c)}
-                      className="mr-2 text-[#25D366] hover:underline"
+                      className="mr-2 text-conversia-primary hover:underline"
                     >
                       Editar
                     </button>
@@ -206,7 +206,7 @@ export default function CategoriasPage() {
               </button>
               <button
                 onClick={saveCategory}
-                className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white"
+                className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white"
               >
                 Guardar
               </button>

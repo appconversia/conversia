@@ -12,7 +12,7 @@ export default function OrdenesCursorEntrenamientoPage() {
       <div className="print:hidden fixed top-4 right-4 z-50">
         <button
           onClick={handlePrint}
-          className="px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold rounded-lg shadow-lg transition"
+          className="px-6 py-3 bg-conversia-primary hover:bg-conversia-primary-hover text-white font-semibold rounded-lg shadow-lg transition"
         >
           Descargar PDF
         </button>
@@ -20,7 +20,7 @@ export default function OrdenesCursorEntrenamientoPage() {
 
       <article className="max-w-3xl mx-auto px-8 py-12 print:py-0 print:px-0">
         <header className="mb-12 print:mb-8">
-          <h1 className="text-3xl font-bold text-[#075E54] mb-2">
+          <h1 className="text-3xl font-bold text-conversia-dark mb-2">
             Órdenes para entrenar con Cursor
           </h1>
           <p className="text-lg text-gray-600">
@@ -32,7 +32,7 @@ export default function OrdenesCursorEntrenamientoPage() {
         </header>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             1. Qué es Cursor y cuándo usarlo
           </h2>
           <p className="text-gray-700 mb-3">
@@ -44,7 +44,7 @@ export default function OrdenesCursorEntrenamientoPage() {
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             2. Archivos clave para entrenar
           </h2>
           <table className="w-full border border-gray-300 text-sm">
@@ -88,16 +88,16 @@ export default function OrdenesCursorEntrenamientoPage() {
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             3. Órdenes para Cursor (copia y pega en el chat)
           </h2>
           <p className="text-gray-700 mb-4">
-            Abre Cursor, abre el proyecto WhatsApiBot, y usa el chat (Cmd+L o Ctrl+L). Pega una de estas órdenes y adapta según tu necesidad.
+            Abre Cursor, abre el proyecto Conversia, y usa el chat (Cmd+L o Ctrl+L). Pega una de estas órdenes y adapta según tu necesidad.
           </p>
 
           <div className="space-y-6">
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 1: Cambiar el mensaje cuando el usuario dice algo fuera de tema</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 1: Cambiar el mensaje cuando el usuario dice algo fuera de tema</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`Modifica el mensaje que aparece cuando el usuario escribe algo fuera de alcance o incomprensible. 
 Archivo: src/lib/bot/sub-brains/scope-guard-brain.ts
@@ -107,8 +107,8 @@ y que la lista de productos se muestre después. Mantén la estructura del códi
               <p className="mt-2 text-sm text-gray-600">Ejemplo: "Estamos aquí para ayudarte con [TU NEGOCIO]. ¿En qué podemos asistirte hoy?"</p>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 2: Añadir correcciones de nombres de productos</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 2: Añadir correcciones de nombres de productos</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`En src/lib/bot/sub-brains/sales-flow-brain.ts hay un array PRODUCT_NAME_CORRECTIONS que mapea nombres que la IA inventa a nombres exactos del catálogo.
 Añade una corrección: cuando el usuario o la IA diga "[nombre incorrecto]" debe mapear a "[nombre exacto del producto en el catálogo]".
@@ -117,8 +117,8 @@ Sigue el formato existente: [regex o string, string de reemplazo]`}
               <p className="mt-2 text-sm text-gray-600">Ejemplo: si el cliente dice "la gorra" y tu producto se llama "Gorras Yeison Jimenez", añade ese mapeo.</p>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 3: Cambiar el mensaje cuando no hay asesor asignado</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 3: Cambiar el mensaje cuando no hay asesor asignado</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`Modifica la respuesta que recibe el cliente cuando pidió hablar con un asesor pero aún no hay nadie asignado.
 Archivo: src/lib/bot/sub-brains/sin-asignar-response.ts
@@ -127,8 +127,8 @@ Mantén la lógica de que usa IA para generar la respuesta, solo cambia el promp
               </pre>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 4: Añadir palabras que el bot reconozca como saludo</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 4: Añadir palabras que el bot reconozca como saludo</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`En src/lib/bot/greeting-classifier.ts la función classifyIsGreeting detecta saludos.
 Añade estas palabras/variantes como saludos: [lista de palabras, ej: "hey", "qué tal", "buenas"]
@@ -136,8 +136,8 @@ Mantén la estructura existente.`}
               </pre>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 5: Cambiar el límite de caracteres en descripciones de productos</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 5: Cambiar el límite de caracteres en descripciones de productos</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`En src/lib/bot/sub-brains/product-response-brain.ts hay una constante WHATSAPP_CAPTION_MAX (1024 por defecto).
 Cámbiala a [número] porque mis descripciones de productos son más largas/cortas.
@@ -145,8 +145,8 @@ WhatsApp tiene un límite de 1024 para captions. No pongas más de eso.`}
               </pre>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 6: Personalizar el prompt por defecto para mi industria</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 6: Personalizar el prompt por defecto para mi industria</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`En src/lib/bot/default-system-prompt.ts está el prompt por defecto.
 Quiero que incluya instrucciones específicas para [mi industria: ej. restaurante]:
@@ -157,8 +157,8 @@ Mantén todas las secciones existentes (Tags, Handoff, CTA, Formato WhatsApp) y 
               </pre>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 7: Añadir mapeo "el X" a producto por tamaño/nombre</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 7: Añadir mapeo "el X" a producto por tamaño/nombre</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`En sales-flow-brain.ts hay lógica para mapear "el mediano", "el grande", "el primero" a productos.
 Mis productos tienen tamaños/nombres: [lista]. 
@@ -167,8 +167,8 @@ Revisa las funciones normalizeForMatch, findSingleProductMatch, resolveByNameRef
               </pre>
             </div>
 
-            <div className="border-l-4 border-[#25D366] pl-4">
-              <h3 className="font-bold text-[#075E54]">Orden 8: Cambiar el mensaje de handoff</h3>
+            <div className="border-l-4 border-conversia-primary pl-4">
+              <h3 className="font-bold text-conversia-dark">Orden 8: Cambiar el mensaje de handoff</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`Cuando el bot hace handoff (pasa al cliente a un asesor), se envía un mensaje.
 Archivo: src/lib/bot/sub-brains/handoff-brain.ts
@@ -180,7 +180,7 @@ Mantén la lógica, solo cambia el texto.`}
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             4. Ejemplos completos de órdenes
           </h2>
 
@@ -234,7 +234,7 @@ Revisa cómo está implementado y extiende la lógica para incluir estas formas 
         </section>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             5. Después de editar: desplegar
           </h2>
           <p className="text-gray-700 mb-3">
@@ -249,7 +249,7 @@ Revisa cómo está implementado y extiende la lógica para incluir estas formas 
         </section>
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <p>WhatsApiBot — Órdenes para Cursor v1.0 — Entregar junto al manual del cliente</p>
+          <p>Conversia — Órdenes para Cursor v1.0 — Entregar junto al manual del cliente</p>
         </footer>
       </article>
     </div>

@@ -47,7 +47,7 @@ async function main() {
   for (const c of convs) {
     const botMsgs = c.messages.filter((m) => m.senderId && !m.senderContactId);
     const hasSaludo = botMsgs.some((m) =>
-      /bienvenido a WhatsApiBot|te enviamos|ayudarte hoy/i.test(m.content)
+      /bienvenido a Conversia|bienvenido a WhatsApiBot|te enviamos|ayudarte hoy/i.test(m.content)
     );
     const hasImages = botMsgs.some((m) => m.type === "image");
     const hasCta = botMsgs.some((m) => m.type === "text" && isCtaMessage(m.content));

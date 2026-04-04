@@ -4,7 +4,7 @@ import { prisma } from "./db";
 import { cookies } from "next/headers";
 
 const SALT_ROUNDS = 12;
-const SESSION_COOKIE = "whatsapibot_session";
+const SESSION_COOKIE = "conversia_session";
 const SESSION_DAYS = 7;
 
 export async function hashPassword(password: string): Promise<string> {

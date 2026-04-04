@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/branding";
 
 export const metadata: Metadata = {
-  title: "WhatsApiBot | Bot Comercial WhatsApp",
-  description: "WhatsApiBot - Bot Comercial para WhatsApp Business",
+  title: `${APP_NAME} | ${APP_DESCRIPTION}`,
+  description: `${APP_NAME} — ${APP_DESCRIPTION}`,
+  applicationName: APP_NAME,
 };
 
 export default function RootLayout({

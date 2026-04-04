@@ -1,4 +1,4 @@
-# Configuración para producción (WhatsApiBot)
+# Configuración para producción (Conversia)
 
 ## Variables de entorno en Vercel
 

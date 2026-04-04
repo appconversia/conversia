@@ -377,7 +377,7 @@ export default function BotPage() {
           type="button"
           onClick={() => setTab("flujos")}
           className={`rounded-t-lg px-4 py-2 text-sm font-medium ${
-            tab === "flujos" ? "bg-[#25D366]/20 text-[#075E54]" : "text-[#667781] hover:bg-[#F0F2F5]"
+            tab === "flujos" ? "bg-conversia-primary/20 text-conversia-dark" : "text-[#667781] hover:bg-[#F0F2F5]"
           }`}
         >
           Flujos
@@ -386,7 +386,7 @@ export default function BotPage() {
           type="button"
           onClick={() => setTab("probar")}
           className={`rounded-t-lg px-4 py-2 text-sm font-medium ${
-            tab === "probar" ? "bg-[#25D366]/20 text-[#075E54]" : "text-[#667781] hover:bg-[#F0F2F5]"
+            tab === "probar" ? "bg-conversia-primary/20 text-conversia-dark" : "text-[#667781] hover:bg-[#F0F2F5]"
           }`}
         >
           Probar bot
@@ -396,7 +396,7 @@ export default function BotPage() {
             type="button"
             onClick={() => setTab("config")}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium ${
-              tab === "config" ? "bg-[#25D366]/20 text-[#075E54]" : "text-[#667781] hover:bg-[#F0F2F5]"
+              tab === "config" ? "bg-conversia-primary/20 text-conversia-dark" : "text-[#667781] hover:bg-[#F0F2F5]"
             }`}
           >
             Configuración
@@ -411,7 +411,7 @@ export default function BotPage() {
               type="button"
               onClick={handleCreate}
               disabled={creating}
-              className="w-full rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
+              className="w-full rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-50"
             >
               + Nuevo flujo
             </button>
@@ -426,7 +426,7 @@ export default function BotPage() {
                 <div
                   key={f.id}
                   className={`rounded-lg border p-3 ${
-                    selectedFlow?.id === f.id ? "border-[#25D366] bg-[#25D366]/10" : "border-[#E9EDEF] hover:bg-[#F0F2F5]"
+                    selectedFlow?.id === f.id ? "border-conversia-primary bg-conversia-primary/10" : "border-[#E9EDEF] hover:bg-[#F0F2F5]"
                   }`}
                 >
                   <button
@@ -444,7 +444,7 @@ export default function BotPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleActive(f)}
-                      className="rounded px-2 py-1 text-xs text-[#25D366] hover:bg-[#25D366]/10"
+                      className="rounded px-2 py-1 text-xs text-conversia-primary hover:bg-conversia-primary/10"
                     >
                       {f.isActive ? "Desactivar" : "Activar"}
                     </button>
@@ -469,7 +469,7 @@ export default function BotPage() {
                     type="button"
                     onClick={handleSave}
                     disabled={saving}
-                    className="rounded-lg bg-[#25D366] px-3 py-1.5 text-sm text-white hover:bg-[#20bd5a] disabled:opacity-50"
+                    className="rounded-lg bg-conversia-primary px-3 py-1.5 text-sm text-white hover:bg-conversia-primary-hover disabled:opacity-50"
                   >
                     {saving ? "Guardando…" : "Guardar"}
                   </button>
@@ -517,13 +517,13 @@ export default function BotPage() {
                 onChange={(e) => setTestMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleTestSend()}
                 placeholder="Escribe un mensaje..."
-                className="flex-1 rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                className="flex-1 rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
               />
               <button
                 type="button"
                 onClick={handleTestSend}
                 disabled={testLoading || !testMessage.trim()}
-                className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
+                className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-50"
               >
                 {testLoading ? "…" : "Enviar"}
               </button>
@@ -539,13 +539,13 @@ export default function BotPage() {
         <div className="max-w-2xl rounded-xl border border-[#E9EDEF] bg-white p-6 shadow-sm">
           {configLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
             </div>
           ) : (
             <form onSubmit={handleSaveConfig} className="space-y-4">
               <div className="mb-6 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366]/20">
-                  <svg className="h-6 w-6 text-[#25D366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-conversia-primary/20">
+                  <svg className="h-6 w-6 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -559,7 +559,7 @@ export default function BotPage() {
                   type="checkbox"
                   checked={configForm.botEnabled}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botEnabled: e.target.checked }))}
-                  className="h-4 w-4 rounded border-gray-300 text-[#25D366] focus:ring-[#25D366]"
+                  className="h-4 w-4 rounded border-gray-300 text-conversia-primary focus:ring-conversia-primary"
                 />
                 <span className="text-sm font-medium text-[#111B21]">Activar bot con IA</span>
               </label>
@@ -568,7 +568,7 @@ export default function BotPage() {
                 <select
                   value={configForm.botProvider}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botProvider: e.target.value }))}
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm text-[#111B21] focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm text-[#111B21] focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                 >
                   <option value="openai">OpenAI (GPT)</option>
                   <option value="anthropic">Claude (Anthropic)</option>
@@ -582,7 +582,7 @@ export default function BotPage() {
                   value={configForm.botOpenaiKey}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botOpenaiKey: e.target.value }))}
                   placeholder={config?.bot?.openaiApiKeyMasked ? "•••••••• (vacío = mantener)" : "sk-..."}
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                   autoComplete="off"
                 />
               </div>
@@ -593,7 +593,7 @@ export default function BotPage() {
                   value={configForm.botAnthropicKey}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botAnthropicKey: e.target.value }))}
                   placeholder={config?.bot?.anthropicApiKeyMasked ? "•••••••• (vacío = mantener)" : "sk-ant-..."}
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                   autoComplete="off"
                 />
               </div>
@@ -604,7 +604,7 @@ export default function BotPage() {
                   value={configForm.botGoogleKey}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botGoogleKey: e.target.value }))}
                   placeholder={config?.bot?.googleApiKeyMasked ? "•••••••• (vacío = mantener)" : "AIza..."}
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                   autoComplete="off"
                 />
               </div>
@@ -615,7 +615,7 @@ export default function BotPage() {
                   onChange={(e) => setConfigForm((f) => ({ ...f, botSystemPrompt: e.target.value }))}
                   placeholder="Eres un asistente de atención al cliente..."
                   rows={3}
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                 />
                 <p className="mt-1 text-xs text-[#667781]">Define cómo debe comportarse el bot</p>
               </div>
@@ -626,7 +626,7 @@ export default function BotPage() {
                   value={configForm.botModel}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botModel: e.target.value }))}
                   placeholder="gpt-4o-mini, claude-3-5-haiku, gemini-1.5-flash..."
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                 />
                 <p className="mt-1 text-xs text-[#667781]">Vacío = modelo por defecto del proveedor</p>
               </div>
@@ -640,7 +640,7 @@ export default function BotPage() {
                     step={0.1}
                     value={configForm.botTemperature}
                     onChange={(e) => setConfigForm((f) => ({ ...f, botTemperature: parseFloat(e.target.value) || 0.7 }))}
-                    className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                    className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                   />
                   <p className="mt-1 text-xs text-[#667781]">Creatividad. 0.7 = equilibrado</p>
                 </div>
@@ -652,7 +652,7 @@ export default function BotPage() {
                     max={4096}
                     value={configForm.botMaxTokens}
                     onChange={(e) => setConfigForm((f) => ({ ...f, botMaxTokens: parseInt(e.target.value, 10) || 1024 }))}
-                    className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                    className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                   />
                   <p className="mt-1 text-xs text-[#667781]">Longitud máxima de respuesta</p>
                 </div>
@@ -664,14 +664,14 @@ export default function BotPage() {
                   value={configForm.botN8nWebhook}
                   onChange={(e) => setConfigForm((f) => ({ ...f, botN8nWebhook: e.target.value }))}
                   placeholder="https://tu-n8n.com/webhook/..."
-                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                  className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                 />
                 <p className="mt-1 text-xs text-[#667781]">Para delegar flujos a n8n</p>
               </div>
               <button
                 type="submit"
                 disabled={configSaving}
-                className="rounded-lg bg-[#25D366] px-4 py-2.5 font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
+                className="rounded-lg bg-conversia-primary px-4 py-2.5 font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-50"
               >
                 {configSaving ? "Guardando…" : "Guardar configuración"}
               </button>
@@ -688,7 +688,7 @@ export default function BotPage() {
                       type="checkbox"
                       checked={batchForm.enabled}
                       onChange={(e) => setBatchForm((f) => ({ ...f, enabled: e.target.checked }))}
-                      className="h-4 w-4 rounded border-gray-300 text-[#25D366] focus:ring-[#25D366]"
+                      className="h-4 w-4 rounded border-gray-300 text-conversia-primary focus:ring-conversia-primary"
                     />
                     <span className="text-sm font-medium text-[#111B21]">Activar agrupación</span>
                   </label>
@@ -702,7 +702,7 @@ export default function BotPage() {
                         step={500}
                         value={batchForm.delayMs}
                         onChange={(e) => setBatchForm((f) => ({ ...f, delayMs: parseInt(e.target.value, 10) || 2500 }))}
-                        className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                        className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                       />
                       <p className="mt-1 text-xs text-[#667781]">500–30000. Tiempo de espera antes de procesar (ej. 2500 = 2.5 s)</p>
                     </div>
@@ -714,7 +714,7 @@ export default function BotPage() {
                         max={50}
                         value={batchForm.maxBatchSize}
                         onChange={(e) => setBatchForm((f) => ({ ...f, maxBatchSize: parseInt(e.target.value, 10) || 10 }))}
-                        className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                        className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                       />
                       <p className="mt-1 text-xs text-[#667781]">1–50. Si se alcanza, se procesa de inmediato</p>
                     </div>
@@ -722,7 +722,7 @@ export default function BotPage() {
                   <button
                     type="submit"
                     disabled={batchSaving}
-                    className="rounded-lg bg-[#075E54] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d47] disabled:opacity-50"
+                    className="rounded-lg bg-conversia-dark px-4 py-2 text-sm font-medium text-white hover:bg-[#054d47] disabled:opacity-50"
                   >
                     {batchSaving ? "Guardando…" : "Guardar agrupación"}
                   </button>

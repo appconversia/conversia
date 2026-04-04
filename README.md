@@ -1,12 +1,12 @@
-# WhatsApiBot
+# Conversia
 
 **Bot comercial para WhatsApp Business** — Plataforma lista para desplegar en tu propio servidor y conectar a tu cuenta de Meta/WhatsApp sin interferir con otras instalaciones.
 
 ---
 
-## ¿Qué es WhatsApiBot?
+## ¿Qué es Conversia?
 
-WhatsApiBot es una aplicación web que permite a negocios automatizar la atención al cliente por WhatsApp usando la **API oficial de WhatsApp Cloud** (Meta). Incluye:
+Conversia es una aplicación web que permite a negocios automatizar la atención al cliente por WhatsApp usando la **API oficial de WhatsApp Cloud** (Meta). Incluye:
 
 - **Chat en vivo** — Panel para que tu equipo responda conversaciones manualmente
 - **Bot con IA** — Respuestas automáticas con OpenAI, Anthropic o Google AI
@@ -119,9 +119,9 @@ En tu app de Meta → WhatsApp → Configuración → Webhook:
 | **URL de devolución de llamada** | `https://tu-dominio.com/api/webhook/whatsapp` |
 | **Identificador de verificación** | Una cadena secreta que definas (ej. `MiTokenSecreto123`) |
 
-> El identificador **no** es una URL. Es un texto secreto que debe coincidir con lo que configures en WhatsApiBot. Ver [docs/WEBHOOK_META_CONFIG.md](docs/WEBHOOK_META_CONFIG.md).
+> El identificador **no** es una URL. Es un texto secreto que debe coincidir con lo que configures en Conversia. Ver [docs/WEBHOOK_META_CONFIG.md](docs/WEBHOOK_META_CONFIG.md).
 
-### 3. Configurar en WhatsApiBot
+### 3. Configurar en Conversia
 
 En la app → **Configuración** → sección WhatsApp:
 

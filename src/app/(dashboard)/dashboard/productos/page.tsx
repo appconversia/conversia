@@ -272,7 +272,7 @@ export default function ProductosPage() {
           >
             {syncLoading ? "Sincronizando…" : "Sincronizar con bot"}
           </button>
-          <button onClick={openCreate} className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20BD5C]">
+          <button onClick={openCreate} className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#20BD5C]">
             Agregar producto
           </button>
         </div>
@@ -320,7 +320,7 @@ export default function ProductosPage() {
                     {(p.photos?.length ?? 0) + (p.videos?.length ?? 0)} ({(p.photos?.length ?? 0)} imgs, {(p.videos?.length ?? 0)} videos)
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => openEdit(p)} className="mr-2 text-[#25D366] hover:underline">Editar</button>
+                    <button onClick={() => openEdit(p)} className="mr-2 text-conversia-primary hover:underline">Editar</button>
                     <button onClick={() => deleteProduct(p.id)} className="text-red-600 hover:underline">Borrar</button>
                   </td>
                 </tr>
@@ -402,7 +402,7 @@ export default function ProductosPage() {
             </div>
             <div className="mt-6 flex justify-end gap-2">
               <button onClick={() => { setModal(null); resetForm(); }} className="rounded-lg border px-4 py-2 text-sm">Cancelar</button>
-              <button onClick={saveProduct} className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white">Guardar</button>
+              <button onClick={saveProduct} className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white">Guardar</button>
             </div>
           </div>
         </div>

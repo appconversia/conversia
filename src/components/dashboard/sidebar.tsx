@@ -48,7 +48,7 @@ export function Sidebar({ collapsed, onToggle, isMobileOpen, onCloseMobile, user
       <div className="flex h-16 items-center justify-between border-b border-[#202C33] px-4">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <span className="text-lg">WhatsApiBot</span>
+            <span className="text-lg">Conversia</span>
           </Link>
         )}
         <button
@@ -79,7 +79,7 @@ export function Sidebar({ collapsed, onToggle, isMobileOpen, onCloseMobile, user
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33] transition-colors"
           >
             <svg
-              className="h-6 w-6 shrink-0 text-[#25D366]"
+              className="h-6 w-6 shrink-0 text-conversia-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -123,7 +123,7 @@ export function Sidebar({ collapsed, onToggle, isMobileOpen, onCloseMobile, user
             onClick={onCloseMobile}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33]"
           >
-            <svg className="h-6 w-6 shrink-0 text-[#25D366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6 shrink-0 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
             </svg>
             <span>{item.label}</span>

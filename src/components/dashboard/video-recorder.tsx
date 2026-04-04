@@ -182,7 +182,7 @@ export function VideoRecorder({ onSend, onCancel, sending = false }: VideoRecord
               type="button"
               onClick={sendRecording}
               disabled={sending}
-              className="flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-white hover:bg-[#20bd5a] disabled:opacity-70 disabled:cursor-wait"
+              className="flex items-center gap-2 rounded-full bg-conversia-primary px-4 py-2 text-white hover:bg-conversia-primary-hover disabled:opacity-70 disabled:cursor-wait"
             >
               {sending ? (
                 <>
@@ -214,7 +214,7 @@ export function VideoRecorder({ onSend, onCancel, sending = false }: VideoRecord
             <button
               type="button"
               onClick={startRecording}
-              className="flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-white hover:bg-[#20bd5a]"
+              className="flex items-center gap-2 rounded-full bg-conversia-primary px-4 py-2 text-white hover:bg-conversia-primary-hover"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />

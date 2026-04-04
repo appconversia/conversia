@@ -42,7 +42,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#ECE5DD]">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#25D366]/30" />
+          <div className="w-12 h-12 rounded-full bg-conversia-primary/30" />
           <p className="text-[#667781]">Cargando…</p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Documentación | WhatsApiBot",
+  title: "Documentación | Conversia",
   description: "Procedimientos y manuales - responsables y clientes",
 };
 

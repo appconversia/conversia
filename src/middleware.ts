@@ -6,7 +6,7 @@ const authPaths = ["/dashboard"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("whatsapibot_session")?.value;
+  const token = request.cookies.get("conversia_session")?.value;
 
   const isPublic = publicPaths.some((p) => pathname.startsWith(p));
   const isAuth = authPaths.some((p) => pathname.startsWith(p));

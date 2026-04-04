@@ -16,7 +16,7 @@ function DownloadButton({ url, filename, label }: { url: string; filename?: stri
       download={filename || "archivo"}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-[#075E54] hover:bg-[#25D366]/20 transition"
+      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-conversia-dark hover:bg-conversia-primary/20 transition"
     >
       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -35,7 +35,7 @@ export function MediaViewer({ type, url, filename }: MediaViewerProps) {
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
-          className="block rounded overflow-hidden mb-1 focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+          className="block rounded overflow-hidden mb-1 focus:outline-none focus:ring-2 focus:ring-conversia-primary"
         >
           <img
             src={url}
@@ -110,8 +110,8 @@ export function MediaViewer({ type, url, filename }: MediaViewerProps) {
   if (type === "audio") {
     return (
       <div className="flex flex-col gap-1 mb-1">
-        <div className="flex items-center gap-3 rounded-lg bg-[#25D366]/10 px-3 py-2 min-w-[200px]">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
+        <div className="flex items-center gap-3 rounded-lg bg-conversia-primary/10 px-3 py-2 min-w-[200px]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-white">
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
             </svg>
@@ -145,7 +145,7 @@ export function MediaViewer({ type, url, filename }: MediaViewerProps) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block py-2 text-center text-sm text-[#075E54] hover:underline"
+              className="block py-2 text-center text-sm text-conversia-dark hover:underline"
             >
               Abrir PDF en nueva pestaña
             </a>

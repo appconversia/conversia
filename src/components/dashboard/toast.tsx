@@ -19,10 +19,10 @@ export function Toast({ message, type, onClose, autoClose = 4000 }: ToastProps) 
 
   const bg =
     type === "success"
-      ? "bg-[#25D366] text-white"
+      ? "bg-conversia-primary text-white"
       : type === "error"
         ? "bg-red-600 text-white"
-        : "bg-[#075E54] text-white";
+        : "bg-conversia-dark text-white";
 
   return (
     <div

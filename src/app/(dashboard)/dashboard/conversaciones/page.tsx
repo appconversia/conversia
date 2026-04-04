@@ -1074,8 +1074,8 @@ export default function ConversacionesPage() {
     const el = messageRefsMap.current.get(messageId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("ring-2", "ring-[#25D366]", "ring-offset-2");
-      setTimeout(() => el.classList.remove("ring-2", "ring-[#25D366]", "ring-offset-2"), 1500);
+      el.classList.add("ring-2", "ring-conversia-primary", "ring-offset-2");
+      setTimeout(() => el.classList.remove("ring-2", "ring-conversia-primary", "ring-offset-2"), 1500);
     }
   };
 
@@ -1186,7 +1186,7 @@ export default function ConversacionesPage() {
     return (
       <div className="flex h-[70vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
           <p className="text-sm text-[#667781]">Cargando conversaciones…</p>
         </div>
       </div>
@@ -1242,7 +1242,7 @@ export default function ConversacionesPage() {
                   if (["sin_asignar", "bot", "restringidos"].includes(id) || !["todas", "asistidas"].includes(id)) setTabNivel2(null);
                 }}
                 className={`relative rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  tabNivel1 === id ? "bg-[#25D366] text-white" : "bg-white text-[#111B21] hover:bg-[#E9EDEF]"
+                  tabNivel1 === id ? "bg-conversia-primary text-white" : "bg-white text-[#111B21] hover:bg-[#E9EDEF]"
                 }`}
               >
                 {label}
@@ -1261,7 +1261,7 @@ export default function ConversacionesPage() {
                 type="button"
                 onClick={() => setTabNivel2(null)}
                 className={`rounded-full px-2.5 py-1 text-xs transition ${
-                  !tabNivel2 ? "bg-[#25D366] text-white" : "bg-[#E9EDEF] text-[#667781] hover:bg-[#D1D7DB]"
+                  !tabNivel2 ? "bg-conversia-primary text-white" : "bg-[#E9EDEF] text-[#667781] hover:bg-[#D1D7DB]"
                 }`}
               >
                 Todos
@@ -1272,7 +1272,7 @@ export default function ConversacionesPage() {
                   type="button"
                   onClick={() => setTabNivel2(tabNivel2 === u.id ? null : u.id)}
                   className={`rounded-full px-2.5 py-1 text-xs transition ${
-                    tabNivel2 === u.id ? "bg-[#25D366] text-white" : "bg-[#E9EDEF] text-[#667781] hover:bg-[#D1D7DB]"
+                    tabNivel2 === u.id ? "bg-conversia-primary text-white" : "bg-[#E9EDEF] text-[#667781] hover:bg-[#D1D7DB]"
                   }`}
                 >
                   {u.id === myId ? "Tú" : u.name || u.email}
@@ -1298,7 +1298,7 @@ export default function ConversacionesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-sm font-medium text-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-sm font-medium text-white">
                 {getInitials(otherUser.name, otherUser.email)}
               </div>
               <div className="min-w-0 flex-1 truncate">
@@ -1384,8 +1384,8 @@ export default function ConversacionesPage() {
                     aria-checked={iHaveIt}
                     disabled={!!(someoneElseHasIt && !isAdmin)}
                     onClick={toggleAssignment}
-                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 ${
-                      iHaveIt ? "bg-[#25D366]" : "bg-gray-300"
+                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-conversia-primary focus:ring-offset-2 ${
+                      iHaveIt ? "bg-conversia-primary" : "bg-gray-300"
                     } ${someoneElseHasIt && !isAdmin ? "cursor-not-allowed opacity-60" : ""}`}
                   >
                     <span
@@ -1533,8 +1533,8 @@ export default function ConversacionesPage() {
         <div className="flex-1 overflow-y-auto">
           {filteredConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366]/20">
-                <svg className="h-8 w-8 text-[#25D366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-conversia-primary/20">
+                <svg className="h-8 w-8 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -1588,7 +1588,7 @@ export default function ConversacionesPage() {
                     isSelected ? "bg-[#E9EDEF]" : "hover:bg-[#F0F2F5]"
                   }`}
                 >
-                  <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-base font-medium text-white">
+                  <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-base font-medium text-white">
                     {other ? getInitials(other.name, other.email) : "?"}
                     {(c.unreadCount ?? 0) > 0 && (
                       <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
@@ -1609,7 +1609,7 @@ export default function ConversacionesPage() {
                       {c.lastMessage?.content || "Sin mensajes"}
                     </p>
                     {c.assignedTo && (
-                      <p className="truncate text-[10px] text-[#25D366]">
+                      <p className="truncate text-[10px] text-conversia-primary">
                         {c.assignedTo.id === myId ? "● Tú la tienes" : `● ${c.assignedTo.name || c.assignedTo.email}`}
                       </p>
                     )}
@@ -1656,7 +1656,7 @@ export default function ConversacionesPage() {
                       <button
                         type="button"
                         onClick={() => scrollToMessage(m.replyTo!.id)}
-                        className="mb-1.5 block w-full cursor-pointer rounded border-l-2 border-[#25D366] bg-[#F0F2F5]/60 px-2 py-1 text-left text-xs text-[#667781] transition hover:bg-[#E9EDEF]"
+                        className="mb-1.5 block w-full cursor-pointer rounded border-l-2 border-conversia-primary bg-[#F0F2F5]/60 px-2 py-1 text-left text-xs text-[#667781] transition hover:bg-[#E9EDEF]"
                       >
                         <span className="font-medium text-[#111B21]">
                           {m.replyTo.fromContact ? (otherUser?.name || otherUser?.email || "Contacto") : (m.replyTo.sender?.name || m.replyTo.sender?.email || "Tú")}
@@ -1673,7 +1673,7 @@ export default function ConversacionesPage() {
                       />
                     )}
                     {m.content && (
-                      <div className={m.content.includes("— ") ? "border-l-2 border-[#25D366] pl-2" : ""}>
+                      <div className={m.content.includes("— ") ? "border-l-2 border-conversia-primary pl-2" : ""}>
                         <p className="whitespace-pre-wrap break-words text-sm">{m.content}</p>
                       </div>
                     )}
@@ -1747,7 +1747,7 @@ export default function ConversacionesPage() {
                           setTemplateBodyParams(Array(count).fill(""));
                         }
                       }}
-                      className="w-full rounded-lg border border-[#E9EDEF] bg-white px-3 py-2.5 text-sm text-[#111B21] focus:border-[#25D366] focus:outline-none focus:ring-1 focus:ring-[#25D366]"
+                      className="w-full rounded-lg border border-[#E9EDEF] bg-white px-3 py-2.5 text-sm text-[#111B21] focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
                     >
                       <option value="">Elige una plantilla…</option>
                       {templates.map((t) => (
@@ -1801,7 +1801,7 @@ export default function ConversacionesPage() {
                         type="button"
                         onClick={sendTemplate}
                         disabled={templateSending}
-                        className="w-full rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#20bd5a] disabled:opacity-50"
+                        className="w-full rounded-lg bg-conversia-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-50"
                       >
                         {templateSending ? "Enviando…" : "Enviar plantilla"}
                       </button>
@@ -1866,7 +1866,7 @@ export default function ConversacionesPage() {
               </button>
               <div className="flex min-h-[44px] flex-1 flex-col rounded-2xl bg-white px-4 py-2 shadow-sm">
                 {replyingTo && (
-                  <div className="mb-1 flex items-center justify-between border-l-2 border-[#25D366] bg-[#F0F2F5]/60 pl-2">
+                  <div className="mb-1 flex items-center justify-between border-l-2 border-conversia-primary bg-[#F0F2F5]/60 pl-2">
                     <p className="truncate text-xs text-[#667781]">
                       Respondiendo a {replyingTo.fromContact ? (otherUser?.name || otherUser?.email) : "ti mismo"}: {replyingTo.type !== "text" ? `[${replyingTo.type}]` : replyingTo.content.slice(0, 50)}
                       {replyingTo.content.length > 50 ? "…" : ""}
@@ -1954,7 +1954,7 @@ export default function ConversacionesPage() {
                 type="button"
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || sending || !canWriteDirect}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white disabled:opacity-50 hover:bg-[#20bd5a] disabled:hover:bg-[#25D366] disabled:cursor-not-allowed"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-white disabled:opacity-50 hover:bg-conversia-primary-hover disabled:hover:bg-conversia-primary disabled:cursor-not-allowed"
               >
                 {sending ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -1970,12 +1970,12 @@ export default function ConversacionesPage() {
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center bg-[#ECE5DD] p-8 text-center">
-            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-[#25D366]/10">
-              <svg className="h-12 w-12 text-[#25D366]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-conversia-primary/10">
+              <svg className="h-12 w-12 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <p className="mb-1 text-lg font-medium text-[#111B21]">WhatsApiBot Chat</p>
+            <p className="mb-1 text-lg font-medium text-[#111B21]">Conversia Chat</p>
             <p className="max-w-sm text-sm text-[#667781]">
               Selecciona una conversación o inicia una nueva tocando el botón + en la lista.
             </p>
@@ -2003,7 +2003,7 @@ export default function ConversacionesPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteChatConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-[#25D366] hover:underline"
+                className="px-4 py-2 text-sm font-medium text-conversia-primary hover:underline"
               >
                 Cancelar
               </button>
@@ -2056,7 +2056,7 @@ export default function ConversacionesPage() {
               <button
                 type="button"
                 onClick={() => setShowClearChatConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-[#25D366] hover:underline"
+                className="px-4 py-2 text-sm font-medium text-conversia-primary hover:underline"
               >
                 Cancelar
               </button>
@@ -2108,7 +2108,7 @@ export default function ConversacionesPage() {
               <button
                 type="button"
                 onClick={() => { setShowContactInfo(false); setConversationDetail(null); }}
-                className="rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a]"
+                className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-conversia-primary-hover"
               >
                 Cerrar
               </button>
@@ -2150,7 +2150,7 @@ export default function ConversacionesPage() {
                     onClick={() => startConversation(u.id)}
                     className="flex w-full items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#F0F2F5] transition"
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-base font-medium text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-base font-medium text-white">
                       {getInitials(u.name, u.email)}
                     </div>
                     <div className="min-w-0 flex-1 text-left">

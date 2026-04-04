@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad | WhatsApiBot",
-  description: "Política de privacidad de la aplicación WhatsApiBot para WhatsApp Business.",
+  title: "Política de Privacidad | Conversia",
+  description: "Política de privacidad de la aplicación Conversia para WhatsApp Business.",
 };
 
 export default function PrivacidadPage() {
@@ -20,7 +20,7 @@ export default function PrivacidadPage() {
           <section>
             <h2 className="mb-3 text-xl font-semibold">1. Responsable del tratamiento</h2>
             <p className="leading-relaxed">
-              El responsable (&quot;nosotros&quot;, &quot;nuestra&quot; o &quot;el negocio&quot;) opera la aplicación WhatsApiBot,
+              El responsable (&quot;nosotros&quot;, &quot;nuestra&quot; o &quot;el negocio&quot;) opera la aplicación Conversia,
               que utiliza la API de WhatsApp Business de Meta para proporcionar atención al cliente y
               comunicación comercial. Esta política describe cómo tratamos la información personal
               en el contexto de nuestra integración con WhatsApp Business.
@@ -76,7 +76,7 @@ export default function PrivacidadPage() {
               Conservamos los datos mientras sea necesario para las finalidades indicadas y según
               las obligaciones legales aplicables. Puedes solicitar la eliminación de tus datos en
               cualquier momento siguiendo las instrucciones en nuestra página de{" "}
-              <a href="/eliminacion-datos" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="/eliminacion-datos" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 Eliminación de datos
               </a>
               .
@@ -99,7 +99,7 @@ export default function PrivacidadPage() {
             </ul>
             <p className="mt-4 leading-relaxed">
               Para ejercer estos derechos, contacta a{" "}
-              <a href="mailto:contacto@tudominio.com" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="mailto:contacto@tudominio.com" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 contacto@tudominio.com
               </a>
               . También puedes presentar una reclamación ante la autoridad de protección de datos
@@ -129,7 +129,7 @@ export default function PrivacidadPage() {
             <h2 className="mb-3 text-xl font-semibold">9. Contacto</h2>
             <p className="leading-relaxed">
               Para cualquier consulta sobre esta política:{" "}
-              <a href="mailto:contacto@tudominio.com" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="mailto:contacto@tudominio.com" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 contacto@tudominio.com
               </a>
             </p>

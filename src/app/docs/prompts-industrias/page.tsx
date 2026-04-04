@@ -258,7 +258,7 @@ export default function PromptsIndustriasPage() {
       <div className="print:hidden fixed top-4 right-4 z-50">
         <button
           onClick={handlePrint}
-          className="px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold rounded-lg shadow-lg transition"
+          className="px-6 py-3 bg-conversia-primary hover:bg-conversia-primary-hover text-white font-semibold rounded-lg shadow-lg transition"
         >
           Descargar PDF
         </button>
@@ -266,8 +266,8 @@ export default function PromptsIndustriasPage() {
 
       <article className="max-w-3xl mx-auto px-8 py-12 print:py-0 print:px-0">
         <header className="mb-12 print:mb-8">
-          <h1 className="text-3xl font-bold text-[#075E54] mb-2">
-            Prompts por industria — WhatsApiBot
+          <h1 className="text-3xl font-bold text-conversia-dark mb-2">
+            Prompts por industria — Conversia
           </h1>
           <p className="text-lg text-gray-600">
             Formato completo que la app necesita. Copiar y pegar en Configuración → Bot → Prompt del sistema
@@ -278,7 +278,7 @@ export default function PromptsIndustriasPage() {
         </header>
 
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             Cómo usar
           </h2>
           <ol className="list-decimal pl-6 space-y-2 text-gray-700">
@@ -293,7 +293,7 @@ export default function PromptsIndustriasPage() {
 
         {INDUSTRIES.map((ind, idx) => (
           <section key={idx} className="mb-10 break-inside-avoid">
-            <h2 className="text-xl font-bold text-[#075E54] mb-2">
+            <h2 className="text-xl font-bold text-conversia-dark mb-2">
               {ind.name}
             </h2>
             <p className="text-sm text-gray-600 mb-3">{ind.desc}</p>
@@ -304,7 +304,7 @@ export default function PromptsIndustriasPage() {
         ))}
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <p>WhatsApiBot — Prompts por industria v2.0 — Formato completo para la app</p>
+          <p>Conversia — Prompts por industria v2.0 — Formato completo para la app</p>
         </footer>
       </article>
     </div>

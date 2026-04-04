@@ -130,7 +130,7 @@ export function PhotoCapture({ onSend, onCancel }: PhotoCaptureProps) {
             <button
               type="button"
               onClick={sendPhoto}
-              className="flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-white hover:bg-[#20bd5a]"
+              className="flex items-center gap-2 rounded-full bg-conversia-primary px-4 py-2 text-white hover:bg-conversia-primary-hover"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -154,7 +154,7 @@ export function PhotoCapture({ onSend, onCancel }: PhotoCaptureProps) {
               <button
                 type="button"
                 onClick={capturePhoto}
-                className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-[#25D366] shadow-lg hover:bg-[#20bd5a]"
+                className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-conversia-primary shadow-lg hover:bg-conversia-primary-hover"
                 aria-label="Tomar foto"
               >
                 <span className="h-10 w-10 rounded-full bg-white" />

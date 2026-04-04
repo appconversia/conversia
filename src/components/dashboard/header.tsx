@@ -51,7 +51,7 @@ export function Header({ onMenuClick, userName, userEmail, userRole }: HeaderPro
               <span
                 className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                   userRole === "super_admin"
-                    ? "bg-[#25D366]/20 text-[#25D366]"
+                    ? "bg-conversia-primary/20 text-conversia-primary"
                     : userRole === "admin"
                       ? "bg-violet-500/20 text-violet-300"
                       : "bg-[#2A3942] text-[#8696A0]"
@@ -69,7 +69,7 @@ export function Header({ onMenuClick, userName, userEmail, userRole }: HeaderPro
         </div>
         <button
           onClick={handleLogout}
-          className="rounded-lg px-3 py-1.5 text-sm text-[#25D366] hover:bg-[#2A3942] transition-colors whitespace-nowrap"
+          className="rounded-lg px-3 py-1.5 text-sm text-conversia-primary hover:bg-[#2A3942] transition-colors whitespace-nowrap"
         >
           Salir
         </button>

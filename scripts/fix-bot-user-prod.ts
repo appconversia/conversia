@@ -26,7 +26,7 @@ async function main() {
       data: {
         email: botEmail,
         password: hashedPassword,
-        name: "Bot WhatsApiBot",
+        name: "Bot Conversia",
         role: "sistema",
       },
     });

@@ -20,6 +20,7 @@ import { sendWhatsAppText, withBotTyping } from "./whatsapp-send";
 import { getFullConversationContext } from "./conversation-memory";
 import { isWithinBusinessHours } from "./business-hours";
 import type { ContentPart } from "@/lib/ai-multimodal";
+import { APP_NAME } from "@/lib/branding";
 
 function lastMessageAsText(lastMessage: string | ContentPart[]): string {
   if (typeof lastMessage === "string") return lastMessage;
@@ -137,8 +138,8 @@ export async function runMainBrain(input: BrainInput): Promise<BrainOutput> {
     });
     const botUserId = await getBotUserId();
     const saludo = contactName?.trim()
-      ? `Hola ${contactName.trim()}, bienvenido a WhatsApiBot. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?`
-      : "Bienvenido a WhatsApiBot. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
+      ? `Hola ${contactName.trim()}, bienvenido a ${APP_NAME}. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?`
+      : `Bienvenido a ${APP_NAME}. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?`;
     const sendSaludo = await withBotTyping(contactPhone, receivedMessageId, () => sendWhatsAppText(contactPhone, saludo));
     if (botUserId) {
       await prisma.message.create({

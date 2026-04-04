@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     const token = await createSession(user.id);
     const cookieStore = await cookies();
-    cookieStore.set("whatsapibot_session", token, {
+    cookieStore.set("conversia_session", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

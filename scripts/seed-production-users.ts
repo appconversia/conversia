@@ -12,16 +12,16 @@ async function main() {
     create: {
       email: "admin@whatsapibot.local",
       password: adminPassword,
-      name: "Admin WhatsApiBot",
+      name: "Admin Conversia",
       role: "super_admin",
     },
     update: {
       password: adminPassword,
-      name: "Admin WhatsApiBot",
+      name: "Admin Conversia",
       role: "super_admin",
     },
   });
-  console.log("Admin WhatsApiBot creado/actualizado");
+  console.log("Admin Conversia creado/actualizado");
 
   await prisma.user.upsert({
     where: { email: "ventas@whatsapibot.local" },

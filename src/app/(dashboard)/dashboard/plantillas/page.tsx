@@ -121,7 +121,7 @@ export default function PlantillasPage() {
           href="https://business.facebook.com/wa/manage/message-templates/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#25D366] underline hover:no-underline"
+          className="text-conversia-primary underline hover:no-underline"
         >
           Administrador de Meta Business
         </a>
@@ -179,7 +179,7 @@ export default function PlantillasPage() {
 
       {loading ? (
         <div className="flex h-48 items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
         </div>
       ) : templates.length === 0 ? (
         <div className="rounded-lg border border-[#E9EDEF] bg-[#F0F2F5] px-6 py-12 text-center text-[#667781]">
@@ -197,7 +197,7 @@ export default function PlantillasPage() {
                 key={t.id}
                 onClick={() => setSelectedId(t.id)}
                 className={`cursor-pointer rounded-lg border p-4 transition ${
-                  selectedId === t.id ? "border-[#25D366] bg-[#F0FFF4]" : "border-[#E9EDEF] bg-white hover:border-[#25D366]/50"
+                  selectedId === t.id ? "border-conversia-primary bg-[#F0FFF4]" : "border-[#E9EDEF] bg-white hover:border-conversia-primary/50"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -264,7 +264,7 @@ export default function PlantillasPage() {
                 href="https://business.facebook.com/wa/manage/message-templates/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-block text-sm text-[#25D366] underline hover:no-underline"
+                className="mt-4 inline-block text-sm text-conversia-primary underline hover:no-underline"
               >
                 Gestionar en Meta Business →
               </a>

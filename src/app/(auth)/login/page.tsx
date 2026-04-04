@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
-/** Logo para WhatsApiBot - suppressHydrationWarning evita errores cuando extensiones del navegador modifican el SVG */
+/** Logo para Conversia - suppressHydrationWarning evita errores cuando extensiones del navegador modifican el SVG */
 function BBQLogo({ className = "w-14 h-14" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" suppressHydrationWarning>
@@ -59,12 +59,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left: Branding - hidden on mobile, shown on tablet+ */}
-      <div className="hidden md:flex md:w-1/2 lg:w-2/5 bg-[#075E54] items-center justify-center p-8">
+      <div className="hidden md:flex md:w-1/2 lg:w-2/5 bg-conversia-dark items-center justify-center p-8">
         <div className="text-center max-w-md">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#25D366] flex items-center justify-center shadow-lg text-white" suppressHydrationWarning>
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-conversia-primary flex items-center justify-center shadow-lg text-white" suppressHydrationWarning>
             <BBQLogo className="w-14 h-14" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">WhatsApiBot</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">Conversia</h2>
           <p className="text-[#D9FDD3]/90">Bot Comercial WhatsApp</p>
         </div>
       </div>
@@ -74,10 +74,10 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="md:hidden text-center mb-8">
-            <div className="inline-flex w-16 h-16 rounded-full bg-[#25D366] items-center justify-center mb-4 text-white" suppressHydrationWarning>
+            <div className="inline-flex w-16 h-16 rounded-full bg-conversia-primary items-center justify-center mb-4 text-white" suppressHydrationWarning>
               <BBQLogo className="w-10 h-10" />
             </div>
-            <h1 className="text-2xl font-bold text-[#111B21]">WhatsApiBot</h1>
+            <h1 className="text-2xl font-bold text-[#111B21]">Conversia</h1>
             <p className="text-[#667781]">Bot Comercial WhatsApp</p>
           </div>
 
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   {...register("email")}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none transition text-[#111B21]"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none transition text-[#111B21]"
                   placeholder="tu@email.com"
                 />
                 {errors.email && (
@@ -116,7 +116,7 @@ export default function LoginPage() {
                   type="password"
                   autoComplete="current-password"
                   {...register("password")}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none transition text-[#111B21]"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none transition text-[#111B21]"
                   placeholder="••••••••"
                 />
                 {errors.password && (
@@ -126,7 +126,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-4 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-3 px-4 rounded-lg bg-conversia-primary hover:bg-conversia-primary-hover text-white font-medium transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Cargando…" : "Entrar"}
               </button>

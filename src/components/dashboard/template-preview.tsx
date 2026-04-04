@@ -75,8 +75,8 @@ export function TemplatePreview({ template, bodyParams = [], compact, selected, 
   const cardClass = onClick
     ? `cursor-pointer transition-all duration-200 ${
         selected
-          ? "ring-2 ring-[#25D366] ring-offset-2 border-[#25D366] bg-[#F0FFF4]"
-          : "border-[#E9EDEF] bg-white hover:border-[#25D366]/50 hover:bg-[#FAFFFB]"
+          ? "ring-2 ring-conversia-primary ring-offset-2 border-conversia-primary bg-[#F0FFF4]"
+          : "border-[#E9EDEF] bg-white hover:border-conversia-primary/50 hover:bg-[#FAFFFB]"
       }`
     : "";
 
@@ -112,7 +112,7 @@ export function TemplatePreview({ template, bodyParams = [], compact, selected, 
               <span
                 key={i}
                 className={`
-                  inline-flex items-center gap-1 rounded-lg border border-[#25D366] bg-white px-3 py-1.5 text-sm font-medium text-[#25D366]
+                  inline-flex items-center gap-1 rounded-lg border border-conversia-primary bg-white px-3 py-1.5 text-sm font-medium text-conversia-primary
                   ${isCompact ? "px-2 py-1 text-xs" : ""}
                 `}
               >

@@ -12,7 +12,7 @@ export default function ManualClientePage() {
       <div className="print:hidden fixed top-4 right-4 z-50">
         <button
           onClick={handlePrint}
-          className="px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold rounded-lg shadow-lg transition"
+          className="px-6 py-3 bg-conversia-primary hover:bg-conversia-primary-hover text-white font-semibold rounded-lg shadow-lg transition"
         >
           Descargar PDF
         </button>
@@ -20,8 +20,8 @@ export default function ManualClientePage() {
 
       <article className="max-w-3xl mx-auto px-8 py-12 print:py-0 print:px-0">
         <header className="mb-12 print:mb-8">
-          <h1 className="text-3xl font-bold text-[#075E54] mb-2">
-            Manual del cliente — WhatsApiBot
+          <h1 className="text-3xl font-bold text-conversia-dark mb-2">
+            Manual del cliente — Conversia
           </h1>
           <p className="text-lg text-gray-600">
             Guía completa para conectar WhatsApp, entrenar el bot y desplegar cambios
@@ -29,7 +29,7 @@ export default function ManualClientePage() {
           <p className="text-sm text-gray-500 mt-1">
             Todo lo que debes hacer tú después de recibir la app desplegada
           </p>
-          <div className="mt-4 p-4 bg-[#25D366]/10 border border-[#25D366]/30 rounded-lg">
+          <div className="mt-4 p-4 bg-conversia-primary/10 border border-conversia-primary/30 rounded-lg">
             <p className="text-gray-700">
               <strong>¿Es difícil?</strong> Tiene una curva de aprendizaje: los primeros pasos (conectar WhatsApp, configurar la IA) requieren seguir instrucciones con cuidado. No necesitas ser programador para la mayoría de tareas. Si ya usas Meta, Vercel o herramientas similares, te resultará más rápido. Si no, tómate tu tiempo, lee cada paso y verás que es totalmente alcanzable. Para cambios avanzados (editar código con Cursor) sí ayuda tener algo de experiencia técnica.
             </p>
@@ -47,7 +47,7 @@ export default function ManualClientePage() {
               <li><strong>Crear la app en Meta for Developers</strong> — La cuenta y la app son tuyas</li>
               <li><strong>Obtener y conectar las credenciales de WhatsApp</strong> — Access Token, Phone Number ID, Business Account ID</li>
               <li><strong>Configurar el webhook en Meta</strong> — URL y token de verificación</li>
-              <li><strong>Pegar las credenciales en WhatsApiBot</strong> — En Configuración → WhatsApp</li>
+              <li><strong>Pegar las credenciales en Conversia</strong> — En Configuración → WhatsApp</li>
               <li><strong>Activar la API de WhatsApp</strong> — Sin esto el bot no recibe ni envía mensajes</li>
               <li><strong>Obtener y configurar una API key de IA</strong> — OpenAI, Anthropic o Google (para que el bot responda con inteligencia artificial)</li>
               <li><strong>Añadir tus productos al catálogo</strong> — Nombre, descripción, fotos, videos, precios</li>
@@ -61,13 +61,13 @@ export default function ManualClientePage() {
 
         {/* LO QUE SÍ RECIBES */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             2. Lo que sí recibes
           </h2>
           <ul className="list-disc pl-6 space-y-2 text-gray-700">
             <li><strong>URL de tu app</strong> — Es la dirección web donde está tu panel (ej. https://tu-app.vercel.app). La usarás para entrar y para configurar el webhook de Meta.</li>
             <li><strong>Credenciales de acceso</strong> — Usuario y contraseña para entrar al panel. Hay tres roles: Super Admin (acceso total), Admin (gestión) y Colaborador (solo conversaciones).</li>
-            <li><strong>App desplegada</strong> — Tu WhatsApiBot ya está en internet, funcionando. Solo falta que tú conectes WhatsApp y configures el bot.</li>
+            <li><strong>App desplegada</strong> — Tu Conversia ya está en internet, funcionando. Solo falta que tú conectes WhatsApp y configures el bot.</li>
             <li><strong>Base de datos</strong> — Donde se guardan conversaciones, productos, usuarios. Ya está creada y configurada en Neon (servicio en la nube).</li>
             <li><strong>Este manual</strong> y el documento de <strong>Prompts por industria</strong> — Para que copies prompts listos según tu negocio.</li>
           </ul>
@@ -75,7 +75,7 @@ export default function ManualClientePage() {
 
         {/* GLOSARIO */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             Glosario (términos que verás)
           </h2>
           <dl className="space-y-3 text-gray-700">
@@ -84,7 +84,7 @@ export default function ManualClientePage() {
             <dt className="font-semibold">Webhook</dt>
             <dd className="pl-4 text-sm">Es la URL a la que Meta envía los mensajes que recibe tu número de WhatsApp. Sin configurarla, tu app no recibe nada.</dd>
             <dt className="font-semibold">Token de verificación</dt>
-            <dd className="pl-4 text-sm">Una cadena de texto que tú inventas. Meta la usa para comprobar que eres tú quien controla la URL del webhook. Debe ser la misma en Meta y en WhatsApiBot.</dd>
+            <dd className="pl-4 text-sm">Una cadena de texto que tú inventas. Meta la usa para comprobar que eres tú quien controla la URL del webhook. Debe ser la misma en Meta y en Conversia.</dd>
             <dt className="font-semibold">Phone Number ID</dt>
             <dd className="pl-4 text-sm">Identificador único que Meta asigna a tu número de WhatsApp Business. Lo encuentras en el panel de Meta.</dd>
             <dt className="font-semibold">API key</dt>
@@ -96,7 +96,7 @@ export default function ManualClientePage() {
 
         {/* PRIMEROS PASOS */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             3. Primeros pasos (inmediatamente)
           </h2>
           <ol className="list-decimal pl-6 space-y-3 text-gray-700">
@@ -108,14 +108,14 @@ export default function ManualClientePage() {
 
         {/* CREAR APP EN META */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             4. Crear tu app en Meta for Developers
           </h2>
           <p className="mb-3 text-gray-600 text-sm">
             Meta for Developers es la plataforma donde Facebook/Meta gestiona las apps que usan WhatsApp Business API. Necesitas crear una app para obtener las credenciales.
           </p>
           <ol className="list-decimal pl-6 space-y-3 text-gray-700">
-            <li>Entra a <a href="https://developers.facebook.com" className="text-[#25D366] underline" target="_blank" rel="noopener noreferrer">developers.facebook.com</a></li>
+            <li>Entra a <a href="https://developers.facebook.com" className="text-conversia-primary underline" target="_blank" rel="noopener noreferrer">developers.facebook.com</a></li>
             <li>Inicia sesión con tu cuenta de Facebook (o crea una si no tienes)</li>
             <li>En el menú superior, haz clic en <strong>Mis apps</strong> → <strong>Crear app</strong></li>
             <li>Te preguntará el tipo: elige <strong>Empresa</strong> (no "Consumidor"). Empresa es para negocios que usan WhatsApp Business.</li>
@@ -130,7 +130,7 @@ export default function ManualClientePage() {
 
         {/* OBTENER CREDENCIALES */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             5. Obtener credenciales de WhatsApp
           </h2>
           <p className="mb-3 text-gray-700">En la sección WhatsApp de tu app de Meta necesitas tres datos. Búscalos en el menú lateral o en "API Setup":</p>
@@ -155,7 +155,7 @@ export default function ManualClientePage() {
 
         {/* CONFIGURAR WEBHOOK */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             6. Configurar el webhook en Meta (crítico)
           </h2>
           <p className="mb-3 text-gray-700">
@@ -176,23 +176,23 @@ export default function ManualClientePage() {
               </tr>
               <tr>
                 <td className="border border-gray-300 p-2 font-medium">Identificador de verificación</td>
-                <td className="border border-gray-300 p-2">Una cadena secreta que TÚ defines (ej. <code className="bg-gray-100 px-1 rounded">MiTokenSecreto2026</code>). <strong>NO es una URL.</strong> Debe coincidir exactamente con lo que pongas en WhatsApiBot.</td>
+                <td className="border border-gray-300 p-2">Una cadena secreta que TÚ defines (ej. <code className="bg-gray-100 px-1 rounded">MiTokenSecreto2026</code>). <strong>NO es una URL.</strong> Debe coincidir exactamente con lo que pongas en Conversia.</td>
               </tr>
             </tbody>
           </table>
           <p className="text-sm text-amber-700 bg-amber-50 p-3 rounded">
-            <strong>Error común:</strong> Si Meta dice "No se ha podido validar la URL de devolución de llamada", casi siempre es porque el Identificador de verificación no coincide. Debe ser exactamente la misma cadena (mismo texto, mismo mayúsculas/minúsculas) en Meta y en WhatsApiBot (Configuración → Token de verificación de webhook). No copies la URL en ese campo: el identificador es un texto que tú inventas, como una contraseña.
+            <strong>Error común:</strong> Si Meta dice "No se ha podido validar la URL de devolución de llamada", casi siempre es porque el Identificador de verificación no coincide. Debe ser exactamente la misma cadena (mismo texto, mismo mayúsculas/minúsculas) en Meta y en Conversia (Configuración → Token de verificación de webhook). No copies la URL en ese campo: el identificador es un texto que tú inventas, como una contraseña.
           </p>
           <p className="mt-2 text-gray-700">Después de rellenar ambos campos, haz clic en <strong>Verificar y guardar</strong>. Si todo está bien, Meta mostrará que la verificación fue exitosa.</p>
         </section>
 
         {/* CONFIGURAR EN WHATSAPIBOT */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
-            7. Configurar WhatsApp en WhatsApiBot
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
+            7. Configurar WhatsApp en Conversia
           </h2>
           <p className="mb-3 text-gray-700">
-            Ahora debes pegar en tu panel de WhatsApiBot las credenciales que copiaste de Meta. Así tu app "conecta" con tu número de WhatsApp.
+            Ahora debes pegar en tu panel de Conversia las credenciales que copiaste de Meta. Así tu app "conecta" con tu número de WhatsApp.
           </p>
           <ol className="list-decimal pl-6 space-y-3 text-gray-700">
             <li>Entra a tu app (la URL que te dieron) e inicia sesión</li>
@@ -208,7 +208,7 @@ export default function ManualClientePage() {
 
         {/* API DE IA */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             8. Configurar la IA del bot (obligatorio para respuestas automáticas)
           </h2>
           <p className="mb-3 text-gray-700">
@@ -220,7 +220,7 @@ export default function ManualClientePage() {
             <li><strong>Anthropic</strong> (Claude) — console.anthropic.com → API keys → Create key. Copia la clave.</li>
             <li><strong>Google</strong> (Gemini) — aistudio.google.com → Get API key. Sigue los pasos y copia la clave.</li>
           </ul>
-          <p className="mb-3 text-gray-700">En WhatsApiBot → Configuración → sección Bot:</p>
+          <p className="mb-3 text-gray-700">En Conversia → Configuración → sección Bot:</p>
           <ol className="list-decimal pl-6 space-y-2 text-gray-700">
             <li>Elige el proveedor (OpenAI, Anthropic o Google) en el desplegable</li>
             <li>Pega la API key en el campo correspondiente. No la compartas con nadie.</li>
@@ -233,7 +233,7 @@ export default function ManualClientePage() {
 
         {/* PROMPT DEL SISTEMA */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             9. Entrenar el bot: prompt del sistema
           </h2>
           <p className="mb-3 text-gray-700">
@@ -259,7 +259,7 @@ export default function ManualClientePage() {
 
         {/* PRODUCTOS */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             10. Añadir productos al catálogo
           </h2>
           <p className="mb-3 text-gray-700">
@@ -277,7 +277,7 @@ export default function ManualClientePage() {
 
         {/* ENTRENAR CON CURSOR */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             11. Entrenar el bot con Cursor (avanzado)
           </h2>
           <p className="mb-3 text-gray-700">Si quieres modificar el código (prompts por defecto, flujos, lógica):</p>
@@ -298,11 +298,11 @@ export default function ManualClientePage() {
 
         {/* DESPLEGAR CAMBIOS */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             12. Desplegar cambios a Vercel y Neon (solo si editaste código)
           </h2>
           <p className="mb-3 text-gray-700">
-            Si solo cambias el prompt, los productos o la configuración desde el panel de WhatsApiBot, no necesitas desplegar nada: los cambios se guardan en la base de datos y ya están activos.
+            Si solo cambias el prompt, los productos o la configuración desde el panel de Conversia, no necesitas desplegar nada: los cambios se guardan en la base de datos y ya están activos.
           </p>
           <p className="mb-3 text-gray-700">
             Solo necesitas desplegar si modificaste el código del proyecto (por ejemplo con Cursor). "Desplegar" significa subir la nueva versión a Vercel para que esté disponible en internet.
@@ -325,7 +325,7 @@ vercel --prod`}
 
         {/* FLUJOS */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             13. Flujos del bot
           </h2>
           <p className="mb-3 text-gray-700">En <strong>Bot → Flujos</strong> puedes ver y editar los flujos (saludo inicial, condiciones, handoff). El flujo principal ya viene configurado. Puedes activar/desactivar flujos o crear nuevos desde la interfaz.</p>
@@ -333,7 +333,7 @@ vercel --prod`}
 
         {/* RESUMEN CHECKLIST */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             14. Checklist: ¿Qué he hecho?
           </h2>
           <ul className="space-y-2 text-gray-700">
@@ -343,16 +343,16 @@ vercel --prod`}
               "Añadí el producto WhatsApp",
               "Obtuve Access Token, Phone Number ID y Business Account ID",
               "Configuré el webhook en Meta (URL + token de verificación)",
-              "Pegué las credenciales en WhatsApiBot → Configuración → WhatsApp",
-              "Activé WhatsApp en WhatsApiBot",
+              "Pegué las credenciales en Conversia → Configuración → WhatsApp",
+              "Activé WhatsApp en Conversia",
               "Configuré una API key de IA (OpenAI/Anthropic/Google)",
-              "Activé el bot en WhatsApiBot",
+              "Activé el bot en Conversia",
               "Añadí mis productos al catálogo",
               "Personalicé el prompt del sistema",
               "Probé enviando un mensaje a mi número de WhatsApp",
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="text-[#25D366] font-bold">☐</span>
+                <span className="text-conversia-primary font-bold">☐</span>
                 {item}
               </li>
             ))}
@@ -361,11 +361,11 @@ vercel --prod`}
 
         {/* PROBLEMAS COMUNES */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             15. Problemas comunes
           </h2>
           <ul className="space-y-3 text-gray-700">
-            <li><strong>Meta: "No se ha podido validar"</strong> — El token de verificación no coincide. Debe ser idéntico en Meta y en WhatsApiBot (Configuración → Token de verificación). No uses la URL en ese campo.</li>
+            <li><strong>Meta: "No se ha podido validar"</strong> — El token de verificación no coincide. Debe ser idéntico en Meta y en Conversia (Configuración → Token de verificación). No uses la URL en ese campo.</li>
             <li><strong>No llegan mensajes al bot</strong> — Revisa: webhook configurado, WhatsApp activado en Configuración, credenciales correctas (Phone Number ID, Access Token).</li>
             <li><strong>El bot no responde</strong> — Revisa: Bot habilitado en Configuración, API key de IA configurada y con créditos.</li>
             <li><strong>No envía fotos de productos</strong> — El prompt debe incluir PRODUCT_INTEREST: [nombre exacto]. El nombre debe coincidir con el catálogo.</li>
@@ -374,7 +374,7 @@ vercel --prod`}
 
         {/* SOPORTE */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             16. Soporte y límites
           </h2>
           <p className="text-gray-700">
@@ -383,7 +383,7 @@ vercel --prod`}
         </section>
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <p>WhatsApiBot — Manual del cliente v1.0</p>
+          <p>Conversia — Manual del cliente v1.0</p>
         </footer>
       </article>
     </div>

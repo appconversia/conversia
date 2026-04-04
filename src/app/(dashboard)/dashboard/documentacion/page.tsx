@@ -26,8 +26,8 @@ const docLinks = [
 export default function DocumentacionPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#075E54] mb-2">Documentación</h1>
-      <p className="text-gray-600 mb-6">Manuales, procedimientos y guías de WhatsApiBot</p>
+      <h1 className="text-2xl font-bold text-conversia-dark mb-2">Documentación</h1>
+      <p className="text-gray-600 mb-6">Manuales, procedimientos y guías de Conversia</p>
       <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
         {docLinks.map((doc) => (
           <Link
@@ -35,11 +35,11 @@ export default function DocumentacionPage() {
             href={doc.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-5 border border-gray-200 rounded-xl hover:border-[#25D366] hover:bg-[#25D366]/5 transition-colors"
+            className="block p-5 border border-gray-200 rounded-xl hover:border-conversia-primary hover:bg-conversia-primary/5 transition-colors"
           >
-            <span className="font-semibold text-[#075E54]">{doc.title}</span>
+            <span className="font-semibold text-conversia-dark">{doc.title}</span>
             <span className="block text-sm text-gray-600 mt-1">{doc.description}</span>
-            <span className="inline-flex items-center gap-1 text-sm text-[#25D366] mt-2 font-medium">
+            <span className="inline-flex items-center gap-1 text-sm text-conversia-primary mt-2 font-medium">
               Abrir documento
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

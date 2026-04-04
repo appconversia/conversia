@@ -80,7 +80,7 @@ export default function DashboardPage() {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
           <p className="text-sm text-[#667781]">Cargando tablero…</p>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                       {item.user?.name ?? item.user?.email ?? "—"}
                     </span>
                     <span
-                      className="ml-2 shrink-0 rounded-full bg-[#25D366]/20 px-2 py-0.5 text-xs font-medium text-[#075E54]"
+                      className="ml-2 shrink-0 rounded-full bg-conversia-primary/20 px-2 py-0.5 text-xs font-medium text-conversia-dark"
                     >
                       {item.count}
                     </span>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/dashboard/conversaciones"
-            className="text-sm font-medium text-[#25D366] hover:text-[#20bd5a]"
+            className="text-sm font-medium text-conversia-primary hover:text-conversia-primary-hover"
           >
             Ver todas →
           </Link>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                     href={`/dashboard/conversaciones?conversationId=${c.id}`}
                     className="flex items-center gap-3 p-4 hover:bg-[#F0F2F5] transition-colors"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-sm font-medium text-white">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-conversia-primary text-sm font-medium text-white">
                       {c.channel === "bot" ? "🤖" : "💬"}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -278,14 +278,14 @@ function KpiCard({
     <div
       className={`rounded-xl border p-4 shadow-sm transition-colors sm:p-5 ${
         accent
-          ? "border-[#25D366]/40 bg-[#25D366]/5"
+          ? "border-conversia-primary/40 bg-conversia-primary/5"
           : "border-[#E9EDEF] bg-white"
       }`}
     >
       <p className="text-sm font-medium text-[#667781]">{title}</p>
       <p
         className={`mt-1 text-2xl font-bold sm:text-3xl ${
-          accent ? "text-[#075E54]" : "text-[#111B21]"
+          accent ? "text-conversia-dark" : "text-[#111B21]"
         }`}
       >
         {value}
@@ -294,7 +294,7 @@ function KpiCard({
         <p className="mt-1 text-xs text-[#667781]">{subtitle}</p>
       )}
       {href && (
-        <span className="mt-2 inline-block text-xs font-medium text-[#25D366]">
+        <span className="mt-2 inline-block text-xs font-medium text-conversia-primary">
           Ver detalles →
         </span>
       )}
@@ -303,7 +303,7 @@ function KpiCard({
 
   if (href) {
     return (
-      <Link href={href} className="block transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 rounded-xl">
+      <Link href={href} className="block transition-opacity hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-conversia-primary focus:ring-offset-2 rounded-xl">
         {content}
       </Link>
     );

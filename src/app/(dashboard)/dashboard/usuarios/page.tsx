@@ -250,7 +250,7 @@ export default function UsuariosPage() {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#25D366] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-conversia-primary border-t-transparent" />
           <p className="text-sm text-[#667781]">Cargando usuarios…</p>
         </div>
       </div>
@@ -270,7 +270,7 @@ export default function UsuariosPage() {
           <button
             type="button"
             onClick={() => { setError(null); createForm.reset(); setModalType("create"); }}
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 font-medium text-white hover:bg-[#20bd5a] transition"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-conversia-primary px-4 py-2.5 font-medium text-white hover:bg-conversia-primary-hover transition"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -317,7 +317,7 @@ export default function UsuariosPage() {
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                           u.role === "super_admin" || u.role === "admin"
-                            ? "bg-[#25D366]/20 text-[#075E54]"
+                            ? "bg-conversia-primary/20 text-conversia-dark"
                             : "bg-gray-100 text-[#667781]"
                         }`}
                       >
@@ -346,7 +346,7 @@ export default function UsuariosPage() {
                           <button
                             type="button"
                             onClick={() => openEdit(u)}
-                            className="rounded p-1.5 text-[#667781] hover:bg-gray-100 hover:text-[#25D366]"
+                            className="rounded p-1.5 text-[#667781] hover:bg-gray-100 hover:text-conversia-primary"
                             title="Editar"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,39 +411,39 @@ export default function UsuariosPage() {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="create-name" className="mb-1.5 block text-sm font-medium text-[#111B21]">Nombre completo</label>
-                  <input id="create-name" {...createForm.register("name")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="Juan Pérez" />
+                  <input id="create-name" {...createForm.register("name")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="Juan Pérez" />
                   {createForm.formState.errors.name && <p className="mt-1 text-sm text-red-600">{createForm.formState.errors.name.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="create-email" className="mb-1.5 block text-sm font-medium text-[#111B21]">Email</label>
-                  <input id="create-email" type="email" {...createForm.register("email")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="juan@ejemplo.com" />
+                  <input id="create-email" type="email" {...createForm.register("email")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="juan@ejemplo.com" />
                   {createForm.formState.errors.email && <p className="mt-1 text-sm text-red-600">{createForm.formState.errors.email.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="create-phone" className="mb-1.5 block text-sm font-medium text-[#111B21]">Teléfono</label>
-                  <input id="create-phone" type="tel" {...createForm.register("phone")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="+57 300 123 4567" />
+                  <input id="create-phone" type="tel" {...createForm.register("phone")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="+57 300 123 4567" />
                 </div>
                 <div>
                   <label htmlFor="create-role" className="mb-1.5 block text-sm font-medium text-[#111B21]">Rol</label>
-                  <select id="create-role" {...createForm.register("role")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none">
+                  <select id="create-role" {...createForm.register("role")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none">
                     <option value="colaborador">Colaborador</option>
                     <option value="admin">Administrador</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="create-password" className="mb-1.5 block text-sm font-medium text-[#111B21]">Contraseña</label>
-                  <input id="create-password" type="password" {...createForm.register("password")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="Mínimo 6 caracteres" />
+                  <input id="create-password" type="password" {...createForm.register("password")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="Mínimo 6 caracteres" />
                   {createForm.formState.errors.password && <p className="mt-1 text-sm text-red-600">{createForm.formState.errors.password.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="create-passwordConfirm" className="mb-1.5 block text-sm font-medium text-[#111B21]">Confirmar contraseña</label>
-                  <input id="create-passwordConfirm" type="password" {...createForm.register("passwordConfirm")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="Repite la contraseña" />
+                  <input id="create-passwordConfirm" type="password" {...createForm.register("passwordConfirm")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="Repite la contraseña" />
                   {createForm.formState.errors.passwordConfirm && <p className="mt-1 text-sm text-red-600">{createForm.formState.errors.passwordConfirm.message}</p>}
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-2">
                 <button type="button" onClick={() => setModalType(null)} className="rounded-lg px-4 py-2.5 text-sm font-medium text-[#667781] hover:bg-gray-100">Cancelar</button>
-                <button type="submit" disabled={creating} className="rounded-lg bg-[#25D366] px-6 py-2.5 font-medium text-white hover:bg-[#20bd5a] disabled:opacity-60">{creating ? "Creando…" : "Crear usuario"}</button>
+                <button type="submit" disabled={creating} className="rounded-lg bg-conversia-primary px-6 py-2.5 font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-60">{creating ? "Creando…" : "Crear usuario"}</button>
               </div>
             </form>
           </div>
@@ -511,39 +511,39 @@ export default function UsuariosPage() {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="edit-name" className="mb-1.5 block text-sm font-medium text-[#111B21]">Nombre completo</label>
-                  <input id="edit-name" {...editForm.register("name")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" />
+                  <input id="edit-name" {...editForm.register("name")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" />
                   {editForm.formState.errors.name && <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.name.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="edit-email" className="mb-1.5 block text-sm font-medium text-[#111B21]">Email</label>
-                  <input id="edit-email" type="email" {...editForm.register("email")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" />
+                  <input id="edit-email" type="email" {...editForm.register("email")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" />
                   {editForm.formState.errors.email && <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.email.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="edit-phone" className="mb-1.5 block text-sm font-medium text-[#111B21]">Teléfono</label>
-                  <input id="edit-phone" type="tel" {...editForm.register("phone")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" />
+                  <input id="edit-phone" type="tel" {...editForm.register("phone")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" />
                 </div>
                 <div>
                   <label htmlFor="edit-role" className="mb-1.5 block text-sm font-medium text-[#111B21]">Rol</label>
-                  <select id="edit-role" {...editForm.register("role")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none">
+                  <select id="edit-role" {...editForm.register("role")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none">
                     <option value="colaborador">Colaborador</option>
                     <option value="admin">Administrador</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="edit-password" className="mb-1.5 block text-sm font-medium text-[#111B21]">Nueva contraseña (opcional)</label>
-                  <input id="edit-password" type="password" {...editForm.register("password")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" placeholder="Dejar en blanco para mantener" />
+                  <input id="edit-password" type="password" {...editForm.register("password")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" placeholder="Dejar en blanco para mantener" />
                   {editForm.formState.errors.password && <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.password.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="edit-passwordConfirm" className="mb-1.5 block text-sm font-medium text-[#111B21]">Confirmar contraseña</label>
-                  <input id="edit-passwordConfirm" type="password" {...editForm.register("passwordConfirm")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none" />
+                  <input id="edit-passwordConfirm" type="password" {...editForm.register("passwordConfirm")} className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#111B21] focus:border-conversia-primary focus:ring-2 focus:ring-conversia-primary/20 outline-none" />
                   {editForm.formState.errors.passwordConfirm && <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.passwordConfirm.message}</p>}
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-2">
                 <button type="button" onClick={() => { setModalType(null); setSelectedUser(null); setError(null); }} className="rounded-lg px-4 py-2.5 text-sm font-medium text-[#667781] hover:bg-gray-100">Cancelar</button>
-                <button type="submit" disabled={saving} className="rounded-lg bg-[#25D366] px-6 py-2.5 font-medium text-white hover:bg-[#20bd5a] disabled:opacity-60">{saving ? "Guardando…" : "Guardar"}</button>
+                <button type="submit" disabled={saving} className="rounded-lg bg-conversia-primary px-6 py-2.5 font-medium text-white hover:bg-conversia-primary-hover disabled:opacity-60">{saving ? "Guardando…" : "Guardar"}</button>
               </div>
             </form>
           </div>
@@ -579,7 +579,7 @@ export default function UsuariosPage() {
                 type="button"
                 onClick={executeConfirm}
                 className={`rounded-lg px-6 py-2.5 font-medium text-white ${
-                  confirmAction === "delete" ? "bg-red-600 hover:bg-red-700" : "bg-[#25D366] hover:bg-[#20bd5a]"
+                  confirmAction === "delete" ? "bg-red-600 hover:bg-red-700" : "bg-conversia-primary hover:bg-conversia-primary-hover"
                 }`}
               >
                 {confirmAction === "delete" && "Eliminar"}

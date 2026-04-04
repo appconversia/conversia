@@ -2,20 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Conversia brand — cambia solo los valores RGB de --conversia-*-rgb para retemar toda la UI.
+  Los colores Tailwind conversia-* en tailwind.config.ts leen estas variables.
+*/
 :root {
-  /* WhatsApp-inspired palette */
-  --wa-primary: #25D366;
-  --wa-primary-hover: #20bd5a;
-  --wa-dark: #075E54;
-  --wa-darker: #054d45;
-  --wa-teal: #128C7E;
-  --wa-light-bg: #ECE5DD;
-  --wa-bubble-sent: #D9FDD3;
-  --wa-bubble-received: #FFFFFF;
-  --wa-text: #111B21;
+  /* Primario (verde tipo WhatsApp por defecto) */
+  --conversia-primary-rgb: 37 211 102;
+  --conversia-primary-hover-rgb: 32 189 90;
+  --conversia-dark-rgb: 7 94 84;
+  --conversia-darker-rgb: 5 77 69;
+  --conversia-teal-rgb: 18 140 126;
+
+  /* Compatibilidad con estilos legacy (alias) */
+  --wa-primary: rgb(var(--conversia-primary-rgb));
+  --wa-primary-hover: rgb(var(--conversia-primary-hover-rgb));
+  --wa-dark: rgb(var(--conversia-dark-rgb));
+  --wa-darker: rgb(var(--conversia-darker-rgb));
+  --wa-teal: rgb(var(--conversia-teal-rgb));
+
+  --wa-light-bg: #ece5dd;
+  --wa-bubble-sent: #d9fdd3;
+  --wa-bubble-received: #ffffff;
+  --wa-text: #111b21;
   --wa-text-muted: #667781;
-  --wa-sidebar-bg: #111B21;
-  --wa-header-bg: #202C33;
+  --wa-sidebar-bg: #111b21;
+  --wa-header-bg: #202c33;
 }
 
 /* Estilos de impresión para procedimiento de entrega / PDF */

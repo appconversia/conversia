@@ -13,7 +13,7 @@ export default function ProcedimientoEntregaPage() {
       <div className="print:hidden fixed top-4 right-4 z-50">
         <button
           onClick={handleDownloadPDF}
-          className="px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold rounded-lg shadow-lg transition"
+          className="px-6 py-3 bg-conversia-primary hover:bg-conversia-primary-hover text-white font-semibold rounded-lg shadow-lg transition"
         >
           Descargar PDF
         </button>
@@ -22,8 +22,8 @@ export default function ProcedimientoEntregaPage() {
       <article className="max-w-3xl mx-auto px-8 py-12 print:py-0 print:px-0" id="pdf-content">
         {/* Encabezado */}
         <header className="mb-12 print:mb-8">
-          <h1 className="text-3xl font-bold text-[#075E54] mb-2">
-            Procedimiento de entrega WhatsApiBot
+          <h1 className="text-3xl font-bold text-conversia-dark mb-2">
+            Procedimiento de entrega Conversia
           </h1>
           <p className="text-lg text-gray-600">
             Documento interno — Ejecutar cada vez que se cierre un cliente
@@ -32,7 +32,7 @@ export default function ProcedimientoEntregaPage() {
 
         {/* Alcance */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             1. Alcance exacto de la entrega
           </h2>
           <div className="space-y-3 text-gray-700">
@@ -40,7 +40,7 @@ export default function ProcedimientoEntregaPage() {
               <strong>Incluido en tu entrega:</strong>
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Desplegar WhatsApiBot en Vercel (hosting)</li>
+              <li>Desplegar Conversia en Vercel (hosting)</li>
               <li>Crear y configurar base de datos en Neon</li>
               <li>Ejecutar migraciones y seed inicial</li>
               <li>Configurar variables de entorno en producción</li>
@@ -62,14 +62,14 @@ export default function ProcedimientoEntregaPage() {
 
         {/* Paso a paso */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             2. Procedimiento paso a paso
           </h2>
 
           <div className="space-y-8">
             {/* Paso 1 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 1: Cuentas del cliente</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 1: Cuentas del cliente</h3>
               <p className="mt-2 text-gray-700">
                 Antes de empezar, el cliente debe tener (o crear durante la sesión):
               </p>
@@ -84,10 +84,10 @@ export default function ProcedimientoEntregaPage() {
             </div>
 
             {/* Paso 2 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 2: Crear base de datos en Neon</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 2: Crear base de datos en Neon</h3>
               <ol className="list-decimal pl-6 mt-2 space-y-2 text-gray-700">
-                <li>Entra a <a href="https://console.neon.tech" className="text-[#25D366] underline" target="_blank" rel="noopener noreferrer">console.neon.tech</a></li>
+                <li>Entra a <a href="https://console.neon.tech" className="text-conversia-primary underline" target="_blank" rel="noopener noreferrer">console.neon.tech</a></li>
                 <li>Crea un nuevo proyecto (o usa uno existente del cliente)</li>
                 <li>Nombre sugerido: <code className="bg-gray-100 px-1 rounded">whatsapibot-cliente</code></li>
                 <li>Copia la <strong>connection string</strong> (formato: <code className="bg-gray-100 px-1 rounded text-sm">postgresql://user:pass@host/db?sslmode=require</code>)</li>
@@ -96,8 +96,8 @@ export default function ProcedimientoEntregaPage() {
             </div>
 
             {/* Paso 3 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 3: Clonar el repositorio</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 3: Clonar el repositorio</h3>
               <p className="mt-2 text-gray-700">
                 En tu máquina local (o la del cliente si conectas por AnyDesk):
               </p>
@@ -108,16 +108,16 @@ cd whatsapibot`}
             </div>
 
             {/* Paso 4 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 4: Instalar dependencias</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 4: Instalar dependencias</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded-lg text-sm overflow-x-auto">
 {`npm install`}
               </pre>
             </div>
 
             {/* Paso 5 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 5: Variables de entorno para producción</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 5: Variables de entorno para producción</h3>
               <p className="mt-2 text-gray-700">
                 Crea un archivo <code className="bg-gray-100 px-1 rounded">.env</code> local para probar, o configura directo en Vercel. Variables mínimas:
               </p>
@@ -132,8 +132,8 @@ NEXT_PUBLIC_APP_URL="https://tu-app.vercel.app"`}
             </div>
 
             {/* Paso 6 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 6: Migraciones y seed</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 6: Migraciones y seed</h3>
               <pre className="mt-2 p-4 bg-gray-100 rounded-lg text-sm overflow-x-auto">
 {`npm run db:generate
 npm run db:push
@@ -145,8 +145,8 @@ npm run db:seed`}
             </div>
 
             {/* Paso 7 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 7: Desplegar en Vercel</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 7: Desplegar en Vercel</h3>
               <ol className="list-decimal pl-6 mt-2 space-y-2 text-gray-700">
                 <li>Instala Vercel CLI si no la tienes: <code className="bg-gray-100 px-1 rounded">npm i -g vercel</code></li>
                 <li>Desde la carpeta del proyecto: <code className="bg-gray-100 px-1 rounded">vercel</code></li>
@@ -166,8 +166,8 @@ npm run db:seed`}
             </div>
 
             {/* Paso 8 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 8: Verificar que todo funcione</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 8: Verificar que todo funcione</h3>
               <ul className="list-disc pl-6 mt-2 space-y-1 text-gray-700">
                 <li>Abre la URL de la app (ej. https://whatsapibot-xyz.vercel.app)</li>
                 <li>Debe redirigir al login</li>
@@ -177,8 +177,8 @@ npm run db:seed`}
             </div>
 
             {/* Paso 9 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 9: Entregar al cliente</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 9: Entregar al cliente</h3>
               <p className="mt-2 text-gray-700">
                 Entrega al cliente:
               </p>
@@ -199,16 +199,16 @@ npm run db:seed`}
             </div>
 
             {/* Paso 10 */}
-            <div className="border-l-4 border-[#25D366] pl-6">
-              <h3 className="font-bold text-lg text-[#075E54]">Paso 10: Recordatorio para el cliente</h3>
+            <div className="border-l-4 border-conversia-primary pl-6">
+              <h3 className="font-bold text-lg text-conversia-dark">Paso 10: Recordatorio para el cliente</h3>
               <p className="mt-2 text-gray-700">
                 Comunicar al cliente que él debe:
               </p>
               <ol className="list-decimal pl-6 mt-2 space-y-1 text-gray-700">
-                <li>Crear su app en <a href="https://developers.facebook.com" className="text-[#25D366] underline" target="_blank" rel="noopener noreferrer">Meta for Developers</a></li>
+                <li>Crear su app en <a href="https://developers.facebook.com" className="text-conversia-primary underline" target="_blank" rel="noopener noreferrer">Meta for Developers</a></li>
                 <li>Añadir el producto WhatsApp y obtener Access Token, Phone Number ID, Business Account ID</li>
                 <li>Configurar el webhook en Meta: URL = <code className="bg-gray-100 px-1 rounded">https://SU-URL/api/webhook/whatsapp</code></li>
-                <li>En WhatsApiBot → Configuración → WhatsApp: pegar las credenciales y activar</li>
+                <li>En Conversia → Configuración → WhatsApp: pegar las credenciales y activar</li>
                 <li>Entrenar el bot según el manual (prompts, productos, flujos)</li>
               </ol>
             </div>
@@ -217,7 +217,7 @@ npm run db:seed`}
 
         {/* Checklist */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             3. Checklist de entrega
           </h2>
           <ul className="space-y-2 text-gray-700">
@@ -230,7 +230,7 @@ npm run db:seed`}
               "Cliente sabe que debe conectar WhatsApp y entrenar el bot",
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="text-[#25D366] font-bold">☐</span>
+                <span className="text-conversia-primary font-bold">☐</span>
                 {item}
               </li>
             ))}
@@ -239,7 +239,7 @@ npm run db:seed`}
 
         {/* Contacto / soporte */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold text-[#075E54] mb-4 pb-2 border-b-2 border-[#25D366]">
+          <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
             4. Notas adicionales
           </h2>
           <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -250,7 +250,7 @@ npm run db:seed`}
         </section>
 
         <footer className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <p>WhatsApiBot — Procedimiento de entrega v1.0</p>
+          <p>Conversia — Procedimiento de entrega v1.0</p>
         </footer>
       </article>
     </div>

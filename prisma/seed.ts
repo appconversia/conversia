@@ -25,7 +25,7 @@ async function main() {
   const hashedPassword = await hash(SEED_PASSWORD, 12);
 
   // Super Admin (solo para configuración del sistema)
-  const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || "superadmin@whatsapibot.local";
+  const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || "superadmin@conversia.local";
   let superAdmin = await prisma.user.findUnique({ where: { email: superAdminEmail } });
   if (!superAdmin) {
     superAdmin = await prisma.user.create({
@@ -52,7 +52,7 @@ async function main() {
   });
 
   // Admin
-  const adminEmail = "admin@whatsapibot.local";
+  const adminEmail = "admin@conversia.local";
   let admin = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (!admin) {
     admin = await prisma.user.create({
@@ -73,14 +73,14 @@ async function main() {
   }
 
   // Usuario Bot (sistema) - para mensajes enviados por IA
-  const botEmail = "bot@system.whatsapibot.local";
+  const botEmail = "bot@system.conversia.local";
   let bot = await prisma.user.findUnique({ where: { email: botEmail } });
   if (!bot) {
     bot = await prisma.user.create({
       data: {
         email: botEmail,
         password: hashedPassword,
-        name: "Bot WhatsApiBot",
+        name: "Bot Conversia",
         role: "sistema" as UserRole,
       },
     });
@@ -93,7 +93,7 @@ async function main() {
   });
 
   // Colaborador
-  const colabEmail = "ventas@whatsapibot.local";
+  const colabEmail = "ventas@conversia.local";
   let colaborador = await prisma.user.findUnique({ where: { email: colabEmail } });
   if (!colaborador) {
     colaborador = await prisma.user.create({
@@ -119,10 +119,10 @@ async function main() {
   await prisma.botFlow.updateMany({ data: { isActive: false } });
 
   const saludoInicialTexto =
-    "Bienvenido a WhatsApiBot. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
+    "Bienvenido a Conversia. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
 
   const flowPrincipal = {
-    name: "Flujo principal WhatsApiBot",
+    name: "Flujo principal Conversia",
     description:
       "Primer mensaje: saludo. Resto: IA con memoria, catálogo, clasificación de interés y handoff.",
     flowJson: JSON.stringify({
@@ -153,13 +153,13 @@ async function main() {
   });
   if (!existingPrincipal) {
     await prisma.botFlow.create({ data: flowPrincipal });
-    console.log("Flujo principal WhatsApiBot creado y activado");
+    console.log("Flujo principal Conversia creado y activado");
   } else {
     await prisma.botFlow.update({
       where: { id: existingPrincipal.id },
       data: { flowJson: flowPrincipal.flowJson, isActive: true },
     });
-    console.log("Flujo principal WhatsApiBot actualizado");
+    console.log("Flujo principal Conversia actualizado");
   }
 
   const flowHola = {

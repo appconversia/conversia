@@ -38,7 +38,7 @@ export function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void; o
             type="button"
             onClick={() => setCategory(cat)}
             className={`rounded-lg p-2 text-lg transition ${
-              category === cat ? "bg-[#25D366]/20" : "hover:bg-gray-200"
+              category === cat ? "bg-conversia-primary/20" : "hover:bg-gray-200"
             }`}
             title={cat}
           >

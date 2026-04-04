@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Eliminación de Datos de Usuario | WhatsApiBot",
-  description: "Instrucciones para solicitar la eliminación de tus datos personales en WhatsApiBot.",
+  title: "Eliminación de Datos de Usuario | Conversia",
+  description: "Instrucciones para solicitar la eliminación de tus datos personales en Conversia.",
 };
 
 export default function EliminacionDatosPage() {
@@ -22,7 +22,7 @@ export default function EliminacionDatosPage() {
             <p className="leading-relaxed">
               De acuerdo con el RGPD, CCPA y otras normativas de protección de datos, tienes
               derecho a solicitar la eliminación de tus datos personales recopilados
-              a través del servicio de WhatsApp Business (WhatsApiBot).
+              a través del servicio de WhatsApp Business (Conversia).
             </p>
           </section>
 
@@ -47,10 +47,10 @@ export default function EliminacionDatosPage() {
             <ol className="ml-6 list-decimal space-y-3">
               <li>
                 Envía un correo electrónico a{" "}
-                <a href="mailto:contacto@tudominio.com" className="text-[#25D366] underline hover:text-[#20bd5a]">
+                <a href="mailto:contacto@tudominio.com" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                   contacto@tudominio.com
                 </a>
-                {" "}con el asunto: &quot;Solicitud de eliminación de datos - WhatsApiBot&quot;.
+                {" "}con el asunto: &quot;Solicitud de eliminación de datos - Conversia&quot;.
               </li>
               <li>
                 Indica en el mensaje el número de teléfono de WhatsApp con el que te comunicaste
@@ -100,7 +100,7 @@ export default function EliminacionDatosPage() {
             <h2 className="mb-3 text-xl font-semibold">7. Más información</h2>
             <p className="leading-relaxed">
               Consulta nuestra{" "}
-              <a href="/privacidad" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="/privacidad" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 Política de Privacidad
               </a>
               {" "}para conocer todos tus derechos y cómo tratamos tus datos.
@@ -111,7 +111,7 @@ export default function EliminacionDatosPage() {
             <h2 className="mb-3 text-xl font-semibold">8. Contacto</h2>
             <p className="leading-relaxed">
               Correo electrónico:{" "}
-              <a href="mailto:contacto@tudominio.com" className="text-[#25D366] underline hover:text-[#20bd5a]">
+              <a href="mailto:contacto@tudominio.com" className="text-conversia-primary underline hover:text-conversia-primary-hover">
                 contacto@tudominio.com
               </a>
             </p>

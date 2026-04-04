@@ -1,5 +1,5 @@
 /**
- * Actualiza en producción el flujo principal del bot con la bienvenida WhatsApiBot.
+ * Actualiza en producción el flujo principal del bot con la bienvenida Conversia.
  * Ejecutar: DATABASE_URL="postgresql://...neon.../neondb?sslmode=require" npx tsx scripts/update-production-flow.ts
  */
 import { PrismaClient } from "@prisma/client";
@@ -7,7 +7,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const WELCOME_TEXT =
-  "Bienvenido a WhatsApiBot. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
+  "Bienvenido a Conversia. Soy tu asesor y estoy aquí para ayudarte. ¿En qué puedo ayudarte hoy?";
 
 const FLOW_JSON = {
   nodes: [
@@ -42,7 +42,7 @@ async function main() {
   }
 
   let flow = await prisma.botFlow.findFirst({
-    where: { name: "Flujo principal WhatsApiBot" },
+    where: { name: "Flujo principal Conversia" },
   });
 
   if (flow) {
@@ -53,17 +53,17 @@ async function main() {
         isActive: true,
       },
     });
-    console.log("Flujo principal actualizado con la bienvenida WhatsApiBot.");
+    console.log("Flujo principal actualizado con la bienvenida Conversia.");
   } else {
     await prisma.botFlow.create({
       data: {
-        name: "Flujo principal WhatsApiBot",
+        name: "Flujo principal Conversia",
         description: "Primer mensaje: saludo. Resto: IA conversacional, catálogo, interés y handoff.",
         flowJson: JSON.stringify(FLOW_JSON),
         isActive: true,
       },
     });
-    console.log("Flujo principal creado con la bienvenida WhatsApiBot.");
+    console.log("Flujo principal creado con la bienvenida Conversia.");
   }
 }
 

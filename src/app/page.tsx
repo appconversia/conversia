@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
-      <h1 className="text-4xl font-bold text-gray-900">WhatsApiBot</h1>
+      <h1 className="text-4xl font-bold text-gray-900">Conversia</h1>
       <p className="mt-4 text-gray-600">
         Stack: Next.js 15 + TypeScript + Tailwind + Prisma + PostgreSQL
       </p>
