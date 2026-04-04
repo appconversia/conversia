@@ -7,6 +7,14 @@ import { Header } from "@/components/dashboard/header";
 import { MobileSidebarOverlay } from "@/components/dashboard/mobile-sidebar-overlay";
 import { UserProvider } from "@/contexts/user-context";
 
+type MeUser = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  tenantId: string | null;
+};
+
 export default function DashboardLayout({
   children,
 }: {
@@ -14,7 +22,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [user, setUser] = useState<{ id?: string; email: string; name: string | null; role?: string } | null>(null);
+  const [user, setUser] = useState<MeUser | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -33,7 +41,12 @@ export default function DashboardLayout({
           router.replace("/login");
           return;
         }
-        setUser(data.user);
+        const u = data.user as MeUser;
+        if (u.role === "super_admin" && u.tenantId === null) {
+          router.replace("/platform");
+          return;
+        }
+        setUser(u);
       })
       .catch(() => router.replace("/login"));
   }, [mounted, router]);

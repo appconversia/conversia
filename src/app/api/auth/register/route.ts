@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword, createSession } from "@/lib/auth";
 import { registerSchema } from "@/lib/validations/auth";
+import { createTenantWithOwner } from "@/lib/tenant-onboarding";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, password, name } = parsed.data;
+    const { email, password, name, organizationName } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -27,11 +28,14 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const user = await prisma.user.create({
-      data: { email, password: hashedPassword, name: name ?? null },
+    const { admin } = await createTenantWithOwner({
+      organizationName: organizationName.trim(),
+      adminEmail: email.trim().toLowerCase(),
+      adminName: name.trim(),
+      passwordHash: hashedPassword,
     });
 
-    const token = await createSession(user.id);
+    const token = await createSession(admin.id);
     const cookieStore = await cookies();
     cookieStore.set("conversia_session", token, {
       httpOnly: true,
@@ -42,7 +46,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+        role: admin.role,
+        tenantId: admin.tenantId,
+      },
     });
   } catch (e) {
     console.error("Register error:", e);

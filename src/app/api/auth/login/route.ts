@@ -18,7 +18,9 @@ export async function POST(request: Request) {
 
     const { email, password } = parsed.data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
     if (!user) {
       return NextResponse.json(
         { error: "Email o contraseña incorrectos" },
@@ -52,7 +54,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        tenantId: user.tenantId,
+      },
     });
   } catch (e) {
     console.error("Login error:", e);

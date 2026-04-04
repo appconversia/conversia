@@ -1,29 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const publicPaths = ["/login"];
-const authPaths = ["/dashboard"];
+const authPaths = ["/dashboard", "/platform"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("conversia_session")?.value;
 
-  const isPublic = publicPaths.some((p) => pathname.startsWith(p));
-  const isAuth = authPaths.some((p) => pathname.startsWith(p));
+  const needsAuth = authPaths.some((p) => pathname.startsWith(p));
 
-  if (isPublic && token && pathname === "/login") {
+  // La raíz es siempre la landing pública (marketing); el panel es /dashboard o /platform.
+
+  if ((pathname === "/login" || pathname === "/register") && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (isAuth && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (pathname === "/" && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (pathname === "/" && !token) {
+  if (needsAuth && !token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -31,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/dashboard/:path*"],
+  matcher: ["/", "/login", "/register", "/dashboard/:path*", "/platform/:path*"],
 };
