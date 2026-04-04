@@ -15,9 +15,7 @@ const email = emailRaw.trim().toLowerCase();
 async function main() {
   const hashedPassword = await hash(password, 12);
 
-  const existing = await prisma.user.findFirst({
-    where: { email: { equals: email, mode: "insensitive" } },
-  });
+  const existing = await prisma.user.findUnique({ where: { email } });
 
   if (!existing) {
     await prisma.user.create({

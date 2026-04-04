@@ -18,9 +18,7 @@ export async function POST(request: Request) {
 
     const { email, password } = parsed.data;
 
-    const user = await prisma.user.findFirst({
-      where: { email: { equals: email, mode: "insensitive" } },
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
         { error: "Email o contraseña incorrectos" },
