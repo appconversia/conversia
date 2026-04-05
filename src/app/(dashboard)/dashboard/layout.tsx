@@ -66,6 +66,7 @@ export default function DashboardLayout({
     if (!user?.tenantId || !pathname) return;
     if (pathname.startsWith("/dashboard/billing")) return;
     if (pathname.startsWith("/dashboard/documentacion")) return;
+    if (pathname.startsWith("/dashboard/configuracion")) return;
 
     let cancelled = false;
     fetch("/api/billing/status", { credentials: "include", cache: "no-store" })

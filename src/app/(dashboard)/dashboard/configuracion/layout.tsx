@@ -3,13 +3,5 @@ export default function ConfiguracionLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex flex-col h-full">
-      <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-semibold text-[#111B21]">Configuración</h1>
-        <p className="text-sm text-[#667781]">Ajustes de la aplicación y WhatsApp API</p>
-      </div>
-      {children}
-    </div>
-  );
+  return <div className="flex min-h-0 flex-col">{children}</div>;
 }
