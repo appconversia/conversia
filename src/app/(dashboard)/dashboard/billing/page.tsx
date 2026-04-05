@@ -43,6 +43,7 @@ function formatUsd(cents: number) {
 }
 
 export default function BillingPage() {
+  const [motivoBloqueo, setMotivoBloqueo] = useState<string | null>(null);
   const [data, setData] = useState<BillingPayload | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +66,11 @@ export default function BillingPage() {
   useEffect(() => {
     void load().finally(() => setLoading(false));
   }, [load]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setMotivoBloqueo(new URLSearchParams(window.location.search).get("motivo"));
+  }, []);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -141,6 +147,22 @@ export default function BillingPage() {
           <span className="font-medium text-[#111B21]">{tenant.name}</span>
         </p>
       </div>
+
+      {motivoBloqueo && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+          Acceso al panel limitado:{" "}
+          <span className="font-semibold capitalize">
+            {motivoBloqueo === "vencido"
+              ? "suscripción vencida"
+              : motivoBloqueo === "suspendido"
+                ? "cuenta suspendida"
+                : motivoBloqueo === "inactivo"
+                  ? "comercio inactivo"
+                  : motivoBloqueo}
+          </span>
+          . Regulariza el pago o el estado desde aquí.
+        </div>
+      )}
 
       {!ok && (code === "expired" || code === "suspended" || code === "inactive") && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-950">
