@@ -550,7 +550,7 @@ export default function BotPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#111B21]">Bot con IA</h2>
+                  <h2 className="text-lg font-semibold text-[#111B21]">Bot</h2>
                   <p className="text-sm text-[#667781]">OpenAI, Claude o Gemini. Flujos tipo n8n.</p>
                 </div>
               </div>
