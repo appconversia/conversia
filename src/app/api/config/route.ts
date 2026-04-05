@@ -64,6 +64,7 @@ export async function PUT(request: Request) {
         phoneNumberId: wa.phoneNumberId,
         businessAccountId: wa.businessAccountId,
         webhookVerifyToken: wa.webhookVerifyToken,
+        metaAppId: wa.metaAppId,
         appSecret: wa.appSecret,
         enabled: wa.enabled,
       });

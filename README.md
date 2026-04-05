@@ -146,7 +146,7 @@ Configura en Vercel:
 - `DATABASE_URL` — URL de tu PostgreSQL (Neon, Supabase, etc.)
 - `NEXT_PUBLIC_APP_URL` — URL pública de tu app (ej. `https://chat.tudominio.com`)
 
-Opcionales: Pusher (tiempo real), Vercel Blob (imágenes), `WHATSAPP_APP_SECRET` (verificación de firma del webhook).
+Opcionales: Pusher (tiempo real en Chats), Vercel Blob (imágenes). Meta/WhatsApp (tokens, App ID, App Secret) se configuran **por comercio** en el panel, no en env.
 
 ### Otros proveedores
 

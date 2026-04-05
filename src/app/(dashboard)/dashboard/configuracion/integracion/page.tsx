@@ -20,6 +20,7 @@ type ConfigState = {
     businessAccountId: string;
     webhookVerifyToken: string;
     appSecretMasked?: boolean;
+    metaAppId: string;
     enabled: boolean;
     webhookUrl: string;
   };
@@ -48,6 +49,7 @@ export default function ConfiguracionPage() {
     phoneNumberId: "",
     businessAccountId: "",
     webhookVerifyToken: "",
+    metaAppId: "",
     /** Nuevo valor; vacío = no cambiar (salvo clearMetaAppSecret) */
     metaAppSecret: "",
     clearMetaAppSecret: false,
@@ -143,6 +145,7 @@ export default function ConfiguracionPage() {
         phoneNumberId: data.whatsapp?.phoneNumberId ?? "",
         businessAccountId: data.whatsapp?.businessAccountId ?? "",
         webhookVerifyToken: data.whatsapp?.webhookVerifyToken ?? "",
+        metaAppId: data.whatsapp?.metaAppId ?? "",
         metaAppSecret: "",
         clearMetaAppSecret: false,
         enabled: data.whatsapp?.enabled ?? false,
@@ -311,6 +314,7 @@ export default function ConfiguracionPage() {
             phoneNumberId: form.phoneNumberId.trim(),
             businessAccountId: form.businessAccountId.trim(),
             webhookVerifyToken: form.webhookVerifyToken.trim(),
+            metaAppId: form.metaAppId.trim(),
             ...(form.clearMetaAppSecret
               ? { appSecret: "" }
               : form.metaAppSecret.trim()
@@ -461,6 +465,22 @@ export default function ConfiguracionPage() {
           </div>
 
           <div>
+            <label className="mb-1 block text-sm font-medium text-[#111B21]">App ID (Meta)</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={form.metaAppId}
+              onChange={(e) => setForm((f) => ({ ...f, metaAppId: e.target.value.replace(/[^\d]/g, "") }))}
+              placeholder="Ej. 123456789012345"
+              className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm text-[#111B21] placeholder:text-[#667781] focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
+              autoComplete="off"
+            />
+            <p className="mt-1 text-xs text-[#667781]">
+              developers.facebook.com → Tu app → Información básica → «ID de aplicación». Necesario para subir la foto de perfil del número (Resumable Upload).
+            </p>
+          </div>
+
+          <div>
             <label className="mb-1 block text-sm font-medium text-[#111B21]">Webhook Verify Token</label>
             <input
               type="text"
@@ -490,10 +510,9 @@ export default function ConfiguracionPage() {
               autoComplete="off"
             />
             <p className="mt-1 text-xs text-[#667781]">
-              Usado para verificar la firma <code className="rounded bg-[#F0F2F5] px-1">X-Hub-Signature-256</code> de los webhooks.{" "}
-              <strong>Cada comercio con su propia app en Meta</strong> debe guardar aquí el secreto de esa app. Si no hay secreto
-              por comercio, se usa la variable global <code className="rounded bg-[#F0F2F5] px-1">WHATSAPP_APP_SECRET</code> en
-              Vercel (una sola app Meta compartida).
+              Obligatorio en producción: verifica la firma <code className="rounded bg-[#F0F2F5] px-1">X-Hub-Signature-256</code> de
+              Meta. Debe ser el <strong>Secreto de la app</strong> de la misma app de Meta que usa este comercio (developers.facebook.com →
+              Tu app → Configuración → Básico).
             </p>
             {config?.whatsapp?.appSecretMasked && (
               <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-[#667781]">

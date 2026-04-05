@@ -244,7 +244,7 @@ npm run db:seed`}
           </h2>
           <ul className="list-disc pl-6 space-y-2 text-gray-700">
             <li>Si el cliente quiere dominio propio (ej. chat.suempresa.com), configúralo en Vercel → Settings → Domains y actualiza NEXT_PUBLIC_APP_URL.</li>
-            <li>Pusher, Vercel Blob y META_APP_ID son opcionales. La app funciona sin ellos para uso básico.</li>
+            <li>Pusher y Vercel Blob son opcionales (sin Pusher hay polling en Chats). Meta (App ID, App Secret, tokens) va por comercio en Integración.</li>
             <li>El manual del cliente debe incluir: entrenar con Cursor, desplegar cambios con <code className="bg-gray-100 px-1 rounded">vercel --prod</code>, y pasos para conectar WhatsApp.</li>
           </ul>
         </section>

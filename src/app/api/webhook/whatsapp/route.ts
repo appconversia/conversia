@@ -92,11 +92,21 @@ export async function POST(request: NextRequest) {
     ? await findTenantIdByWhatsAppPhoneNumberId(phoneFromPayload)
     : null;
   const tenantSecret = tenantForSecret ? await getTenantWhatsAppAppSecret(tenantForSecret) : null;
-  const globalSecret = process.env.WHATSAPP_APP_SECRET?.trim() || "";
-  const effectiveSecret = (tenantSecret?.trim() || globalSecret) || null;
+  const effectiveSecret = tenantSecret?.trim() || null;
 
-  if (effectiveSecret && !verifyWebhookSignature(rawBody, signature, effectiveSecret)) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  if (signature?.startsWith("sha256=")) {
+    if (!effectiveSecret) {
+      return NextResponse.json(
+        {
+          error:
+            "Configura el App Secret (Meta) en Integración para este comercio. La firma del webhook no puede verificarse.",
+        },
+        { status: 401 }
+      );
+    }
+    if (!verifyWebhookSignature(rawBody, signature, effectiveSecret)) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
   }
 
   try {

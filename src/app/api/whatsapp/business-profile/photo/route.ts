@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getWhatsAppConfig } from "@/lib/config";
 
-const SUPER_ADMIN_ROLES = ["super_admin"];
+const ADMIN_ROLES = ["super_admin", "admin"];
 const GRAPH_API = "https://graph.facebook.com/v21.0";
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
@@ -10,32 +10,31 @@ const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 /**
  * POST /api/whatsapp/business-profile/photo
  * Sube foto de perfil: Resumable Upload a Meta → actualiza perfil con handle.
- * Solo super_admin. Requiere META_APP_ID en variables de entorno.
+ * Admin del comercio. App ID de Meta se configura en Integración (por tenant).
  */
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
-  if (!SUPER_ADMIN_ROLES.includes(session.role)) {
-    return NextResponse.json({ error: "Solo super administradores" }, { status: 403 });
+  if (!ADMIN_ROLES.includes(session.role)) {
+    return NextResponse.json({ error: "Solo administradores" }, { status: 403 });
   }
   if (!session.tenantId) {
     return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
   }
 
-  const appId = process.env.META_APP_ID?.trim();
+  const config = await getWhatsAppConfig(session.tenantId);
+  const appId = config.metaAppId?.trim();
   if (!appId) {
     return NextResponse.json(
       {
         error:
-          "Falta META_APP_ID. Añade la variable en Vercel: Configuración → Variables de entorno. Obtén el App ID en developers.facebook.com → Tu app.",
+          "Configura el App ID de Meta en Configuración → Integración (campo «App ID (Meta)»). Lo encuentras en developers.facebook.com → Tu app → Información básica.",
       },
       { status: 400 }
     );
   }
-
-  const config = await getWhatsAppConfig(session.tenantId);
   if (!config.accessToken || !config.phoneNumberId) {
     return NextResponse.json(
       { error: "Configura WhatsApp en Configuración" },

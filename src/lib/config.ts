@@ -7,8 +7,10 @@ const KEYS = {
   WHATSAPP_PHONE_NUMBER_ID: "whatsapp_phone_number_id",
   WHATSAPP_BUSINESS_ACCOUNT_ID: "whatsapp_business_account_id",
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: "whatsapp_webhook_verify_token",
-  /** App Secret de Meta (firma X-Hub-Signature-256); por tenant en multi-app */
+  /** App Secret de Meta (firma X-Hub-Signature-256) — solo por tenant */
   WHATSAPP_APP_SECRET: "whatsapp_app_secret",
+  /** App ID numérico de Meta (subida de foto de perfil, etc.) — por tenant */
+  WHATSAPP_META_APP_ID: "whatsapp_meta_app_id",
   WHATSAPP_ENABLED: "whatsapp_enabled",
   APP_BASE_URL: "app_base_url",
   BOT_OPENAI_API_KEY: "bot_openai_api_key",
@@ -33,6 +35,8 @@ export type WhatsAppConfig = {
   webhookVerifyToken: string;
   /** Solo UI/máscara; el valor real no se expone */
   appSecretMasked?: boolean;
+  /** App ID numérico de la app en Meta (público en el panel de Meta) */
+  metaAppId: string;
   enabled: boolean;
   webhookUrl: string;
 };
@@ -98,11 +102,12 @@ export async function getTenantWhatsAppAppSecret(tenantId: string): Promise<stri
 }
 
 export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfig> {
-  const [accessToken, phoneNumberId, businessAccountId, webhookVerifyToken, enabled, baseUrl] = await Promise.all([
+  const [accessToken, phoneNumberId, businessAccountId, webhookVerifyToken, metaAppId, enabled, baseUrl] = await Promise.all([
     getValue(tenantId, KEYS.WHATSAPP_ACCESS_TOKEN),
     getValue(tenantId, KEYS.WHATSAPP_PHONE_NUMBER_ID),
     getValue(tenantId, KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
     getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_META_APP_ID),
     getValue(tenantId, KEYS.WHATSAPP_ENABLED),
     getValue(tenantId, KEYS.APP_BASE_URL),
   ]);
@@ -114,6 +119,7 @@ export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfi
     phoneNumberId: phoneNumberId ?? "",
     businessAccountId: businessAccountId ?? "",
     webhookVerifyToken: webhookVerifyToken ?? "",
+    metaAppId: metaAppId ?? "",
     enabled: enabled === "true",
     webhookUrl: `${appBase}/api/webhook/whatsapp`,
   };
@@ -172,6 +178,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
     businessAccountId,
     webhookVerifyToken,
     whatsappAppSecret,
+    whatsappMetaAppId,
     whatsappEnabled,
     baseUrl,
     openaiKey,
@@ -190,6 +197,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
     getValue(tenantId, KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
     getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
     getValue(tenantId, KEYS.WHATSAPP_APP_SECRET),
+    getValue(tenantId, KEYS.WHATSAPP_META_APP_ID),
     getValue(tenantId, KEYS.WHATSAPP_ENABLED),
     getValue(tenantId, KEYS.APP_BASE_URL),
     getValue(tenantId, KEYS.BOT_OPENAI_API_KEY),
@@ -219,6 +227,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
       businessAccountId: businessAccountId ?? "",
       webhookVerifyToken: webhookVerifyToken ?? "",
       appSecretMasked: !!whatsappAppSecret,
+      metaAppId: whatsappMetaAppId ?? "",
       enabled: whatsappEnabled === "true",
       webhookUrl,
     },
@@ -249,6 +258,13 @@ export async function saveWhatsAppConfig(tenantId: string, data: Partial<WhatsAp
   if (data.phoneNumberId !== undefined) updates.push([KEYS.WHATSAPP_PHONE_NUMBER_ID, data.phoneNumberId || null]);
   if (data.businessAccountId !== undefined) updates.push([KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID, data.businessAccountId || null]);
   if (data.webhookVerifyToken !== undefined) updates.push([KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN, data.webhookVerifyToken || null]);
+  if (data.metaAppId !== undefined) {
+    if (data.metaAppId.trim() === "") {
+      await setValue(tenantId, KEYS.WHATSAPP_META_APP_ID, null);
+    } else {
+      updates.push([KEYS.WHATSAPP_META_APP_ID, data.metaAppId.trim()]);
+    }
+  }
   if (data.appSecret !== undefined) {
     if (data.appSecret.trim() === "") {
       await setValue(tenantId, KEYS.WHATSAPP_APP_SECRET, null);
