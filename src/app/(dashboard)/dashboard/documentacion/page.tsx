@@ -12,6 +12,11 @@ const docLinks = [
     description: "Para el cliente — conectar WhatsApp, entrenar, desplegar",
   },
   {
+    href: "/docs/guia-meta-whatsapp",
+    title: "Guía Meta / WhatsApp",
+    description: "Qué copiar en Meta y qué pegar en Integración (tabla y orden de pasos)",
+  },
+  {
     href: "/docs/prompts-industrias",
     title: "Prompts por industria",
     description: "Plantillas en formato completo para la app (retail, restaurantes, salud, etc.)",

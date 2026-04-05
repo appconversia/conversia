@@ -1,5 +1,9 @@
 # Variables de entorno y configuración (Conversia)
 
+**Guía para el comercio (Meta → panel):** todo lo de WhatsApp (tokens, App ID, App Secret, webhook) se explica paso a paso en **[docs/GUIA_META_WHATSAPP.md](docs/GUIA_META_WHATSAPP.md)**. En la app también está el **Manual del cliente** (`/docs/manual-cliente`) y la guía in-app **[Guía Meta / WhatsApp](/docs/guia-meta-whatsapp)**.
+
+---
+
 ## Qué va en Vercel (infraestructura)
 
 Estas variables son **del proyecto** en Vercel, no por comercio.

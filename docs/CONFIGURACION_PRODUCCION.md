@@ -2,6 +2,8 @@
 
 Listado alineado con `VARIABLES_DESPLIEGUE.md` en la raíz del repo.
 
+**Guía detallada Meta → Conversia:** [GUIA_META_WHATSAPP.md](GUIA_META_WHATSAPP.md) (qué copiar de Meta, qué pegar en **Configuración → Integración**, webhook, App Secret, errores comunes).
+
 ## Variables de entorno en Vercel
 
 | Variable | Descripción |

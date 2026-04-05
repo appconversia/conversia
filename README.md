@@ -43,8 +43,8 @@ Cada usuario despliega su propia instancia en su servidor, con su base de datos 
 ### 1. Clonar e instalar dependencias
 
 ```bash
-git clone https://github.com/whatsapibot/whatsapibot.git
-cd whatsapibot
+git clone https://github.com/appconversia/conversia.git
+cd conversia
 npm install
 ```
 
@@ -53,10 +53,10 @@ npm install
 Crea una base de datos PostgreSQL nueva:
 
 ```bash
-createdb whatsapibot
+createdb conversia
 ```
 
-O desde tu gestor (pgAdmin, Postgres.app, etc.): crea una BD llamada `whatsapibot`.
+O desde tu gestor (pgAdmin, Postgres.app, etc.): crea una BD llamada `conversia`.
 
 ### 3. Variables de entorno
 
@@ -69,7 +69,7 @@ cp .env.example .env
 Edita `.env` y define al menos:
 
 ```env
-DATABASE_URL="postgresql://USUARIO:CONTRASEÑA@localhost:5432/whatsapibot"
+DATABASE_URL="postgresql://USUARIO:CONTRASEÑA@localhost:5432/conversia"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
@@ -95,41 +95,45 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 | Rol | Email |
 |-----|-------|
-| Super Admin | superadmin@whatsapibot.local |
-| Admin | admin@whatsapibot.local |
-| Colaborador | ventas@whatsapibot.local |
+| Super Admin | superadmin@conversia.local |
+| Admin | admin@conversia.local |
+| Colaborador | ventas@conversia.local |
 
 ---
 
 ## Conectar a WhatsApp (Meta)
+
+Toda la credencial de Meta/WhatsApp va **por comercio** en el panel (**Configuración → Integración**), no en `.env`. La guía completa (mapa campo a campo, orden de pasos, App ID, App Secret y webhook) está en **[docs/GUIA_META_WHATSAPP.md](docs/GUIA_META_WHATSAPP.md)**.
 
 ### 1. Crear app en Meta
 
 1. Entra en [Meta for Developers](https://developers.facebook.com/)
 2. Crea una app → tipo **Empresa**
 3. Añade el producto **WhatsApp**
-4. Obtén: **Access Token**, **Phone Number ID**, **Business Account ID**
+4. En **Configuración → Básico** anota **App ID** y **App Secret**
+5. En **WhatsApp → API Setup** (o equivalente) obtén **Access Token**, **Phone Number ID** y **WhatsApp Business Account ID**
 
 ### 2. Configurar el webhook
 
-En tu app de Meta → WhatsApp → Configuración → Webhook:
+En tu app de Meta → **WhatsApp** → **Configuración** → **Webhook**:
 
 | Campo | Valor |
 |-------|-------|
-| **URL de devolución de llamada** | `https://tu-dominio.com/api/webhook/whatsapp` |
-| **Identificador de verificación** | Una cadena secreta que definas (ej. `MiTokenSecreto123`) |
+| **URL de devolución de llamada** | `https://tu-dominio.com/api/webhook/whatsapp` (la misma URL que muestra Integración en Conversia) |
+| **Identificador de verificación** | Una cadena secreta que **tú** inventas; la misma en Meta y en el panel |
 
-> El identificador **no** es una URL. Es un texto secreto que debe coincidir con lo que configures en Conversia. Ver [docs/WEBHOOK_META_CONFIG.md](docs/WEBHOOK_META_CONFIG.md).
+> El identificador **no** es una URL. Errores típicos: [docs/WEBHOOK_META_CONFIG.md](docs/WEBHOOK_META_CONFIG.md).
 
 ### 3. Configurar en Conversia
 
-En la app → **Configuración** → sección WhatsApp:
+En la app → **Configuración** → **Integración**:
 
-- Access Token
-- Phone Number ID  
-- Business Account ID
-- Token de verificación del webhook (el mismo que pusiste en Meta)
-- Activar WhatsApp
+- Access Token, Phone Number ID, Business Account ID  
+- Webhook Verify Token (idéntico al de Meta)  
+- **App ID (Meta)** y **App Secret (Meta)** (misma app que el token; el secreto valida la firma del webhook en producción)  
+- Activa la integración y **Guarda**
+
+Opcional en la misma pantalla: **Suscribir webhook** y **Verificar conexión Meta** si algo no llega.
 
 ---
 

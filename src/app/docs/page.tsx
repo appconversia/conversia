@@ -20,6 +20,13 @@ export default function DocsIndexPage() {
           <span className="block text-sm text-gray-600 mt-1">Para el cliente — conectar WhatsApp, entrenar, desplegar</span>
         </Link>
         <Link
+          href="/docs/guia-meta-whatsapp"
+          className="block p-4 border border-gray-200 rounded-lg hover:border-conversia-primary hover:bg-conversia-primary/5 transition"
+        >
+          <span className="font-semibold text-conversia-dark">Guía Meta / WhatsApp</span>
+          <span className="block text-sm text-gray-600 mt-1">Qué copiar en Meta y qué pegar en Integración (tabla y orden de pasos)</span>
+        </Link>
+        <Link
           href="/docs/prompts-industrias"
           className="block p-4 border border-gray-200 rounded-lg hover:border-conversia-primary hover:bg-conversia-primary/5 transition"
         >

@@ -29,6 +29,14 @@ export default function ManualClientePage() {
           <p className="text-sm text-gray-500 mt-1">
             Todo lo que debes hacer tú después de recibir la app desplegada
           </p>
+          <p className="text-sm text-gray-600 mt-3">
+            <strong>Resumen rápido Meta → panel:</strong>{" "}
+            <a href="/docs/guia-meta-whatsapp" className="text-conversia-primary font-medium underline">
+              Guía Meta / WhatsApp
+            </a>{" "}
+            (tabla de campos y orden de pasos). Todo lo de WhatsApp se guarda en <strong>Configuración → Integración</strong>, no en variables
+            globales del servidor.
+          </p>
           <div className="mt-4 p-4 bg-conversia-primary/10 border border-conversia-primary/30 rounded-lg">
             <p className="text-gray-700">
               <strong>¿Es difícil?</strong> Tiene una curva de aprendizaje: los primeros pasos (conectar WhatsApp, configurar la IA) requieren seguir instrucciones con cuidado. No necesitas ser programador para la mayoría de tareas. Si ya usas Meta, Vercel o herramientas similares, te resultará más rápido. Si no, tómate tu tiempo, lee cada paso y verás que es totalmente alcanzable. Para cambios avanzados (editar código con Cursor) sí ayuda tener algo de experiencia técnica.
@@ -47,7 +55,10 @@ export default function ManualClientePage() {
               <li><strong>Crear la app en Meta for Developers</strong> — La cuenta y la app son tuyas</li>
               <li><strong>Obtener y conectar las credenciales de WhatsApp</strong> — Access Token, Phone Number ID, Business Account ID</li>
               <li><strong>Configurar el webhook en Meta</strong> — URL y token de verificación</li>
-              <li><strong>Pegar las credenciales en Conversia</strong> — En Configuración → WhatsApp</li>
+              <li>
+                <strong>Pegar las credenciales en Conversia</strong> — En <strong>Configuración → Integración</strong> (Access Token, Phone
+                Number ID, WABA ID, verify token del webhook, App ID y App Secret de Meta)
+              </li>
               <li><strong>Activar la API de WhatsApp</strong> — Sin esto el bot no recibe ni envía mensajes</li>
               <li><strong>Obtener y configurar una API key de IA</strong> — OpenAI, Anthropic o Google (para que el bot responda con inteligencia artificial)</li>
               <li><strong>Añadir tus productos al catálogo</strong> — Nombre, descripción, fotos, videos, precios</li>
@@ -87,6 +98,16 @@ export default function ManualClientePage() {
             <dd className="pl-4 text-sm">Una cadena de texto que tú inventas. Meta la usa para comprobar que eres tú quien controla la URL del webhook. Debe ser la misma en Meta y en Conversia.</dd>
             <dt className="font-semibold">Phone Number ID</dt>
             <dd className="pl-4 text-sm">Identificador único que Meta asigna a tu número de WhatsApp Business. Lo encuentras en el panel de Meta.</dd>
+            <dt className="font-semibold">App ID (Meta)</dt>
+            <dd className="pl-4 text-sm">
+              Número de la aplicación en Meta (Configuración → Básico). En Conversia se usa entre otras cosas para la API de foto de perfil
+              del negocio.
+            </dd>
+            <dt className="font-semibold">App Secret (Meta)</dt>
+            <dd className="pl-4 text-sm">
+              &quot;Clave secreta&quot; de la misma app de Meta. El servidor la usa para comprobar la firma de los webhooks (
+              <code className="bg-gray-100 px-1 rounded">X-Hub-Signature-256</code>). Debe coincidir con la app cuyo token usas.
+            </dd>
             <dt className="font-semibold">API key</dt>
             <dd className="pl-4 text-sm">Clave para usar un servicio (OpenAI, Anthropic, Google). Sin ella, el bot no puede generar respuestas con IA.</dd>
             <dt className="font-semibold">Prompt del sistema</dt>
@@ -147,6 +168,21 @@ export default function ManualClientePage() {
               <strong>Business Account ID (WABA ID)</strong> — ID de tu cuenta empresarial de WhatsApp.
               <p className="mt-1 text-sm">En "Configuración de la cuenta" o "WhatsApp Business Account" verás el ID. También es un número largo. Cópialo.</p>
             </li>
+            <li>
+              <strong>App ID (Meta)</strong> — Identificador numérico de tu aplicación en Meta.
+              <p className="mt-1 text-sm">
+                En el menú de tu app: <strong>Configuración</strong> → <strong>Básico</strong> → &quot;Identificador de la aplicación&quot;.
+                Cópialo al campo <strong>App ID (Meta)</strong> en Conversia.
+              </p>
+            </li>
+            <li>
+              <strong>App Secret (Meta)</strong> — Clave secreta de la aplicación.
+              <p className="mt-1 text-sm">
+                Misma pantalla <strong>Configuración</strong> → <strong>Básico</strong> → &quot;Clave secreta&quot; (Meta puede pedirte tu
+                contraseña de Facebook para mostrarla). Pégala en <strong>App Secret (Meta)</strong> en Conversia. Es obligatoria para que el
+                servidor acepte webhooks firmados en producción.
+              </p>
+            </li>
           </ol>
           <p className="mt-4 text-sm text-amber-700 bg-amber-50 p-3 rounded">
             <strong>Importante sobre el número:</strong> El número que uses NO puede estar en WhatsApp personal ni en la app gratuita WhatsApp Business. Debe ser un número nuevo o migrado. Meta puede pedir verificación del negocio (documentos, sitio web). Si ya tienes WhatsApp Business API con otro proveedor, el proceso puede variar.
@@ -184,26 +220,51 @@ export default function ManualClientePage() {
             <strong>Error común:</strong> Si Meta dice "No se ha podido validar la URL de devolución de llamada", casi siempre es porque el Identificador de verificación no coincide. Debe ser exactamente la misma cadena (mismo texto, mismo mayúsculas/minúsculas) en Meta y en Conversia (Configuración → Token de verificación de webhook). No copies la URL en ese campo: el identificador es un texto que tú inventas, como una contraseña.
           </p>
           <p className="mt-2 text-gray-700">Después de rellenar ambos campos, haz clic en <strong>Verificar y guardar</strong>. Si todo está bien, Meta mostrará que la verificación fue exitosa.</p>
+          <p className="mt-4 text-sm text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">
+            <strong>Firma de los mensajes (POST):</strong> además del verify token, Meta envía una firma en cada notificación. Conversia valida
+            esa firma con el <strong>App Secret</strong> que guardaste en Integración. Si el secreto no está o no coincide con la app de Meta,
+            los mensajes pueden no procesarse. Usa siempre el App Secret de la <strong>misma</strong> app cuyo Access Token estás usando.
+          </p>
         </section>
 
         {/* CONFIGURAR EN WHATSAPIBOT */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-conversia-dark mb-4 pb-2 border-b-2 border-conversia-primary">
-            7. Configurar WhatsApp en Conversia
+            7. Configurar WhatsApp en Conversia (Integración)
           </h2>
           <p className="mb-3 text-gray-700">
-            Ahora debes pegar en tu panel de Conversia las credenciales que copiaste de Meta. Así tu app "conecta" con tu número de WhatsApp.
+            Pegar en el panel todo lo que obtuviste en Meta. La sección se llama <strong>Integración</strong> (incluye WhatsApp Cloud API y la
+            URL del webhook).
           </p>
           <ol className="list-decimal pl-6 space-y-3 text-gray-700">
             <li>Entra a tu app (la URL que te dieron) e inicia sesión</li>
-            <li>En el menú lateral, haz clic en <strong>Configuración</strong></li>
-            <li>Verás varias secciones. Busca la de <strong>WhatsApp</strong> (suele estar arriba)</li>
-            <li>En los campos, pega: Access Token, Phone Number ID, Business Account ID (los que copiaste en el Paso 5)</li>
-            <li>En "Token de verificación de webhook": escribe exactamente la misma cadena que pusiste en Meta en el Paso 6. Si en Meta pusiste "MiTokenSecreto2026", aquí también "MiTokenSecreto2026"</li>
-            <li>Activa el interruptor <strong>WhatsApp habilitado</strong> (debe quedar en verde/azul)</li>
-            <li>Haz clic en <strong>Guardar</strong></li>
+            <li>Menú lateral → <strong>Configuración</strong> → <strong>Integración</strong></li>
+            <li>
+              Si tu pantalla tiene <strong>URL base / URL pública de la app</strong>, pon tu dominio con <code className="bg-gray-100 px-1 rounded">https://…</code> (el mismo que usarás en Meta). Así se genera bien la URL del webhook.
+            </li>
+            <li>
+              Rellena <strong>Access Token</strong>, <strong>Phone Number ID</strong> y <strong>WhatsApp Business Account ID</strong> (Paso 5).
+            </li>
+            <li>
+              <strong>App ID (Meta)</strong> y <strong>App Secret (Meta)</strong> desde Configuración → Básico de la app (Paso 5). El App Secret
+              es necesario para webhooks firmados en producción.
+            </li>
+            <li>
+              <strong>Token de verificación de webhook:</strong> exactamente la misma cadena que en Meta (Paso 6), carácter a carácter.
+            </li>
+            <li>
+              Copia la <strong>URL de webhook</strong> que muestra la pantalla (termina en <code className="bg-gray-100 px-1 rounded">/api/webhook/whatsapp</code>) y pégala en Meta como Callback URL si aún no lo hiciste; luego Verificar y guardar en Meta.
+            </li>
+            <li>Haz clic en <strong>Guardar</strong> en Conversia</li>
+            <li>Activa <strong>Activar integración WhatsApp</strong> y vuelve a <strong>Guardar</strong> si hace falta</li>
+            <li>
+              Si los mensajes no llegan: en la misma pantalla usa <strong>Suscribir webhook</strong> y <strong>Verificar conexión Meta</strong> (o
+              el diagnóstico disponible)
+            </li>
           </ol>
-          <p className="mt-3 text-gray-600">Si todo está bien, el webhook de Meta quedará verificado y empezarás a recibir mensajes cuando alguien te escriba a tu número de WhatsApp.</p>
+          <p className="mt-3 text-gray-600">
+            Si el verify token y la URL coinciden con Meta y el App Secret es el correcto, deberías recibir mensajes cuando escriban a tu número.
+          </p>
         </section>
 
         {/* API DE IA */}
@@ -283,7 +344,10 @@ export default function ManualClientePage() {
           <p className="mb-3 text-gray-700">Si quieres modificar el código (prompts por defecto, flujos, lógica):</p>
           <ol className="list-decimal pl-6 space-y-3 text-gray-700">
             <li>Instala <strong>Cursor</strong> (cursor.com) si no lo tienes</li>
-            <li>Clona el repositorio: <code className="bg-gray-100 px-1 rounded">git clone https://github.com/whatsapibot/whatsapibot.git</code></li>
+            <li>
+              Clona el repositorio:{" "}
+              <code className="bg-gray-100 px-1 rounded">git clone https://github.com/appconversia/conversia.git</code>
+            </li>
             <li>Abre la carpeta en Cursor</li>
             <li>Archivos clave para entrenar:
               <ul className="list-disc pl-6 mt-2">
@@ -343,7 +407,7 @@ vercel --prod`}
               "Añadí el producto WhatsApp",
               "Obtuve Access Token, Phone Number ID y Business Account ID",
               "Configuré el webhook en Meta (URL + token de verificación)",
-              "Pegué las credenciales en Conversia → Configuración → WhatsApp",
+              "Pegué las credenciales en Conversia → Configuración → Integración",
               "Activé WhatsApp en Conversia",
               "Configuré una API key de IA (OpenAI/Anthropic/Google)",
               "Activé el bot en Conversia",

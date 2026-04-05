@@ -89,7 +89,7 @@ export default function ProcedimientoEntregaPage() {
               <ol className="list-decimal pl-6 mt-2 space-y-2 text-gray-700">
                 <li>Entra a <a href="https://console.neon.tech" className="text-conversia-primary underline" target="_blank" rel="noopener noreferrer">console.neon.tech</a></li>
                 <li>Crea un nuevo proyecto (o usa uno existente del cliente)</li>
-                <li>Nombre sugerido: <code className="bg-gray-100 px-1 rounded">whatsapibot-cliente</code></li>
+                <li>Nombre sugerido: <code className="bg-gray-100 px-1 rounded">conversia-cliente</code></li>
                 <li>Copia la <strong>connection string</strong> (formato: <code className="bg-gray-100 px-1 rounded text-sm">postgresql://user:pass@host/db?sslmode=require</code>)</li>
                 <li>Guárdala para el Paso 5</li>
               </ol>
@@ -102,8 +102,8 @@ export default function ProcedimientoEntregaPage() {
                 En tu máquina local (o la del cliente si conectas por AnyDesk):
               </p>
               <pre className="mt-2 p-4 bg-gray-100 rounded-lg text-sm overflow-x-auto">
-{`git clone https://github.com/whatsapibot/whatsapibot.git
-cd whatsapibot`}
+{`git clone https://github.com/appconversia/conversia.git
+cd conversia`}
               </pre>
             </div>
 
@@ -127,7 +127,9 @@ NEXT_PUBLIC_APP_URL="https://tu-app.vercel.app"`}
               </pre>
               <p className="mt-2 text-sm text-gray-600">
                 <strong>DATABASE_URL:</strong> La connection string de Neon (Paso 2).<br />
-                <strong>NEXT_PUBLIC_APP_URL:</strong> La URL que tendrá la app en Vercel (ej. https://whatsapibot-xyz.vercel.app). Puedes actualizarla después del primer deploy.
+                <strong>NEXT_PUBLIC_APP_URL:</strong> La URL que tendrá la app en Vercel (ej. https://conversia-xyz.vercel.app). Puedes actualizarla después del primer deploy.
+                <br />
+                <strong>DIRECT_URL:</strong> En Neon, usa la connection string &quot;direct&quot; (sin pooler) para migraciones; ver <code className="bg-gray-100 px-1 rounded">VARIABLES_DESPLIEGUE.md</code>.
               </p>
             </div>
 
@@ -169,9 +171,9 @@ npm run db:seed`}
             <div className="border-l-4 border-conversia-primary pl-6">
               <h3 className="font-bold text-lg text-conversia-dark">Paso 8: Verificar que todo funcione</h3>
               <ul className="list-disc pl-6 mt-2 space-y-1 text-gray-700">
-                <li>Abre la URL de la app (ej. https://whatsapibot-xyz.vercel.app)</li>
+                <li>Abre la URL de la app (ej. https://conversia-xyz.vercel.app)</li>
                 <li>Debe redirigir al login</li>
-                <li>Inicia sesión con: <strong>admin@whatsapibot.local</strong> / <strong>Inicio-00</strong></li>
+                <li>Inicia sesión con: <strong>admin@conversia.local</strong> / <strong>Inicio-00</strong></li>
                 <li>Verifica que el dashboard cargue (Conversaciones, Productos, Configuración, etc.)</li>
               </ul>
             </div>
@@ -183,15 +185,15 @@ npm run db:seed`}
                 Entrega al cliente:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1 text-gray-700">
-                <li><strong>URL de la app</strong> (ej. https://whatsapibot-cliente.vercel.app)</li>
+                <li><strong>URL de la app</strong> (ej. https://conversia-cliente.vercel.app)</li>
                 <li><strong>Credenciales de acceso:</strong>
                   <ul className="list-circle pl-6 mt-1 text-sm">
-                    <li>Super Admin: superadmin@whatsapibot.local / Inicio-00</li>
-                    <li>Admin: admin@whatsapibot.local / Inicio-00</li>
-                    <li>Colaborador: ventas@whatsapibot.local / Inicio-00</li>
+                    <li>Super Admin: superadmin@conversia.local / Inicio-00</li>
+                    <li>Admin: admin@conversia.local / Inicio-00</li>
+                    <li>Colaborador: ventas@conversia.local / Inicio-00</li>
                   </ul>
                 </li>
-                <li><strong>Manual del cliente</strong> — PDF de /docs/manual-cliente (conexión WhatsApp, entrenamiento, despliegue)</li>
+                <li><strong>Manual del cliente</strong> y <strong>Guía Meta / WhatsApp</strong> — /docs/manual-cliente y /docs/guia-meta-whatsapp</li>
                 <li><strong>Prompts por industria</strong> — PDF de /docs/prompts-industrias (formato completo para la app)</li>
                 <li><strong>Órdenes para Cursor</strong> — PDF de /docs/ordenes-cursor-entrenamiento (entrenamiento profundo con ejemplos)</li>
                 <li><strong>Recomendación:</strong> Que el cliente cambie las contraseñas desde Configuración → Usuarios</li>
@@ -206,9 +208,9 @@ npm run db:seed`}
               </p>
               <ol className="list-decimal pl-6 mt-2 space-y-1 text-gray-700">
                 <li>Crear su app en <a href="https://developers.facebook.com" className="text-conversia-primary underline" target="_blank" rel="noopener noreferrer">Meta for Developers</a></li>
-                <li>Añadir el producto WhatsApp y obtener Access Token, Phone Number ID, Business Account ID</li>
-                <li>Configurar el webhook en Meta: URL = <code className="bg-gray-100 px-1 rounded">https://SU-URL/api/webhook/whatsapp</code></li>
-                <li>En Conversia → Configuración → WhatsApp: pegar las credenciales y activar</li>
+                <li>Añadir el producto WhatsApp y obtener Access Token, Phone Number ID, Business Account ID, App ID y App Secret (Configuración → Básico en Meta)</li>
+                <li>Configurar el webhook en Meta: URL = <code className="bg-gray-100 px-1 rounded">https://SU-URL/api/webhook/whatsapp</code> y el mismo verify token que en el panel</li>
+                <li>En Conversia → <strong>Configuración → Integración</strong>: pegar todas las credenciales, App Secret incluido, y activar la integración</li>
                 <li>Entrenar el bot según el manual (prompts, productos, flujos)</li>
               </ol>
             </div>
