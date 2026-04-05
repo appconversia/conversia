@@ -23,6 +23,11 @@ export async function getBoldIdentityKey(): Promise<string | null> {
   return getPlatformSetting(PLATFORM_KEYS.BOLD_IDENTITY_KEY);
 }
 
+/** Llave secreta (Botón de pagos) — firma HMAC del webhook. */
+export async function getBoldSecretKey(): Promise<string | null> {
+  return getPlatformSetting(PLATFORM_KEYS.BOLD_SECRET_KEY);
+}
+
 export async function isBoldSandbox(): Promise<boolean> {
   const v = await getPlatformSetting(PLATFORM_KEYS.BOLD_USE_SANDBOX);
   return v === "true" || v === "1";

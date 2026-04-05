@@ -1,47 +1,88 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { applyExtraPackPayment, applySubscriptionPayment } from "@/lib/billing";
+import { verifyBoldWebhookSignature } from "@/lib/bold";
+import { getBoldSecretKey, isBoldSandbox } from "@/lib/platform-settings";
+
+export const runtime = "nodejs";
 
 /**
- * Webhook Bold — configurar en el panel Bold la URL pública: /api/webhook/bold
- * El payload exacto puede variar; intentamos localizar payment_link / id y estado PAID.
+ * Webhook Bold (CloudEvents) — Panel Comercios → Integraciones → Webhooks.
+ * URL: https://TU_DOMINIO/api/webhook/bold
+ * Firma: https://developers.bold.co/webhook (x-bold-signature, llave secreta Botón de pagos)
  */
 export async function POST(request: Request) {
-  let payload: Record<string, unknown>;
-  try {
-    payload = (await request.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
+  const rawBody = await request.text();
+  const signature =
+    request.headers.get("x-bold-signature") ??
+    request.headers.get("x-bold-Signature") ??
+    request.headers.get("X-Bold-Signature");
+
+  const isSandbox = await isBoldSandbox();
+  const secretFromDb = await getBoldSecretKey();
+  /** Producción: llave secreta obligatoria. Sandbox/pruebas: string vacío según doc Bold. */
+  const secretKey = isSandbox ? "" : (secretFromDb ?? "");
+
+  if (!isSandbox && !secretFromDb?.trim()) {
+    console.error("[webhook/bold] Falta BOLD_SECRET_KEY en plataforma (llave secreta Botón de pagos).");
+    return NextResponse.json({ error: "Webhook no configurado (llave secreta)" }, { status: 503 });
   }
 
-  const status = String(
-    payload.status ?? (payload.data as Record<string, unknown>)?.status ?? ""
-  ).toUpperCase();
-  const linkId = String(
-    payload.payment_link ??
-      payload.id ??
-      (payload.data as Record<string, unknown>)?.payment_link ??
-      (payload.payload as Record<string, unknown>)?.payment_link ??
-      ""
-  );
+  if (!verifyBoldWebhookSignature(rawBody, signature, secretKey)) {
+    return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
+  }
 
-  if (!linkId || status !== "PAID" && status !== "APPROVED") {
-    // Algunos webhooks envían otro formato; si viene transaction aprobada:
-    const alt = String(payload.type ?? "");
-    if (!linkId && alt !== "PAYMENT_APPROVED") {
-      return NextResponse.json({ received: true });
+  let payload: Record<string, unknown>;
+  try {
+    payload = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const eventType = String(payload.type ?? "");
+  if (eventType !== "SALE_APPROVED") {
+    return NextResponse.json({ received: true, ignored: eventType || "unknown" });
+  }
+
+  const data = payload.data as Record<string, unknown> | undefined;
+  const metadata = data?.metadata as Record<string, unknown> | undefined;
+  const refFromMeta =
+    metadata && typeof metadata.reference === "string" ? metadata.reference.trim() : "";
+
+  const subject = typeof payload.subject === "string" ? payload.subject.trim() : "";
+  const paymentId = typeof data?.payment_id === "string" ? data.payment_id.trim() : "";
+
+  let record =
+    refFromMeta.length > 0
+      ? await prisma.paymentRecord.findFirst({
+          where: { reference: refFromMeta },
+        })
+      : null;
+
+  if (!record && subject.length > 0) {
+    record = await prisma.paymentRecord.findFirst({
+      where: { OR: [{ boldLinkId: subject }, { reference: subject }] },
+    });
+  }
+
+  if (!record && paymentId.length > 0) {
+    record = await prisma.paymentRecord.findFirst({
+      where: { OR: [{ boldLinkId: paymentId }, { reference: paymentId }] },
+    });
+  }
+
+  if (!record) {
+    const linkHint = rawBody.match(/LNK_[A-Za-z0-9]+/);
+    if (linkHint) {
+      record = await prisma.paymentRecord.findFirst({
+        where: { boldLinkId: linkHint[0] },
+      });
     }
   }
 
-  const record = linkId
-    ? await prisma.paymentRecord.findFirst({
-        where: { boldLinkId: linkId },
-      })
-    : null;
-
   if (!record) {
-    console.warn("[webhook/bold] Sin PaymentRecord para link", linkId, JSON.stringify(payload).slice(0, 500));
-    return NextResponse.json({ received: true });
+    console.warn("[webhook/bold] Sin PaymentRecord. ref=", refFromMeta, "subject=", subject);
+    return NextResponse.json({ received: true, pending: true });
   }
 
   if (record.status === "paid") {
