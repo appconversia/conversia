@@ -68,14 +68,14 @@ export function PlatformAdminHome() {
       try {
         const [rStats, rTenants] = await Promise.all([
           fetch("/api/dashboard/stats", { credentials: "include", cache: "no-store" }),
-          fetch("/api/platform/tenants?limit=8", { credentials: "include", cache: "no-store" }),
+          fetch("/api/platform/comercios?limit=8", { credentials: "include", cache: "no-store" }),
         ]);
         if (!rStats.ok) throw new Error("No se pudieron cargar las métricas globales");
-        if (!rTenants.ok) throw new Error("No se pudieron cargar las organizaciones");
+        if (!rTenants.ok) throw new Error("No se pudieron cargar los comercios");
         const [dataStats, dataTenants] = await Promise.all([rStats.json(), rTenants.json()]);
         if (!cancelled) {
           setStats(dataStats);
-          setTenants(dataTenants.tenants ?? []);
+          setTenants(dataTenants.comercios ?? []);
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Error");
@@ -120,15 +120,14 @@ export function PlatformAdminHome() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D9FDD3]/90">Administración SaaS</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Visión global de Conversia</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#E9EDEF]/90">
-            Métricas agregadas de todas las organizaciones, actividad reciente y acceso rápido a la gestión de
-            cuentas.
+            Métricas agregadas de todos los comercios, actividad reciente y acceso rápido a la gestión de cuentas.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/dashboard/platform/organizaciones"
+              href="/dashboard/platform/comercios"
               className="inline-flex items-center rounded-xl bg-conversia-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-conversia-primary-hover"
             >
-              Gestionar organizaciones
+              Gestionar comercios
             </Link>
             <Link
               href="/dashboard/documentacion"
@@ -144,7 +143,7 @@ export function PlatformAdminHome() {
         <Kpi
           title="Conversaciones (todas)"
           value={conversations.total}
-          hint="En todas las organizaciones"
+          hint="En todos los comercios"
         />
         <Kpi title="Mensajes hoy" value={messages.today} sub={`${messages.thisWeek} esta semana`} />
         <Kpi title="Usuarios activos" value={team.activeUsers} hint="Cuentas de equipo" />
@@ -176,11 +175,11 @@ export function PlatformAdminHome() {
         </section>
 
         <section className="rounded-xl border border-[#E9EDEF] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#111B21]">Organizaciones recientes</h2>
+          <h2 className="text-lg font-semibold text-[#111B21]">Comercios recientes</h2>
           <p className="text-sm text-[#667781]">Últimas altas</p>
           <ul className="mt-4 space-y-3">
             {tenants.length === 0 ? (
-              <li className="text-sm text-[#667781]">No hay organizaciones registradas.</li>
+              <li className="text-sm text-[#667781]">No hay comercios registrados.</li>
             ) : (
               tenants.map((t) => (
                 <li
@@ -203,7 +202,7 @@ export function PlatformAdminHome() {
             )}
           </ul>
           <Link
-            href="/dashboard/platform/organizaciones"
+            href="/dashboard/platform/comercios"
             className="mt-4 inline-flex w-full justify-center rounded-lg border border-conversia-primary/30 py-2 text-sm font-medium text-conversia-dark hover:bg-conversia-primary/5"
           >
             Ver todas →
@@ -215,7 +214,7 @@ export function PlatformAdminHome() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-[#111B21]">Conversaciones recientes (global)</h2>
-            <p className="text-sm text-[#667781]">Últimas 5 en cualquier organización</p>
+            <p className="text-sm text-[#667781]">Últimas 5 en cualquier comercio</p>
           </div>
           <span className="rounded-full bg-[#111B21]/5 px-3 py-1 text-xs font-medium text-[#667781]">
             Solo lectura

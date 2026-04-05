@@ -37,13 +37,27 @@ export async function GET(request: Request) {
   });
 
   return NextResponse.json({
-    tenants: tenants.map((t) => ({
+    comercios: tenants.map((t) => ({
       id: t.id,
       name: t.name,
       slug: t.slug,
       active: t.active,
+      billingStatus: t.billingStatus,
+      subscriptionStartAt: t.subscriptionStartAt?.toISOString() ?? null,
+      subscriptionEndAt: t.subscriptionEndAt?.toISOString() ?? null,
+      conversationsInPeriod: t.conversationsInPeriod,
+      extraConversationPacks: t.extraConversationPacks,
       createdAt: t.createdAt.toISOString(),
-      plan: t.plan ? { id: t.plan.id, name: t.plan.name, slug: t.plan.slug } : null,
+      plan: t.plan
+        ? {
+            id: t.plan.id,
+            name: t.plan.name,
+            slug: t.plan.slug,
+            priceUsdCents: t.plan.priceUsdCents,
+            includedConversations: t.plan.includedConversations,
+            extraPackConversations: t.plan.extraPackConversations,
+          }
+        : null,
       counts: {
         users: t._count.users,
         conversations: t._count.conversations,

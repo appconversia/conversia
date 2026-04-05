@@ -10,34 +10,96 @@ datasource db {
 }
 
 model Plan {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  maxUsers  Int      @default(5)
-  sortOrder Int      @default(0)
-  tenants   Tenant[]
+  id                       String   @id @default(cuid())
+  name                     String
+  slug                     String   @unique
+  maxUsers                 Int      @default(5)
+  sortOrder                Int      @default(0)
+  /// Precio mensual en centavos USD (ej. 4900 = US$49.00)
+  priceUsdCents            Int      @default(0)
+  /// Conversaciones incluidas por periodo de facturación
+  includedConversations    Int      @default(100)
+  /// Tamaño de cada pack extra (p. ej. 1000 conversaciones)
+  extraPackConversations   Int      @default(1000)
+  /// Precio por pack extra en centavos USD (p. ej. 1500 = US$15.00)
+  extraPackPriceUsdCents     Int      @default(1500)
+  tagline                  String?  @db.Text
+  tenants                  Tenant[]
+}
+
+enum BillingStatus {
+  trial
+  active
+  past_due
+  suspended
 }
 
 model Tenant {
-  id                 String              @id @default(cuid())
-  name               String
-  slug               String              @unique
-  planId             String?
-  plan               Plan?               @relation(fields: [planId], references: [id], onDelete: SetNull)
-  active             Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  users              User[]
-  appConfigs         AppConfig[]
-  conversationTags   ConversationTag[]
-  contacts           Contact[]
-  conversations      Conversation[]
-  categories         Category[]
-  botFlows           BotFlow[]
-  leads              Lead[]
-  botLogs            BotLog[]
+  id                     String         @id @default(cuid())
+  name                   String
+  slug                   String         @unique
+  planId                 String?
+  plan                   Plan?          @relation(fields: [planId], references: [id], onDelete: SetNull)
+  active                 Boolean        @default(true)
+  billingStatus          BillingStatus  @default(trial)
+  subscriptionStartAt    DateTime?
+  subscriptionEndAt      DateTime?
+  /// Inicio del mes calendario usado para el conteo de conversaciones del periodo
+  usagePeriodMonthStart  DateTime?
+  conversationsInPeriod Int           @default(0)
+  /// Packs extra comprados (cada pack suma plan.extraPackConversations)
+  extraConversationPacks Int           @default(0)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  users                  User[]
+  appConfigs             AppConfig[]
+  conversationTags       ConversationTag[]
+  contacts               Contact[]
+  conversations          Conversation[]
+  categories             Category[]
+  botFlows               BotFlow[]
+  leads                  Lead[]
+  botLogs                BotLog[]
+  payments               PaymentRecord[]
 
   @@index([slug])
+  @@index([billingStatus])
+  @@index([subscriptionEndAt])
+}
+
+enum PaymentRecordStatus {
+  pending
+  paid
+  failed
+  expired
+}
+
+model PaymentRecord {
+  id               String              @id @default(cuid())
+  tenantId         String
+  tenant           Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  amountUsdCents   Int
+  currency         String                @default("USD")
+  status           PaymentRecordStatus   @default(pending)
+  /// subscription | extra_pack | manual
+  type             String
+  description      String?
+  boldLinkId       String?
+  checkoutUrl      String?               @db.Text
+  reference        String?               @unique
+  packCount        Int?
+  createdAt        DateTime              @default(now())
+  paidAt           DateTime?
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model PlatformSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRole {

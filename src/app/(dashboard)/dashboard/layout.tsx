@@ -61,6 +61,36 @@ export default function DashboardLayout({
     }
   }, [user, pathname, router]);
 
+  /** Comercios: si la suscripción está vencida, suspendida o inactiva, solo facturación y guías. */
+  useEffect(() => {
+    if (!user?.tenantId || !pathname) return;
+    if (pathname.startsWith("/dashboard/billing")) return;
+    if (pathname.startsWith("/dashboard/documentacion")) return;
+
+    let cancelled = false;
+    fetch("/api/billing/status", { credentials: "include", cache: "no-store" })
+      .then(async (r) => {
+        if (!r.ok) return null;
+        return r.json() as Promise<{ ok?: boolean; code?: string }>;
+      })
+      .then((data) => {
+        if (cancelled || !data) return;
+        if (data.ok) return;
+        const code = data.code;
+        if (code === "quota") return;
+        if (code === "expired" || code === "suspended" || code === "inactive") {
+          router.replace(
+            `/dashboard/billing?motivo=${encodeURIComponent(code === "expired" ? "vencido" : code === "suspended" ? "suspendido" : "inactivo")}`
+          );
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.tenantId, user?.id, pathname, router]);
+
   if (!mounted || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#ECE5DD]">

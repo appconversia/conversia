@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getBillingGate, incrementConversationUsage } from "@/lib/billing";
 
 export async function GET() {
   try {
@@ -67,7 +68,9 @@ export async function GET() {
   }
 
   const isAdmin = ["super_admin", "admin"].includes(String(session.role ?? "").toLowerCase());
+  const tenantFilter = session.tenantId ? { tenantId: session.tenantId } : {};
   const convosRaw = await prisma.conversation.findMany({
+    where: tenantFilter,
     include: {
       contact: { select: { id: true, phone: true, name: true } },
       assignedTo: { select: { id: true, email: true, name: true } },
@@ -214,6 +217,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Se requiere cuenta de organización" }, { status: 403 });
   }
 
+  const gate = await getBillingGate(session.tenantId);
+  if (!gate.ok) {
+    return NextResponse.json({ error: gate.message, code: gate.code }, { status: 402 });
+  }
+
   const conversation = await prisma.conversation.create({
     data: {
       tenantId: session.tenantId,
@@ -222,6 +230,7 @@ export async function POST(request: Request) {
       },
     },
   });
+  await incrementConversationUsage(session.tenantId);
 
   return NextResponse.json({ conversation: { id: conversation.id } });
 }

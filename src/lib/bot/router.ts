@@ -79,6 +79,15 @@ export async function routeIncomingMessage(
   let conversation = contact.conversations?.[0];
 
   if (!conversation) {
+    const { getBillingGate, incrementConversationUsage } = await import("@/lib/billing");
+    const gate = await getBillingGate(tenantId);
+    if (!gate.ok) {
+      void botLog("warn", "router", `Facturación/cupo: ${gate.message}`, {
+        tenantId,
+        metadata: { billingCode: gate.code },
+      });
+      return { ok: false, error: gate.message };
+    }
     const botTag = await prisma.conversationTag.findUnique({
       where: { tenantId_slug: { tenantId, slug: "bot" } },
       select: { id: true },
@@ -91,6 +100,7 @@ export async function routeIncomingMessage(
         ...(botTag && { conversationTagId: botTag.id }),
       },
     });
+    await incrementConversationUsage(tenantId);
   }
 
   let lastMessageContent: string | ContentPart[] = msg.text?.trim() ?? "";
