@@ -130,6 +130,12 @@ export function PlatformAdminHome() {
               Gestionar comercios
             </Link>
             <Link
+              href="/dashboard/platform/ventas"
+              className="inline-flex items-center rounded-xl border border-white/35 bg-white/15 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25"
+            >
+              Ventas e ingresos
+            </Link>
+            <Link
               href="/dashboard/documentacion"
               className="inline-flex items-center rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/15"
             >

@@ -93,6 +93,7 @@ model PaymentRecord {
 
   @@index([tenantId])
   @@index([status])
+  @@index([paidAt])
 }
 
 model PlatformSetting {
