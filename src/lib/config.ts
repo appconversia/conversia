@@ -7,6 +7,8 @@ const KEYS = {
   WHATSAPP_PHONE_NUMBER_ID: "whatsapp_phone_number_id",
   WHATSAPP_BUSINESS_ACCOUNT_ID: "whatsapp_business_account_id",
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: "whatsapp_webhook_verify_token",
+  /** App Secret de Meta (firma X-Hub-Signature-256); por tenant en multi-app */
+  WHATSAPP_APP_SECRET: "whatsapp_app_secret",
   WHATSAPP_ENABLED: "whatsapp_enabled",
   APP_BASE_URL: "app_base_url",
   BOT_OPENAI_API_KEY: "bot_openai_api_key",
@@ -29,6 +31,8 @@ export type WhatsAppConfig = {
   phoneNumberId: string;
   businessAccountId: string;
   webhookVerifyToken: string;
+  /** Solo UI/máscara; el valor real no se expone */
+  appSecretMasked?: boolean;
   enabled: boolean;
   webhookUrl: string;
 };
@@ -86,6 +90,11 @@ export async function findTenantIdByWhatsAppPhoneNumberId(phoneNumberId: string)
     select: { tenantId: true },
   });
   return row?.tenantId ?? null;
+}
+
+/** App Secret de Meta guardado para el tenant (firma de webhooks). */
+export async function getTenantWhatsAppAppSecret(tenantId: string): Promise<string | null> {
+  return getValue(tenantId, KEYS.WHATSAPP_APP_SECRET);
 }
 
 export async function getWhatsAppConfig(tenantId: string): Promise<WhatsAppConfig> {
@@ -162,6 +171,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
     phoneNumberId,
     businessAccountId,
     webhookVerifyToken,
+    whatsappAppSecret,
     whatsappEnabled,
     baseUrl,
     openaiKey,
@@ -179,6 +189,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
     getValue(tenantId, KEYS.WHATSAPP_PHONE_NUMBER_ID),
     getValue(tenantId, KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID),
     getValue(tenantId, KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
+    getValue(tenantId, KEYS.WHATSAPP_APP_SECRET),
     getValue(tenantId, KEYS.WHATSAPP_ENABLED),
     getValue(tenantId, KEYS.APP_BASE_URL),
     getValue(tenantId, KEYS.BOT_OPENAI_API_KEY),
@@ -207,6 +218,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
       phoneNumberId: phoneNumberId ?? "",
       businessAccountId: businessAccountId ?? "",
       webhookVerifyToken: webhookVerifyToken ?? "",
+      appSecretMasked: !!whatsappAppSecret,
       enabled: whatsappEnabled === "true",
       webhookUrl,
     },
@@ -229,7 +241,7 @@ export async function getAppConfigForUI(tenantId: string, request?: Request): Pr
   };
 }
 
-export async function saveWhatsAppConfig(tenantId: string, data: Partial<WhatsAppConfig>): Promise<void> {
+export async function saveWhatsAppConfig(tenantId: string, data: Partial<WhatsAppConfig & { appSecret?: string }>): Promise<void> {
   const updates: Array<[string, string | null]> = [];
   if (data.accessToken !== undefined && data.accessToken.trim() !== "") {
     updates.push([KEYS.WHATSAPP_ACCESS_TOKEN, data.accessToken.trim()]);
@@ -237,6 +249,13 @@ export async function saveWhatsAppConfig(tenantId: string, data: Partial<WhatsAp
   if (data.phoneNumberId !== undefined) updates.push([KEYS.WHATSAPP_PHONE_NUMBER_ID, data.phoneNumberId || null]);
   if (data.businessAccountId !== undefined) updates.push([KEYS.WHATSAPP_BUSINESS_ACCOUNT_ID, data.businessAccountId || null]);
   if (data.webhookVerifyToken !== undefined) updates.push([KEYS.WHATSAPP_WEBHOOK_VERIFY_TOKEN, data.webhookVerifyToken || null]);
+  if (data.appSecret !== undefined) {
+    if (data.appSecret.trim() === "") {
+      await setValue(tenantId, KEYS.WHATSAPP_APP_SECRET, null);
+    } else {
+      updates.push([KEYS.WHATSAPP_APP_SECRET, data.appSecret.trim()]);
+    }
+  }
   if (data.enabled !== undefined) updates.push([KEYS.WHATSAPP_ENABLED, data.enabled ? "true" : "false"]);
 
   for (const [key, value] of updates) {

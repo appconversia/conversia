@@ -1,14 +1,17 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { findTenantIdByWebhookVerifyToken, findTenantIdByWhatsAppPhoneNumberId } from "@/lib/config";
+import {
+  findTenantIdByWebhookVerifyToken,
+  findTenantIdByWhatsAppPhoneNumberId,
+  getTenantWhatsAppAppSecret,
+} from "@/lib/config";
 import { routeIncomingMessage } from "@/lib/bot/router";
 import { sendWhatsAppRead } from "@/lib/bot/whatsapp-send";
 import { botLog } from "@/lib/bot/bot-logger";
 import { prisma } from "@/lib/db";
 
-/** Verifica X-Hub-Signature-256 con el App Secret de Meta (recomendado en producción). */
-function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
-  const secret = process.env.WHATSAPP_APP_SECRET;
+/** Verifica X-Hub-Signature-256 con el App Secret de Meta (por tenant o variable global). */
+function verifyWebhookSignature(rawBody: string, signatureHeader: string | null, secret: string): boolean {
   if (!secret || !signatureHeader?.startsWith("sha256=")) return false;
   const received = signatureHeader.slice(7).toLowerCase();
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
@@ -18,6 +21,21 @@ function verifyWebhookSignature(rawBody: string, signatureHeader: string | null)
   } catch {
     return false;
   }
+}
+
+type WebhookBody = {
+  object?: string;
+  entry?: Array<{ changes?: Array<{ field?: string; value?: { metadata?: { phone_number_id?: string } } }> }>;
+};
+
+function extractPhoneNumberId(body: WebhookBody): string | null {
+  for (const entry of body.entry ?? []) {
+    for (const change of entry.changes ?? []) {
+      const id = change.value?.metadata?.phone_number_id;
+      if (id) return String(id);
+    }
+  }
+  return null;
 }
 
 /**
@@ -58,15 +76,27 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-hub-signature-256");
-  if (process.env.WHATSAPP_APP_SECRET && !verifyWebhookSignature(rawBody, signature)) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-  }
 
-  let body: { object?: string; entry?: Array<{ changes?: Array<{ field?: string; value?: Record<string, unknown> }> }> };
+  let body: {
+    object?: string;
+    entry?: Array<{ changes?: Array<{ field?: string; value?: Record<string, unknown> }> }>;
+  };
   try {
     body = JSON.parse(rawBody) as typeof body;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const phoneFromPayload = extractPhoneNumberId(body as WebhookBody);
+  const tenantForSecret = phoneFromPayload
+    ? await findTenantIdByWhatsAppPhoneNumberId(phoneFromPayload)
+    : null;
+  const tenantSecret = tenantForSecret ? await getTenantWhatsAppAppSecret(tenantForSecret) : null;
+  const globalSecret = process.env.WHATSAPP_APP_SECRET?.trim() || "";
+  const effectiveSecret = (tenantSecret?.trim() || globalSecret) || null;
+
+  if (effectiveSecret && !verifyWebhookSignature(rawBody, signature, effectiveSecret)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   try {

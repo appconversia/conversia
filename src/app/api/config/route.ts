@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as {
       tenantId?: string;
-      whatsapp?: Partial<WhatsAppConfig & { accessTokenMasked?: boolean }>;
+      whatsapp?: Partial<WhatsAppConfig & { accessTokenMasked?: boolean; appSecret?: string }>;
       appBaseUrl?: string;
       bot?: Partial<BotConfig & { openaiApiKeyMasked?: boolean; anthropicApiKeyMasked?: boolean; googleApiKeyMasked?: boolean }>;
     };
@@ -64,6 +64,7 @@ export async function PUT(request: Request) {
         phoneNumberId: wa.phoneNumberId,
         businessAccountId: wa.businessAccountId,
         webhookVerifyToken: wa.webhookVerifyToken,
+        appSecret: wa.appSecret,
         enabled: wa.enabled,
       });
     }

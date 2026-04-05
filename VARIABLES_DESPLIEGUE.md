@@ -51,7 +51,7 @@ Lista completa de lo que debes configurar en cada instalación. **Ninguna creden
 
 | Variable | Requerido | Descripción |
 |----------|-----------|-------------|
-| `WHATSAPP_APP_SECRET` | Opcional | Para verificar firma del webhook en producción |
+| `WHATSAPP_APP_SECRET` | Opcional | Firma global del webhook (una sola app Meta). Si cada comercio tiene su app, que guarden el secreto en **Integración → App Secret** (por tenant). |
 | `META_APP_ID` | Opcional | Para cambiar foto de perfil de negocio |
 
 ---

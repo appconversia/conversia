@@ -19,6 +19,7 @@ type ConfigState = {
     phoneNumberId: string;
     businessAccountId: string;
     webhookVerifyToken: string;
+    appSecretMasked?: boolean;
     enabled: boolean;
     webhookUrl: string;
   };
@@ -47,6 +48,9 @@ export default function ConfiguracionPage() {
     phoneNumberId: "",
     businessAccountId: "",
     webhookVerifyToken: "",
+    /** Nuevo valor; vacío = no cambiar (salvo clearMetaAppSecret) */
+    metaAppSecret: "",
+    clearMetaAppSecret: false,
     enabled: false,
     appBaseUrl: "",
   });
@@ -139,6 +143,8 @@ export default function ConfiguracionPage() {
         phoneNumberId: data.whatsapp?.phoneNumberId ?? "",
         businessAccountId: data.whatsapp?.businessAccountId ?? "",
         webhookVerifyToken: data.whatsapp?.webhookVerifyToken ?? "",
+        metaAppSecret: "",
+        clearMetaAppSecret: false,
         enabled: data.whatsapp?.enabled ?? false,
         appBaseUrl: data.appBaseUrl ?? "",
       });
@@ -305,6 +311,11 @@ export default function ConfiguracionPage() {
             phoneNumberId: form.phoneNumberId.trim(),
             businessAccountId: form.businessAccountId.trim(),
             webhookVerifyToken: form.webhookVerifyToken.trim(),
+            ...(form.clearMetaAppSecret
+              ? { appSecret: "" }
+              : form.metaAppSecret.trim()
+                ? { appSecret: form.metaAppSecret.trim() }
+                : {}),
             enabled: form.enabled,
           },
           appBaseUrl: form.appBaseUrl.trim(),
@@ -325,7 +336,12 @@ export default function ConfiguracionPage() {
         return;
       }
       setConfig(data);
-      setForm((prev) => ({ ...prev, accessToken: "" }));
+      setForm((prev) => ({
+        ...prev,
+        accessToken: "",
+        metaAppSecret: "",
+        clearMetaAppSecret: false,
+      }));
       if (data.bot) {
         setBotForm((prev) => ({
           ...prev,
@@ -457,6 +473,39 @@ export default function ConfiguracionPage() {
             <p className="mt-1 text-xs text-[#667781]">
               Token que tú defines. Debe coincidir con el que introduces en Meta al configurar el webhook.
             </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#111B21]">App Secret (Meta)</label>
+            <input
+              type="password"
+              value={form.metaAppSecret}
+              onChange={(e) => setForm((f) => ({ ...f, metaAppSecret: e.target.value, clearMetaAppSecret: false }))}
+              placeholder={
+                config?.whatsapp?.appSecretMasked
+                  ? "•••••••• (dejar vacío para no cambiar)"
+                  : "Pegar desde Meta → Tu app → Configuración → Básico → Secreto de la app"
+              }
+              className="w-full rounded-lg border border-[#E9EDEF] px-3 py-2 text-sm text-[#111B21] placeholder:text-[#667781] focus:border-conversia-primary focus:outline-none focus:ring-1 focus:ring-conversia-primary"
+              autoComplete="off"
+            />
+            <p className="mt-1 text-xs text-[#667781]">
+              Usado para verificar la firma <code className="rounded bg-[#F0F2F5] px-1">X-Hub-Signature-256</code> de los webhooks.{" "}
+              <strong>Cada comercio con su propia app en Meta</strong> debe guardar aquí el secreto de esa app. Si no hay secreto
+              por comercio, se usa la variable global <code className="rounded bg-[#F0F2F5] px-1">WHATSAPP_APP_SECRET</code> en
+              Vercel (una sola app Meta compartida).
+            </p>
+            {config?.whatsapp?.appSecretMasked && (
+              <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-[#667781]">
+                <input
+                  type="checkbox"
+                  checked={form.clearMetaAppSecret}
+                  onChange={(e) => setForm((f) => ({ ...f, clearMetaAppSecret: e.target.checked }))}
+                  className="h-4 w-4 rounded border-gray-300 text-conversia-primary"
+                />
+                Eliminar App Secret guardado para este comercio
+              </label>
+            )}
           </div>
 
           {config?.whatsapp?.webhookUrl && (
