@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getSession, isPlatformSuperAdmin } from "@/lib/auth";
 
 const now = new Date();
 const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -12,6 +12,20 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+
+  const tenantScope = session.tenantId;
+  const platformView = isPlatformSuperAdmin(session);
+
+  if (!tenantScope && !platformView) {
+    return NextResponse.json({ error: "Sin organización asignada" }, { status: 403 });
+  }
+
+  const convWhere = tenantScope ? { tenantId: tenantScope } : {};
+  const msgWhere = tenantScope
+    ? { conversation: { tenantId: tenantScope } }
+    : {};
+  const userWhere = tenantScope ? { tenantId: tenantScope } : {};
+  const sessionUserWhere = tenantScope ? { user: { tenantId: tenantScope } } : {};
 
   try {
     const [
@@ -28,27 +42,48 @@ export async function GET() {
       recentConversations,
       conversationsByAssignee,
     ] = await Promise.all([
-      prisma.conversation.count(),
-      prisma.conversation.count({ where: { assignedToId: null } }),
-      prisma.conversation.count({ where: { assignedToId: { not: null } } }),
+      prisma.conversation.count({ where: convWhere }),
       prisma.conversation.count({
-        where: { channel: "bot", handoffRequestedAt: { not: null }, assignedToId: null },
+        where: { ...convWhere, assignedToId: null },
+      }),
+      prisma.conversation.count({
+        where: { ...convWhere, assignedToId: { not: null } },
+      }),
+      prisma.conversation.count({
+        where: {
+          ...convWhere,
+          channel: "bot",
+          handoffRequestedAt: { not: null },
+          assignedToId: null,
+        },
       }),
       prisma.message.count({
-        where: { createdAt: { gte: startOfToday } },
+        where: {
+          ...msgWhere,
+          createdAt: { gte: startOfToday },
+        },
       }),
       prisma.message.count({
-        where: { createdAt: { gte: startOfWeek } },
+        where: {
+          ...msgWhere,
+          createdAt: { gte: startOfWeek },
+        },
       }),
-      prisma.user.count({ where: { active: true } }),
-      prisma.session.count({ where: { expiresAt: { gt: now } } }),
-      getBotFlowCounts(prisma),
-      getConversationsByDay(),
-      getRecentConversations(),
-      getConversationsByAssignee(),
+      prisma.user.count({ where: { ...userWhere, active: true } }),
+      prisma.session.count({
+        where: {
+          expiresAt: { gt: now },
+          ...sessionUserWhere,
+        },
+      }),
+      getBotFlowCounts(tenantScope),
+      getConversationsByDay(tenantScope),
+      getRecentConversations(tenantScope),
+      getConversationsByAssignee(tenantScope),
     ]);
 
     return NextResponse.json({
+      scope: platformView ? "platform" : "tenant",
       conversations: {
         total: totalConversations,
         unassigned: unassignedConversations,
@@ -82,13 +117,12 @@ export async function GET() {
   }
 }
 
-async function getBotFlowCounts(client: typeof prisma): Promise<{ total: number; active: number }> {
+async function getBotFlowCounts(tenantId: string | null): Promise<{ total: number; active: number }> {
   try {
-    const botFlow = (client as { botFlow?: { count: (args?: object) => Promise<number> } }).botFlow;
-    if (!botFlow) return { total: 0, active: 0 };
+    const where = tenantId ? { tenantId } : {};
     const [total, active] = await Promise.all([
-      botFlow.count(),
-      botFlow.count({ where: { isActive: true } }),
+      prisma.botFlow.count({ where }),
+      prisma.botFlow.count({ where: { ...where, isActive: true } }),
     ]);
     return { total, active };
   } catch {
@@ -96,8 +130,9 @@ async function getBotFlowCounts(client: typeof prisma): Promise<{ total: number;
   }
 }
 
-async function getConversationsByDay(): Promise<{ date: string; count: number }[]> {
+async function getConversationsByDay(tenantId: string | null): Promise<{ date: string; count: number }[]> {
   const days: { date: string; count: number }[] = [];
+  const baseWhere = tenantId ? { tenantId } : {};
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
@@ -105,7 +140,10 @@ async function getConversationsByDay(): Promise<{ date: string; count: number }[
     const end = new Date(start);
     end.setDate(end.getDate() + 1);
     const count = await prisma.conversation.count({
-      where: { createdAt: { gte: start, lt: end } },
+      where: {
+        ...baseWhere,
+        createdAt: { gte: start, lt: end },
+      },
     });
     days.push({
       date: start.toISOString().slice(0, 10),
@@ -115,8 +153,10 @@ async function getConversationsByDay(): Promise<{ date: string; count: number }[
   return days;
 }
 
-async function getRecentConversations() {
+async function getRecentConversations(tenantId: string | null) {
+  const where = tenantId ? { tenantId } : {};
   const list = await prisma.conversation.findMany({
+    where,
     take: 5,
     orderBy: { createdAt: "desc" },
     include: {
@@ -144,10 +184,11 @@ async function getRecentConversations() {
   });
 }
 
-async function getConversationsByAssignee() {
+async function getConversationsByAssignee(tenantId: string | null) {
+  const where = tenantId ? { tenantId, assignedToId: { not: null } } : { assignedToId: { not: null } };
   const grouped = await prisma.conversation.groupBy({
     by: ["assignedToId"],
-    where: { assignedToId: { not: null } },
+    where,
     _count: { id: true },
     orderBy: { _count: { assignedToId: "desc" } },
     take: 5,

@@ -5,14 +5,32 @@ import Link from "next/link";
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
-  /** En mobile: si el drawer está abierto y callback para cerrarlo */
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
-  /** Solo admin ve Usuarios */
   userRole?: string;
+  /** null = administrador de plataforma (sin organización) */
+  tenantId?: string | null;
 }
 
-const baseNavItems = [
+const platformNavItems = [
+  {
+    href: "/dashboard",
+    label: "Inicio",
+    icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+  },
+  {
+    href: "/dashboard/platform/organizaciones",
+    label: "Organizaciones",
+    icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+  },
+  {
+    href: "/dashboard/documentacion",
+    label: "Guías",
+    icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+  },
+];
+
+const tenantNavItems = [
   { href: "/dashboard", label: "Inicio", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", adminOnly: false, superAdminOnly: false },
   { href: "/dashboard/conversaciones", label: "Conversaciones", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", adminOnly: false, superAdminOnly: false },
   { href: "/dashboard/categorias", label: "Categorías", icon: "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7a2 2 0 010-2.828l7-7A2 2 0 0112 3h5c2.828 0 5 2.172 5 5v1H7V3z", adminOnly: true, superAdminOnly: false },
@@ -26,60 +44,55 @@ const baseNavItems = [
   { href: "/dashboard/logs", label: "Logs", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", adminOnly: false, superAdminOnly: true },
 ];
 
-export function Sidebar({ collapsed, onToggle, isMobileOpen, onCloseMobile, userRole }: SidebarProps) {
+export function Sidebar({
+  collapsed,
+  onToggle,
+  isMobileOpen,
+  onCloseMobile,
+  userRole,
+  tenantId,
+}: SidebarProps) {
   const showMobile = isMobileOpen === true;
   const role = String(userRole ?? "").toLowerCase();
   const isAdmin = role === "admin" || role === "super_admin";
   const isSuperAdmin = role === "super_admin";
-  const navItems = baseNavItems.filter((item) => {
-    if (item.superAdminOnly) return isSuperAdmin;
-    if (item.adminOnly) return isAdmin;
-    return true;
-  });
+  const isPlatformShell = isSuperAdmin && (tenantId === null || tenantId === undefined);
+
+  const navItems = isPlatformShell
+    ? platformNavItems
+    : tenantNavItems.filter((item) => {
+        if (item.superAdminOnly) return isSuperAdmin;
+        if (item.adminOnly) return isAdmin;
+        return true;
+      });
+
+  const brandSubtitle = isPlatformShell ? "Plataforma" : null;
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside
         className={`fixed left-0 top-0 z-40 h-screen bg-[#111B21] text-white transition-all duration-300 ease-in-out hidden lg:block ${
           collapsed ? "w-[72px]" : "w-64"
         }`}
       >
-      <div className="flex h-16 items-center justify-between border-b border-[#202C33] px-4">
-        {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <span className="text-lg">Conversia</span>
-          </Link>
-        )}
-        <button
-          onClick={onToggle}
-          aria-label={collapsed ? "Expandir menú" : "Contraer menú"}
-          className="rounded-lg p-2 hover:bg-[#202C33] transition-colors"
-        >
-          <svg
-            className={`h-6 w-6 transition-transform ${collapsed ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-            />
-          </svg>
-        </button>
-      </div>
-      <nav className="mt-4 space-y-1 px-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33] transition-colors"
+        <div className="flex h-16 items-center justify-between border-b border-[#202C33] px-4">
+          {!collapsed && (
+            <Link href="/dashboard" className="flex min-w-0 flex-col font-semibold leading-tight">
+              <span className="text-lg truncate">Conversia</span>
+              {brandSubtitle && (
+                <span className="text-[10px] font-medium uppercase tracking-wider text-conversia-primary">
+                  {brandSubtitle}
+                </span>
+              )}
+            </Link>
+          )}
+          <button
+            onClick={onToggle}
+            aria-label={collapsed ? "Expandir menú" : "Contraer menú"}
+            className="rounded-lg p-2 hover:bg-[#202C33] transition-colors"
           >
             <svg
-              className="h-6 w-6 shrink-0 text-conversia-primary"
+              className={`h-6 w-6 transition-transform ${collapsed ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -88,49 +101,72 @@ export function Sidebar({ collapsed, onToggle, isMobileOpen, onCloseMobile, user
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d={item.icon}
+                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
               />
             </svg>
-            {!collapsed && <span>{item.label}</span>}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+          </button>
+        </div>
+        <nav className="mt-4 space-y-1 px-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33] transition-colors"
+            >
+              <svg
+                className="h-6 w-6 shrink-0 text-conversia-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+              </svg>
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
+          ))}
+        </nav>
+      </aside>
 
-    {/* Mobile drawer - mismo contenido, una sola fuente */}
-    <aside
-      className={`fixed left-0 top-0 z-40 h-screen w-64 bg-[#111B21] text-white transition-transform duration-300 ease-out lg:hidden ${
-        showMobile ? "translate-x-0" : "-translate-x-full"
-      }`}
-    >
-      <div className="flex h-16 items-center justify-between border-b border-[#202C33] px-4">
-        <span className="font-semibold">Menú</span>
-        <button
-          onClick={onCloseMobile}
-          aria-label="Cerrar"
-          className="rounded-lg p-2 hover:bg-[#202C33]"
-        >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <nav className="mt-4 space-y-1 px-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
+      <aside
+        className={`fixed left-0 top-0 z-40 h-screen w-64 bg-[#111B21] text-white transition-transform duration-300 ease-out lg:hidden ${
+          showMobile ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-[#202C33] px-4">
+          <div className="flex flex-col">
+            <span className="font-semibold">Menú</span>
+            {brandSubtitle && (
+              <span className="text-[10px] font-medium uppercase tracking-wider text-conversia-primary">
+                {brandSubtitle}
+              </span>
+            )}
+          </div>
+          <button
             onClick={onCloseMobile}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33]"
+            aria-label="Cerrar"
+            className="rounded-lg p-2 hover:bg-[#202C33]"
           >
-            <svg className="h-6 w-6 shrink-0 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
+          </button>
+        </div>
+        <nav className="mt-4 space-y-1 px-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              onClick={onCloseMobile}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[#E9EDEF] hover:bg-[#202C33]"
+            >
+              <svg className="h-6 w-6 shrink-0 text-conversia-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+              </svg>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+      </aside>
     </>
   );
 }

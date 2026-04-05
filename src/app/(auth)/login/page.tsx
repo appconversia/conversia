@@ -53,9 +53,7 @@ export default function LoginPage() {
       setError(json.error ?? "Error al procesar");
       return;
     }
-    const u = json.user as { role?: string; tenantId?: string | null };
-    const isPlatform = u?.role === "super_admin" && (u?.tenantId === null || u?.tenantId === undefined);
-    router.push(isPlatform ? "/platform" : "/dashboard");
+    router.push("/dashboard");
     router.refresh();
   };
 

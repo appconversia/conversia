@@ -42,14 +42,24 @@ export default function DashboardLayout({
           return;
         }
         const u = data.user as MeUser;
-        if (u.role === "super_admin" && u.tenantId === null) {
-          router.replace("/platform");
-          return;
-        }
         setUser(u);
       })
       .catch(() => router.replace("/login"));
   }, [mounted, router]);
+
+  /** Super admin plataforma: solo inicio, /dashboard/platform/* y guías (sin datos de un tenant). */
+  useEffect(() => {
+    if (!user || !pathname) return;
+    const isPlatformShell = user.role === "super_admin" && user.tenantId === null;
+    if (!isPlatformShell) return;
+    const allowed =
+      pathname === "/dashboard" ||
+      pathname.startsWith("/dashboard/platform") ||
+      pathname.startsWith("/dashboard/documentacion");
+    if (!allowed) {
+      router.replace("/dashboard");
+    }
+  }, [user, pathname, router]);
 
   if (!mounted || !user) {
     return (
@@ -72,6 +82,7 @@ export default function DashboardLayout({
         isMobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
         userRole={user.role}
+        tenantId={user.tenantId}
       />
 
       <div
@@ -84,10 +95,23 @@ export default function DashboardLayout({
           userName={user.name}
           userEmail={user.email}
           userRole={user.role}
+          tenantId={user.tenantId}
         />
 
         <main className={`min-h-[calc(100vh-4rem)] ${isChat ? "p-0" : "p-4 lg:p-6"}`}>
-          <UserProvider user={user ? { id: user.id ?? "", email: user.email, name: user.name, role: user.role ?? "colaborador" } : null}>
+          <UserProvider
+            user={
+              user
+                ? {
+                    id: user.id ?? "",
+                    email: user.email,
+                    name: user.name,
+                    role: user.role ?? "colaborador",
+                    tenantId: user.tenantId ?? null,
+                  }
+                : null
+            }
+          >
             {isChat ? (
               <div className="h-[calc(100vh-4rem)]">{children}</div>
             ) : (

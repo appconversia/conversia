@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const authPaths = ["/dashboard", "/platform"];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("conversia_session")?.value;
 
-  const needsAuth = authPaths.some((p) => pathname.startsWith(p));
+  if (pathname === "/platform" || pathname.startsWith("/platform/")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
-  // La raíz es siempre la landing pública (marketing); el panel es /dashboard o /platform.
+  const needsAuth = pathname.startsWith("/dashboard");
 
   if ((pathname === "/login" || pathname === "/register") && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -23,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register", "/dashboard/:path*", "/platform/:path*"],
+  matcher: ["/", "/login", "/register", "/dashboard/:path*", "/platform", "/platform/:path*"],
 };

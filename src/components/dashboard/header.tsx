@@ -7,6 +7,7 @@ interface HeaderProps {
   userName?: string | null;
   userEmail?: string | null;
   userRole?: string;
+  tenantId?: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -15,7 +16,7 @@ const ROLE_LABELS: Record<string, string> = {
   colaborador: "Colaborador",
 };
 
-export function Header({ onMenuClick, userName, userEmail, userRole }: HeaderProps) {
+export function Header({ onMenuClick, userName, userEmail, userRole, tenantId }: HeaderProps) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -24,7 +25,12 @@ export function Header({ onMenuClick, userName, userEmail, userRole }: HeaderPro
     router.refresh();
   };
 
-  const roleLabel = userRole ? ROLE_LABELS[userRole] ?? userRole : "";
+  const isPlatformShell = userRole === "super_admin" && (tenantId === null || tenantId === undefined);
+  const roleLabel = isPlatformShell
+    ? "Super Admin · Plataforma"
+    : userRole
+      ? ROLE_LABELS[userRole] ?? userRole
+      : "";
   const displayName = userName?.trim() || userEmail || "Usuario";
 
   return (

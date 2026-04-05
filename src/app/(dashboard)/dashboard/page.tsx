@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useUser } from "@/contexts/user-context";
+import { PlatformAdminHome } from "@/components/dashboard/platform-admin-home";
 
 type Stats = {
   conversations: {
@@ -51,6 +53,14 @@ function truncate(str: string, max: number) {
 }
 
 export default function DashboardPage() {
+  const user = useUser();
+  const isPlatformShell =
+    user?.role === "super_admin" && (user?.tenantId === null || user?.tenantId === undefined);
+  if (isPlatformShell) return <PlatformAdminHome />;
+  return <TenantDashboardHome />;
+}
+
+function TenantDashboardHome() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
