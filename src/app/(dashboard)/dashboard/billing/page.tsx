@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { DashboardHero, DashboardHeroGhostLink } from "@/components/dashboard/dashboard-hero";
 
 type BillingPayload = {
   ok: boolean;
@@ -140,13 +141,19 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[#111B21]">Facturación</h1>
-        <p className="mt-1 text-[#667781]">
-          Plan, uso de conversaciones del mes y pagos con Bold (USD). Comercio:{" "}
-          <span className="font-medium text-[#111B21]">{tenant.name}</span>
-        </p>
-      </div>
+      <DashboardHero
+        overline="Suscripción"
+        title="Facturación"
+        description={`Plan, uso de conversaciones del mes y pagos con Bold (USD). Comercio: ${tenant.name}.`}
+        actions={
+          <>
+            <DashboardHeroGhostLink href="/dashboard/configuracion/integracion">Integración</DashboardHeroGhostLink>
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
+              Ayuda y manuales
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
 
       {motivoBloqueo && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">

@@ -3,6 +3,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useUser, useCanEditBotConfig } from "@/contexts/user-context";
+import {
+  DashboardHero,
+  DashboardHeroGhostLink,
+  DashboardHeroPrimaryLink,
+} from "@/components/dashboard/dashboard-hero";
 
 type HubCard = {
   href: string;
@@ -147,12 +152,22 @@ export default function ConfiguracionHubPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[#E9EDEF] pb-4">
-        <h1 className="text-2xl font-semibold text-[#111B21]">Configuración</h1>
-        <p className="mt-1 text-sm text-[#667781]">
-          Accede a facturación, contenido y documentación desde un solo lugar.
-        </p>
-      </div>
+      <DashboardHero
+        overline="Centro de control"
+        title="Configuración"
+        description="Accede a facturación, integración, contenido y documentación desde un solo lugar."
+        actions={
+          <>
+            <DashboardHeroPrimaryLink href="/dashboard/billing">Facturación</DashboardHeroPrimaryLink>
+            {showIntegration ? (
+              <DashboardHeroGhostLink href="/dashboard/configuracion/integracion">Integración WhatsApp</DashboardHeroGhostLink>
+            ) : null}
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
+              Manuales y guías
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
 
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {visible.map((card) => (

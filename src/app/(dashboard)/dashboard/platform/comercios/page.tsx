@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import {
+  DashboardHero,
+  DashboardHeroGhostLink,
+  DashboardHeroPrimaryLink,
+} from "@/components/dashboard/dashboard-hero";
 
 type PlanOpt = {
   id: string;
@@ -169,12 +174,19 @@ export default function ComerciosPlatformPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[#111B21] sm:text-3xl">Comercios</h1>
-        <p className="mt-1 text-[#667781]">
-          Cada comercio es un espacio aislado: equipo, conversaciones y facturación propia.
-        </p>
-      </div>
+      <DashboardHero
+        overline="Administración SaaS"
+        title="Comercios"
+        description="Cada comercio es un espacio aislado: equipo, conversaciones y facturación propia."
+        actions={
+          <>
+            <DashboardHeroPrimaryLink href="/dashboard/platform/ventas">Ventas e ingresos</DashboardHeroPrimaryLink>
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
+              Guías y manuales
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-[#E9EDEF] bg-white p-4 shadow-sm">

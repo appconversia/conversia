@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useUser } from "@/contexts/user-context";
 import { PlatformAdminHome } from "@/components/dashboard/platform-admin-home";
+import {
+  DashboardHero,
+  DashboardHeroGhostLink,
+  DashboardHeroPrimaryLink,
+} from "@/components/dashboard/dashboard-hero";
 
 type Stats = {
   conversations: {
@@ -61,6 +66,8 @@ export default function DashboardPage() {
 }
 
 function TenantDashboardHome() {
+  const user = useUser();
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,10 +117,22 @@ function TenantDashboardHome() {
 
   return (
     <div className="space-y-6 pb-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-[#111B21] sm:text-3xl">Dashboard</h1>
-        <p className="mt-1 text-[#667781]">Resumen de actividad y métricas del backoffice.</p>
-      </div>
+      <DashboardHero
+        overline="Tu comercio"
+        title="Dashboard"
+        description="Resumen de actividad, conversaciones y equipo. Accesos rápidos a lo que más usas cada día."
+        actions={
+          <>
+            <DashboardHeroPrimaryLink href="/dashboard/conversaciones">Abrir Chats</DashboardHeroPrimaryLink>
+            {isAdmin ? (
+              <DashboardHeroGhostLink href="/dashboard/bot">Bot y flujos</DashboardHeroGhostLink>
+            ) : null}
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
+              Guías y manuales
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
 
       {/* KPIs */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

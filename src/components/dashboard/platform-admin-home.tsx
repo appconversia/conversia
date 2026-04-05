@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import {
+  DashboardHero,
+  DashboardHeroGhostLink,
+  DashboardHeroPrimaryLink,
+} from "@/components/dashboard/dashboard-hero";
 
 type Stats = {
   scope?: string;
@@ -113,37 +118,20 @@ export function PlatformAdminHome() {
 
   return (
     <div className="space-y-8 pb-8">
-      <div className="relative overflow-hidden rounded-2xl border border-[#0d3d36]/20 bg-gradient-to-br from-[#075E54] via-[#064a42] to-[#022c28] p-6 sm:p-8 text-white shadow-lg">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-conversia-primary/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-teal-400/10 blur-2xl" />
-        <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#D9FDD3]/90">Administración SaaS</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Visión global de Conversia</h1>
-          <p className="mt-2 max-w-2xl text-sm text-[#E9EDEF]/90">
-            Métricas agregadas de todos los comercios, actividad reciente y acceso rápido a la gestión de cuentas.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/dashboard/platform/comercios"
-              className="inline-flex items-center rounded-xl bg-conversia-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-conversia-primary-hover"
-            >
-              Gestionar comercios
-            </Link>
-            <Link
-              href="/dashboard/platform/ventas"
-              className="inline-flex items-center rounded-xl border border-white/35 bg-white/15 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25"
-            >
-              Ventas e ingresos
-            </Link>
-            <Link
-              href="/dashboard/documentacion"
-              className="inline-flex items-center rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/15"
-            >
+      <DashboardHero
+        overline="Administración SaaS"
+        title="Visión global de Conversia"
+        description="Métricas agregadas de todos los comercios, actividad reciente y acceso rápido a la gestión de cuentas."
+        actions={
+          <>
+            <DashboardHeroPrimaryLink href="/dashboard/platform/comercios">Gestionar comercios</DashboardHeroPrimaryLink>
+            <DashboardHeroGhostLink href="/dashboard/platform/ventas">Ventas e ingresos</DashboardHeroGhostLink>
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
               Guías y manuales
-            </Link>
-          </div>
-        </div>
-      </div>
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi

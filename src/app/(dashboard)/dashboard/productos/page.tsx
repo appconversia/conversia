@@ -4,6 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { MEDIA_LIMITS, isImageFile, isVideoFile, validateImageSize, validateVideoSize } from "@/lib/media-upload";
+import {
+  DashboardHero,
+  DashboardHeroGhostButton,
+  DashboardHeroPrimaryButton,
+} from "@/components/dashboard/dashboard-hero";
 
 type Category = { id: string; name: string };
 
@@ -262,21 +267,23 @@ export default function ProductosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-[#111B21]">Productos</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={syncWithBot}
-            disabled={syncLoading || products.length === 0}
-            className="rounded-lg bg-[#128C7E] px-4 py-2 text-sm font-medium text-white hover:bg-[#0a6e62] disabled:opacity-50"
-          >
-            {syncLoading ? "Sincronizando…" : "Sincronizar con bot"}
-          </button>
-          <button onClick={openCreate} className="rounded-lg bg-conversia-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#20BD5C]">
-            Agregar producto
-          </button>
-        </div>
-      </div>
+      <DashboardHero
+        overline="Catálogo"
+        title="Productos"
+        description="Gestiona el catálogo que el bot muestra a tus clientes. Sincroniza cuando hagas cambios importantes."
+        actions={
+          <>
+            <DashboardHeroGhostButton
+              muted
+              disabled={syncLoading || products.length === 0}
+              onClick={() => void syncWithBot()}
+            >
+              {syncLoading ? "Sincronizando…" : "Sincronizar con bot"}
+            </DashboardHeroGhostButton>
+            <DashboardHeroPrimaryButton onClick={openCreate}>Agregar producto</DashboardHeroPrimaryButton>
+          </>
+        }
+      />
 
       <p className="text-sm text-[#667781]">
         Gestiona los productos que vendes. Puedes agregar imágenes (JPEG, PNG, WebP, GIF, HEIC — máx. {MEDIA_LIMITS.image.maxMB} MB) y videos (MP4, MOV, WebM, 3GP, M4V — máx. {MEDIA_LIMITS.video.maxMB} MB). Las imágenes se comprimen. Por producto: imagen (con descripción) y video (sin descripción); si no hay video, solo se envía la imagen.

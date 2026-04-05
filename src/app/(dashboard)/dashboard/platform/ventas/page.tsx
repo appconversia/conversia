@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { DashboardHero, DashboardHeroGhostLink, DashboardHeroPrimaryLink } from "@/components/dashboard/dashboard-hero";
 
 type RangeKey = "today" | "yesterday" | "7d" | "30d" | "month" | "year" | "all";
 
@@ -183,15 +184,21 @@ export default function PlatformVentasPage() {
 
   return (
     <div className="space-y-8 pb-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#111B21]">Ventas e ingresos</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[#667781]">
-            Ingresos por suscripciones y packs extra (Bold), nuevos comercios, usuarios del panel y distribución por plan. Solo
-            administración de plataforma.
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 rounded-xl border border-[#E9EDEF] bg-[#f8faf9] p-4 text-sm">
+      <DashboardHero
+        overline="Ingresos de plataforma"
+        title="Ventas e ingresos"
+        description="Ingresos por suscripciones y packs extra (Bold), nuevos comercios, usuarios del panel y distribución por plan."
+        actions={
+          <>
+            <DashboardHeroPrimaryLink href="/dashboard/platform/comercios">Comercios</DashboardHeroPrimaryLink>
+            <DashboardHeroGhostLink href="/dashboard/documentacion" muted>
+              Guías y manuales
+            </DashboardHeroGhostLink>
+          </>
+        }
+      />
+
+      <div className="flex flex-col gap-2 rounded-xl border border-[#E9EDEF] bg-[#f8faf9] p-4 text-sm sm:max-w-xl sm:self-end">
           <label className="flex items-center gap-2 text-[#111B21]">
             <input
               type="checkbox"
@@ -249,7 +256,6 @@ export default function PlatformVentasPage() {
             Periodo: <strong>{data.range.label}</strong> · {new Date(data.range.from).toLocaleString("es")} —{" "}
             {new Date(data.range.to).toLocaleString("es")}
           </p>
-        </div>
       </div>
 
       {error && (
