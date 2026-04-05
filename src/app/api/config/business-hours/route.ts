@@ -5,28 +5,22 @@ import {
   saveBusinessHours,
   type DaySchedule,
 } from "@/lib/bot/business-hours";
-
-const SUPER_ADMIN_ROLES = ["super_admin"];
-
-function resolveTenantId(request: Request, sessionTenantId: string | null): string | null {
-  const q = new URL(request.url).searchParams.get("tenantId");
-  if (q?.trim()) return q.trim();
-  return sessionTenantId;
-}
+import { canAccessTenantAppConfig, resolveTenantIdForConfigGet, resolveTenantIdForConfigPut } from "@/lib/tenant-config-access";
 
 export async function GET(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
-  if (!SUPER_ADMIN_ROLES.includes(session.role)) {
-    return NextResponse.json({ error: "Solo super administradores" }, { status: 403 });
+  if (!canAccessTenantAppConfig(session)) {
+    return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
   }
 
-  const tenantId = resolveTenantId(request, session.tenantId);
-  if (!tenantId) {
-    return NextResponse.json({ error: "Indica tenantId (?tenantId=)" }, { status: 400 });
+  const resolved = resolveTenantIdForConfigGet(session, request);
+  if (!resolved.ok) {
+    return NextResponse.json({ error: resolved.error }, { status: resolved.status });
   }
+  const { tenantId } = resolved;
 
   try {
     const config = await getBusinessHoursConfig(tenantId);
@@ -42,8 +36,8 @@ export async function PUT(request: Request) {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
-  if (!SUPER_ADMIN_ROLES.includes(session.role)) {
-    return NextResponse.json({ error: "Solo super administradores" }, { status: 403 });
+  if (!canAccessTenantAppConfig(session)) {
+    return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
   }
 
   try {
@@ -52,10 +46,11 @@ export async function PUT(request: Request) {
       timezone?: string;
       schedule?: DaySchedule[];
     };
-    const tenantId = body.tenantId?.trim() || resolveTenantId(request, session.tenantId);
-    if (!tenantId) {
-      return NextResponse.json({ error: "Indica tenantId en el cuerpo o ?tenantId=" }, { status: 400 });
+    const resolved = resolveTenantIdForConfigPut(session, request, body.tenantId);
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: resolved.status });
     }
+    const { tenantId } = resolved;
 
     const timezone = body.timezone as string | undefined;
     const schedule = body.schedule as DaySchedule[] | undefined;
