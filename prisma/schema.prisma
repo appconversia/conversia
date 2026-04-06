@@ -24,7 +24,8 @@ model Plan {
   /// Precio por pack extra en centavos USD (p. ej. 1500 = US$15.00)
   extraPackPriceUsdCents     Int      @default(1500)
   tagline                  String?  @db.Text
-  tenants                  Tenant[]
+  tenants                  Tenant[] @relation("TenantActivePlan")
+  pendingTenants           Tenant[] @relation("TenantPendingPlan")
 }
 
 enum BillingStatus {
@@ -39,7 +40,13 @@ model Tenant {
   name                   String
   slug                   String         @unique
   planId                 String?
-  plan                   Plan?          @relation(fields: [planId], references: [id], onDelete: SetNull)
+  plan                   Plan?          @relation("TenantActivePlan", fields: [planId], references: [id], onDelete: SetNull)
+  pendingPlanId          String?
+  pendingPlan            Plan?          @relation("TenantPendingPlan", fields: [pendingPlanId], references: [id], onDelete: SetNull)
+  /// Cuando aplica el cambio a pendingPlan (p. ej. fin del periodo para downgrade)
+  pendingPlanEffectiveAt DateTime?
+  /// El usuario solicitó no renovar al terminar el periodo pagado
+  cancelSubscriptionAtPeriodEnd Boolean @default(false)
   active                 Boolean        @default(true)
   billingStatus          BillingStatus  @default(trial)
   subscriptionStartAt    DateTime?
@@ -65,6 +72,7 @@ model Tenant {
   @@index([slug])
   @@index([billingStatus])
   @@index([subscriptionEndAt])
+  @@index([pendingPlanId])
 }
 
 enum PaymentRecordStatus {
@@ -81,9 +89,11 @@ model PaymentRecord {
   amountUsdCents   Int
   currency         String                @default("USD")
   status           PaymentRecordStatus   @default(pending)
-  /// subscription | extra_pack | manual
+  /// subscription | renewal | upgrade | extra_pack | manual
   type             String
   description      String?
+  /// Plan destino tras pagar upgrade (prorrateo)
+  targetPlanId     String?
   boldLinkId       String?
   checkoutUrl      String?               @db.Text
   reference        String?               @unique

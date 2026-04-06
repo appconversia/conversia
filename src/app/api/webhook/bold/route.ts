@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { applyExtraPackPayment, applySubscriptionPayment } from "@/lib/billing";
+import { applyExtraPackPayment, applySubscriptionPayment, applyUpgradePayment } from "@/lib/billing";
 import { verifyBoldWebhookSignature } from "@/lib/bold";
 import { getBoldSecretKey, isBoldSandbox } from "@/lib/platform-settings";
 
@@ -94,8 +94,13 @@ export async function POST(request: Request) {
     data: { status: "paid", paidAt: new Date() },
   });
 
-  if (record.type === "subscription") {
+  if (record.type === "subscription" || record.type === "renewal") {
     await applySubscriptionPayment({ tenantId: record.tenantId, monthsToAdd: 1 });
+  } else if (record.type === "upgrade") {
+    const tid = record.targetPlanId;
+    if (tid) {
+      await applyUpgradePayment(record.tenantId, tid);
+    }
   } else if (record.type === "extra_pack") {
     const price = await getPackPrice(record.tenantId);
     const packs = record.packCount ?? Math.max(1, Math.round(record.amountUsdCents / price));

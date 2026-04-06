@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { hashPassword } from "@/lib/auth";
@@ -77,6 +78,25 @@ export async function POST(request: Request) {
     }
 
     const { name, email, phone, password, role } = parsed.data;
+
+    const [tenant, userCount] = await Promise.all([
+      prisma.tenant.findUnique({
+        where: { id: session.tenantId },
+        include: { plan: true },
+      }),
+      prisma.user.count({
+        where: { tenantId: session.tenantId, role: { not: UserRole.sistema } },
+      }),
+    ]);
+    const maxUsers = tenant?.plan?.maxUsers ?? 999;
+    if (userCount >= maxUsers) {
+      return NextResponse.json(
+        {
+          error: `Límite de usuarios del plan alcanzado (${maxUsers}). Sube de plan o elimina usuarios.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {

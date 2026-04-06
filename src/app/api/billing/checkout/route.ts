@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { createBoldPaymentLink } from "@/lib/bold";
 import { getBoldIdentityKey, isBoldSandbox } from "@/lib/platform-settings";
+import { computeUpgradeProration } from "@/lib/billing-proration";
+
+type CheckoutType = "subscription" | "renewal" | "upgrade" | "extra_pack";
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -14,9 +17,16 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as {
     type?: string;
     packs?: number;
+    targetPlanId?: string;
   };
-  const type = body.type === "extra_pack" ? "extra_pack" : "subscription";
+
+  let type: CheckoutType = "subscription";
+  if (body.type === "extra_pack") type = "extra_pack";
+  else if (body.type === "renewal") type = "renewal";
+  else if (body.type === "upgrade") type = "upgrade";
+
   const packs = Math.min(24, Math.max(1, Number(body.packs) || 1));
+  const targetPlanId = typeof body.targetPlanId === "string" ? body.targetPlanId.trim() : "";
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: session.tenantId },
@@ -28,12 +38,48 @@ export async function POST(request: Request) {
 
   let amountUsdCents = 0;
   let desc = "";
-  if (type === "subscription") {
+  let recordType: string = type;
+  let paymentTargetPlanId: string | null = null;
+
+  if (type === "subscription" || type === "renewal") {
     amountUsdCents = tenant.plan.priceUsdCents;
-    desc = `Suscripción ${tenant.plan.name} — ${tenant.name}`;
+    desc =
+      type === "renewal"
+        ? `Renovación ${tenant.plan.name} — ${tenant.name}`
+        : `Suscripción ${tenant.plan.name} — ${tenant.name}`;
+    recordType = type;
+  } else if (type === "upgrade") {
+    if (!targetPlanId) {
+      return NextResponse.json({ error: "Indica targetPlanId para el upgrade" }, { status: 400 });
+    }
+    const target = await prisma.plan.findUnique({ where: { id: targetPlanId } });
+    if (!target) {
+      return NextResponse.json({ error: "Plan destino no encontrado" }, { status: 404 });
+    }
+    if (target.id === tenant.planId) {
+      return NextResponse.json({ error: "Ya estás en ese plan" }, { status: 400 });
+    }
+    const pr = computeUpgradeProration({
+      now: new Date(),
+      subscriptionStartAt: tenant.subscriptionStartAt,
+      subscriptionEndAt: tenant.subscriptionEndAt,
+      currentPriceUsdCents: tenant.plan.priceUsdCents,
+      newPriceUsdCents: target.priceUsdCents,
+    });
+    if (pr.amountUsdCents <= 0) {
+      return NextResponse.json(
+        { error: pr.summary || "El upgrade no tiene cargo. Usa programar cambio de plan para bajar de plan." },
+        { status: 400 }
+      );
+    }
+    amountUsdCents = pr.amountUsdCents;
+    desc = `Upgrade a ${target.name} — ${pr.summary} — ${tenant.name}`;
+    recordType = "upgrade";
+    paymentTargetPlanId = target.id;
   } else {
     amountUsdCents = tenant.plan.extraPackPriceUsdCents * packs;
     desc = `${packs} pack(s) extra (+${tenant.plan.extraPackConversations * packs} conversaciones) — ${tenant.name}`;
+    recordType = "extra_pack";
   }
 
   if (amountUsdCents <= 0) {
@@ -69,8 +115,9 @@ export async function POST(request: Request) {
       amountUsdCents,
       currency: "USD",
       status: "pending",
-      type,
+      type: recordType,
       description: desc,
+      targetPlanId: paymentTargetPlanId,
       boldLinkId: link.paymentLink,
       checkoutUrl: link.checkoutUrl,
       reference,

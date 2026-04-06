@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { prisma } from "@/lib/db";
+
+/** Evita prerender en build (Prisma requiere DB en tiempo de ejecución). */
+export const dynamic = "force-dynamic";
+
+function formatLandingUsd(cents: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+}
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -61,7 +69,22 @@ const steps = [
   { n: "03", t: "Entrena y publica", d: "Catálogo, bot y plantillas alineados a tu marca." },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const plans = await prisma.plan.findMany({
+    orderBy: { sortOrder: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      priceUsdCents: true,
+      includedConversations: true,
+      extraPackConversations: true,
+      extraPackPriceUsdCents: true,
+      tagline: true,
+      maxUsers: true,
+    },
+  });
+
   return (
     <div className={`${dmSans.className} min-h-screen bg-[#050807] text-[#e8f0ec]`}>
       <div
@@ -187,6 +210,50 @@ export default function Home() {
                 <p className="mt-2 text-[#9fb5a8]">{s.d}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="border-y border-white/5 bg-[#060a08]/90 py-20 backdrop-blur-sm">
+          <div className="mx-auto max-w-6xl px-5 sm:px-8">
+            <h2 className={`${fraunces.className} text-3xl font-semibold text-white sm:text-4xl`}>Planes</h2>
+            <p className="mt-3 max-w-2xl text-[#8fa99c]">
+              Precios en USD. Incluyen conversaciones por mes; en el plan superior puedes sumar packs de +1.000
+              conversaciones. Upgrade con prorrateo y downgrade al fin de periodo desde el panel.
+            </p>
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {plans.map((p) => (
+                <article
+                  key={p.id}
+                  className="flex flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-transparent p-6"
+                >
+                  <h3 className={`${fraunces.className} text-lg font-semibold text-white`}>{p.name}</h3>
+                  {p.tagline && (
+                    <p className="mt-2 text-xs leading-relaxed text-[#8fa99c]">{p.tagline}</p>
+                  )}
+                  <p className="mt-4 text-2xl font-bold text-emerald-300/95">
+                    {formatLandingUsd(p.priceUsdCents)}
+                    <span className="text-sm font-normal text-[#6b8578]"> / mes</span>
+                  </p>
+                  <ul className="mt-4 flex-1 space-y-2 text-sm text-[#b8cfc2]">
+                    <li>
+                      <strong className="text-white">{p.includedConversations.toLocaleString()}</strong> conversaciones
+                      / mes
+                    </li>
+                    <li>Hasta {p.maxUsers} usuarios</li>
+                    <li>
+                      Pack extra: +{p.extraPackConversations.toLocaleString()} conv. ·{" "}
+                      {formatLandingUsd(p.extraPackPriceUsdCents)}
+                    </li>
+                  </ul>
+                  <Link
+                    href="/register"
+                    className="mt-6 inline-flex justify-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+                  >
+                    Empezar
+                  </Link>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 

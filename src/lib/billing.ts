@@ -36,7 +36,24 @@ export function totalConversationQuota(plan: {
   return base + extraPacks * packSize;
 }
 
+/** Aplica downgrade programado cuando llega la fecha efectiva. */
+export async function applyPendingPlanIfNeeded(tenantId: string): Promise<void> {
+  const t = await prisma.tenant.findUnique({ where: { id: tenantId } });
+  if (!t?.pendingPlanId || !t.pendingPlanEffectiveAt) return;
+  if (new Date() < t.pendingPlanEffectiveAt) return;
+  await prisma.tenant.update({
+    where: { id: tenantId },
+    data: {
+      planId: t.pendingPlanId,
+      pendingPlanId: null,
+      pendingPlanEffectiveAt: null,
+    },
+  });
+}
+
 export async function getBillingGate(tenantId: string): Promise<BillingGateResult> {
+  await applyPendingPlanIfNeeded(tenantId);
+
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     include: { plan: true },
@@ -105,6 +122,27 @@ export async function applySubscriptionPayment(params: {
       billingStatus: "active" as BillingStatus,
       subscriptionStartAt: tenant.subscriptionStartAt ?? new Date(),
       subscriptionEndAt: end,
+      cancelSubscriptionAtPeriodEnd: false,
+      ...(tenant.pendingPlanId
+        ? {
+            /** El downgrade pendiente aplica al nuevo fin de periodo tras renovar. */
+            pendingPlanEffectiveAt: end,
+          }
+        : {}),
+    },
+  });
+}
+
+/** Tras pagar un upgrade (prorrateo): cambia de plan sin alargar el periodo. */
+export async function applyUpgradePayment(tenantId: string, targetPlanId: string): Promise<void> {
+  await prisma.tenant.update({
+    where: { id: tenantId },
+    data: {
+      planId: targetPlanId,
+      billingStatus: "active" as BillingStatus,
+      cancelSubscriptionAtPeriodEnd: false,
+      pendingPlanId: null,
+      pendingPlanEffectiveAt: null,
     },
   });
 }

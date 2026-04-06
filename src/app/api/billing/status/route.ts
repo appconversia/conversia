@@ -9,10 +9,27 @@ export async function GET() {
     return NextResponse.json({ error: "Solo cuentas de comercio" }, { status: 403 });
   }
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: session.tenantId },
-    include: { plan: true },
-  });
+  const [tenant, allPlans] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { id: session.tenantId },
+      include: { plan: true, pendingPlan: true },
+    }),
+    prisma.plan.findMany({
+      orderBy: { sortOrder: "asc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        maxUsers: true,
+        sortOrder: true,
+        priceUsdCents: true,
+        includedConversations: true,
+        extraPackConversations: true,
+        extraPackPriceUsdCents: true,
+        tagline: true,
+      },
+    }),
+  ]);
   if (!tenant) {
     return NextResponse.json({ error: "Comercio no encontrado" }, { status: 404 });
   }
@@ -31,11 +48,13 @@ export async function GET() {
     ok: gate.ok,
     code: gate.ok ? undefined : gate.code,
     message: gate.ok ? undefined : gate.message,
+    plans: allPlans,
     tenant: {
       name: tenant.name,
       billingStatus: tenant.billingStatus,
       subscriptionStartAt: tenant.subscriptionStartAt?.toISOString() ?? null,
       subscriptionEndAt: tenant.subscriptionEndAt?.toISOString() ?? null,
+      cancelSubscriptionAtPeriodEnd: tenant.cancelSubscriptionAtPeriodEnd,
       extraConversationPacks: tenant.extraConversationPacks,
       conversationsInPeriod: used,
       quota,
@@ -51,6 +70,17 @@ export async function GET() {
             tagline: tenant.plan.tagline,
           }
         : null,
+      pendingPlan: tenant.pendingPlan
+        ? {
+            id: tenant.pendingPlan.id,
+            name: tenant.pendingPlan.name,
+            slug: tenant.pendingPlan.slug,
+            priceUsdCents: tenant.pendingPlan.priceUsdCents,
+            includedConversations: tenant.pendingPlan.includedConversations,
+            tagline: tenant.pendingPlan.tagline,
+          }
+        : null,
+      pendingPlanEffectiveAt: tenant.pendingPlanEffectiveAt?.toISOString() ?? null,
     },
     payments: payments.map((p) => ({
       id: p.id,
