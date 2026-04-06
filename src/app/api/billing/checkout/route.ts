@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { createBoldPaymentLink } from "@/lib/bold";
 import { getBoldIdentityKey, isBoldSandbox } from "@/lib/platform-settings";
 import { computeUpgradeProration } from "@/lib/billing-proration";
+import { planAllowsExtraConversationPacks } from "@/lib/plan-catalog";
 
 type CheckoutType = "subscription" | "renewal" | "upgrade" | "extra_pack";
 
@@ -77,6 +78,18 @@ export async function POST(request: Request) {
     recordType = "upgrade";
     paymentTargetPlanId = target.id;
   } else {
+    if (!planAllowsExtraConversationPacks(tenant.plan.slug)) {
+      return NextResponse.json(
+        {
+          error:
+            "Los packs extra (+1.000 conversaciones por US$15 c/u) solo están disponibles en el plan Empresa.",
+        },
+        { status: 403 }
+      );
+    }
+    if (tenant.plan.extraPackPriceUsdCents <= 0) {
+      return NextResponse.json({ error: "Packs extra no disponibles en tu plan." }, { status: 400 });
+    }
     amountUsdCents = tenant.plan.extraPackPriceUsdCents * packs;
     desc = `${packs} pack(s) extra (+${tenant.plan.extraPackConversations * packs} conversaciones) — ${tenant.name}`;
     recordType = "extra_pack";

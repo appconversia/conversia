@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DashboardHero, DashboardHeroGhostLink } from "@/components/dashboard/dashboard-hero";
+import { planAllowsExtraConversationPacks } from "@/lib/plan-catalog";
 
 type PlanRow = {
   id: string;
@@ -603,30 +604,40 @@ export default function BillingPage() {
 
       <section className="rounded-xl border border-[#E9EDEF] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#111B21]">Packs extra</h2>
-        <p className="mt-1 text-sm text-[#667781]">
-          Añade conversaciones sin cambiar de plan. Cada pack suma el cupo indicado en tu plan (p. ej. +1.000).
-        </p>
-        <div className="mt-4 flex flex-wrap items-end gap-3">
-          <label className="text-sm">
-            <span className="text-[#667781]">Cantidad de packs</span>
-            <input
-              type="number"
-              min={1}
-              max={24}
-              value={packs}
-              onChange={(e) => setPacks(Math.min(24, Math.max(1, Number(e.target.value) || 1)))}
-              className="ml-2 w-20 rounded-lg border border-[#E9EDEF] px-2 py-1"
-            />
-          </label>
-          <button
-            type="button"
-            disabled={!tenant.plan || paying?.startsWith("extra_pack")}
-            onClick={() => void pay("extra_pack")}
-            className="rounded-xl border border-conversia-primary bg-conversia-primary/10 px-5 py-2.5 text-sm font-semibold text-conversia-dark hover:bg-conversia-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {paying?.startsWith("extra_pack") ? "Abriendo Bold…" : "Comprar packs con Bold"}
-          </button>
-        </div>
+        {tenant.plan && planAllowsExtraConversationPacks(tenant.plan.slug) ? (
+          <>
+            <p className="mt-1 text-sm text-[#667781]">
+              Solo en plan Empresa: cada pack suma +{tenant.plan.extraPackConversations.toLocaleString()}{" "}
+              conversaciones por {formatUsd(tenant.plan.extraPackPriceUsdCents)} (hasta 24 packs por compra).
+            </p>
+            <div className="mt-4 flex flex-wrap items-end gap-3">
+              <label className="text-sm">
+                <span className="text-[#667781]">Cantidad de packs</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={packs}
+                  onChange={(e) => setPacks(Math.min(24, Math.max(1, Number(e.target.value) || 1)))}
+                  className="ml-2 w-20 rounded-lg border border-[#E9EDEF] px-2 py-1"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={paying?.startsWith("extra_pack")}
+                onClick={() => void pay("extra_pack")}
+                className="rounded-xl border border-conversia-primary bg-conversia-primary/10 px-5 py-2.5 text-sm font-semibold text-conversia-dark hover:bg-conversia-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {paying?.startsWith("extra_pack") ? "Abriendo Bold…" : "Comprar packs con Bold"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="mt-1 text-sm text-[#667781]">
+            Los packs de +1.000 conversaciones por US$15 están disponibles únicamente en el plan{" "}
+            <strong>Empresa</strong>. Sube de plan para habilitarlos.
+          </p>
+        )}
       </section>
 
       <section>

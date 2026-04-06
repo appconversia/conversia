@@ -217,8 +217,8 @@ export default async function Home() {
           <div className="mx-auto max-w-6xl px-5 sm:px-8">
             <h2 className={`${fraunces.className} text-3xl font-semibold text-white sm:text-4xl`}>Planes</h2>
             <p className="mt-3 max-w-2xl text-[#8fa99c]">
-              Precios en USD. Incluyen conversaciones por mes; en el plan superior puedes sumar packs de +1.000
-              conversaciones. Upgrade con prorrateo y downgrade al fin de periodo desde el panel.
+              Precios en USD por mes. En el plan Empresa puedes añadir conversaciones de +1.000 en +1.000 por US$15
+              cada pack. Upgrade con prorrateo y downgrade al fin de periodo desde el panel.
             </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {plans.map((p) => (
@@ -240,10 +240,14 @@ export default async function Home() {
                       / mes
                     </li>
                     <li>Hasta {p.maxUsers} usuarios</li>
-                    <li>
-                      Pack extra: +{p.extraPackConversations.toLocaleString()} conv. ·{" "}
-                      {formatLandingUsd(p.extraPackPriceUsdCents)}
-                    </li>
+                    {p.extraPackPriceUsdCents > 0 ? (
+                      <li>
+                        Packs extra: +{p.extraPackConversations.toLocaleString()} conv. ·{" "}
+                        {formatLandingUsd(p.extraPackPriceUsdCents)} c/u
+                      </li>
+                    ) : (
+                      <li className="text-[#6b8578]">Packs extra solo en plan Empresa</li>
+                    )}
                   </ul>
                   <Link
                     href="/register"
