@@ -36,6 +36,14 @@ Estas variables son **del proyecto** en Vercel, no por comercio.
 
 **Pusher:** si no está configurado, Chats sigue funcionando por **polling** (menos “en vivo”). No es obligatorio para desplegar.
 
+#### Activar Pusher (Channels) en 3 pasos
+
+1. Entra en [Pusher / Channels](https://dashboard.pusher.com/) y crea una app **Channels** (hay plan gratuito).
+2. En **App Keys** copia: **App ID**, **Key**, **Secret** y **Cluster** (ej. `us2`).
+3. En Vercel → Environment Variables (Production y, si quieres, Preview) añade las cuatro variables de la tabla de arriba con esos valores. Redeploy.
+
+No hace falta código adicional: `src/lib/pusher.ts` y `usePusher` ya leen estas variables.
+
 ---
 
 ## Qué NO va en Vercel (Meta / WhatsApp por comercio)
