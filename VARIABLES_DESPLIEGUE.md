@@ -31,7 +31,7 @@ Estas variables son **del proyecto** en Vercel, no por comercio.
 | `PUSHER_SECRET` | **Suele faltar** | Par de Pusher (servidor). |
 | `NEXT_PUBLIC_PUSHER_KEY` | **Suele faltar** | Par de Pusher (cliente). |
 | `NEXT_PUBLIC_PUSHER_CLUSTER` | ej. `us2` | Región Pusher. |
-| `CRON_SECRET` | Opcional | Protege rutas `/api/cron/*` y similares si programas cron en Vercel. |
+| `CRON_SECRET` | **Recomendado en producción** | Mismo valor que envías en `Authorization: Bearer …` al llamar `GET /api/cron/process-batches` (cron externo, ej. cron-job.org). Si no existe, el endpoint puede quedar abierto. |
 | `SEED_*` / build | Solo build/seed | Super admin de plataforma en CI (ver scripts). |
 
 **Pusher:** si no está configurado, Chats sigue funcionando por **polling** (menos “en vivo”). No es obligatorio para desplegar.
@@ -56,6 +56,14 @@ Todo esto se guarda en **Configuración → Integración** por tenant:
 
 - Crear proyecto en [neon.tech](https://neon.tech), copiar `DATABASE_URL` (pooler) y `DIRECT_URL` (direct).  
 - Ejecutar migraciones contra la BD de producción.
+- Si `DIRECT_URL` en Vercel queda vacío, el build (`scripts/vercel-build.mjs`) usa `DATABASE_URL` como respaldo para `prisma migrate deploy`. Aun así, en Neon conviene definir **dos URLs** en Vercel: pooler en `DATABASE_URL` y host **sin** `-pooler` en `DIRECT_URL` para migraciones más fiables.
+
+## Cron externo (cron-job.org u otro)
+
+- URL: `GET https://TU_DOMINIO/api/cron/process-batches`
+- Cabecera obligatoria si `CRON_SECRET` está definido: `Authorization: Bearer <CRON_SECRET>` (el mismo valor que la variable en Vercel).
+- La API REST de [cron-job.org](https://docs.cron-job.org/rest-api.html) permite crear el trabajo con `extendedData.headers` para enviar esa cabecera. **No** subas al repo la API key de cron-job.org ni el valor de `CRON_SECRET`.
+- Frecuencia típica: cada 1–5 minutos (según carga); el panel del bot documenta buffers de lotes.
 
 ---
 
